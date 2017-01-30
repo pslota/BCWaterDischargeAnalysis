@@ -15,7 +15,7 @@ dummy <- lapply(file.path("Functions",list.files(path=file.path("Functions"), pa
          cat("Loading ",x,"\n");
          source(x)})
 
-
+# new comment
 
 # Define variables that provide options for the analysis
 
