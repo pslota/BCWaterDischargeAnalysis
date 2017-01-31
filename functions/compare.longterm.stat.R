@@ -5,14 +5,14 @@
 
 compare.longterm.stat <- function(Q.filename, E.filename,
                                   report.dir='.',
-                                  save.comparison=FALSE,
-                                  save.plots=FALSE){
+                                  write.comparison.csv=FALSE,
+                                  write.plots.pdf=FALSE){
 #  Input
 #    Q.filename - file name of csv file containing the annual statistics
 #    E.filename - Excel workbook with the statistics
 #    report.dir - where the csv and any plots are saved
-#    save.comparsion - save the comparsion between R and Excel
-#    save.plots   save the plots of the comparisons?
+#    write.comparsion.csv - save the comparsion between R and Excel
+#    write.plots.pdf   save the plots of the comparisons?
 #
 #  Output: List with the following objects
 #    stats.in.Q.not.in.E  - statistics in Q but not in E
@@ -24,6 +24,7 @@ compare.longterm.stat <- function(Q.filename, E.filename,
 #############################################################
 #  Some basic error checking on the input parameters
 #
+   Version <- "2017-02-01"
    if( !is.character(Q.filename))    {stop("Q.filename  muste be a character string.")}
    if( !is.character(E.filename))    {stop("E.filename  muste be a character string.")}
    if( !file.exists(Q.filename))     {stop('Q.filename does not exist')}
@@ -32,8 +33,8 @@ compare.longterm.stat <- function(Q.filename, E.filename,
    if(length(E.filename)>1)          {stop("E.filename cannot have length > 1")}
 
    if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exits")}
-   if( !is.logical(save.comparison)) {stop('save.comparison must be logical')}
-   if( !is.logical(save.plots))      {stop("save.plots must be logial")}
+   if( !is.logical(write.comparison.csv)) {stop('write.comparison.csv must be logical')}
+   if( !is.logical(write.plots.pdf))      {stop("write.plots.pdf must be logial")}
      
    #  Load the packages used 
    library(ggplot2)
@@ -110,15 +111,15 @@ compare.longterm.stat <- function(Q.filename, E.filename,
    plot.list <- list(plot.allstat=plot.allstat)
  
    file.comparison <- NA
-   if(save.comparison){
-      file.comparison <- file.path(report.dir, "comparison-longterm-R-vs-Excel.csv")
-      write.csv(diff.stat, file.comparison, row.names=FALSE)
+   if(write.comparison.csv){
+      file.comparison.csv <- file.path(report.dir, "comparison-longterm-R-vs-Excel.csv")
+      write.csv(diff.stat, file.comparison.csv, row.names=FALSE)
    }
    
-   file.plots <- NA
-   if(save.plots){
-      file.plots <- file.path(report.dir, "comparison-longterm-R-vs-Excel.pdf")
-      pdf(file=file.plots)
+   file.plots.pdf <- NA
+   if(write.plots.pdf){
+      file.plots.pdf <- file.path(report.dir, "comparison-longterm-R-vs-Excel.pdf")
+      pdf(file=file.plots.pdf)
       l_ply(plot.list, function(x){plot(x)})
       dev.off()
    }
@@ -128,7 +129,8 @@ compare.longterm.stat <- function(Q.filename, E.filename,
         diff.stat=diff.stat,
         plot.list=plot.list,
         stat.not.plotted=stat.not.plotted,
-        file.comparison=file.comparison,
-        file.plots=file.plots,
+        file.comparison.csv=file.comparison.csv,
+        file.plots.pdf=file.plots.pdf,
+        Version=Version,
         Date=Sys.time())
 }

@@ -8,8 +8,8 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
                           flow, 
                           start.year=9999, 
                           end.year=0,
-                          write.stat=FALSE,        # write out statistics 
-                          write.stat.trans=FALSE,  # write out statistics in transposed format
+                          write.stat.csv=FALSE,        # write out statistics 
+                          write.stat.trans.csv=FALSE,  # write out statistics in transposed format
                           report.dir=".",
                           na.rm=list(na.rm.global=FALSE)){
 #  Compute statistics on an annual (calendar and water) year basis
@@ -35,8 +35,8 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
 #           Missing flow values can be entered by leaving out the date, or entering NA for that date.
 #
 #    start.year, end year - starting and ending year for statistics e.g. start.year=1960, end.year=2013
-#    write.stat   - write out statistics to csv file - file name is returned
-#    write.stat.trans - write out transposed statistics to csv file - file name is returned
+#    write.stat.csv   - write out statistics to csv file - file name is returned
+#    write.stat.trans.csv - write out transposed statistics to csv file - file name is returned
 #    directory where the csv files for the statistics and transposed statistics are saved
 #    na.rm- list of what to do with missing values. Only specify the ones you wish to change in the list
 #           using a call similar to compute.Q.stat.annual(... na.rm=list(na.rm.global=TRUE))
@@ -53,6 +53,7 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
 #############################################################
 #  Some basic error checking on the input parameters
 #
+   Version <- '2017-02-01'
    library(car)         # recode function
    library(plyr)        # split-apply-combine 
    library(reshape2)    # reorganize data (melting and casting)
@@ -72,8 +73,8 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
    if(! (is.numeric(start.year) & is.numeric(end.year))){
                                       stop("start.year and end.year not numberic.")}
    if(! (start.year <= end.year))    {stop("start.year > end.year")}
-   if( !is.logical(write.stat))      {stop("write.stat must be logical (TRUE/FALSE")}
-   if( !is.logical(write.stat.trans)){stop("write.stat.trans must be logical (TRUE/FALSE")}
+   if( !is.logical(write.stat.csv))  {stop("write.stat.csv must be logical (TRUE/FALSE")}
+   if( !is.logical(write.stat.trans.csv)){stop("write.stat.trans.csv must be logical (TRUE/FALSE")}
    if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exist")}
    if( !is.list(na.rm))              {stop("na.rm is not a list") }
    if(! is.logical(unlist(na.rm))){   stop("na.rm is list of logical (TRUE/FALSE) values only.")}
@@ -288,28 +289,29 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
   Q.stat <- merge(Q.stat.annual, Q.stat.wyear, by.x='Year', by.y="WYear", all.x=TRUE)
 
   # See if you want to write out the summary tables?
-  file.stat <- NA
-  if(write.stat){
+  file.stat.csv <- NA
+  if(write.stat.csv){
      # Write out the summary table for comparison to excel spreadsheet
-     file.stat<- file.path(report.dir, paste(Station.Code,"-annual-summary-stat.csv", sep=""))
-     write.csv(Q.stat,file=file.stat, row.names=FALSE)
+     file.stat.csv <- file.path(report.dir, paste(Station.Code,"-annual-summary-stat.csv", sep=""))
+     write.csv(Q.stat,file=file.stat.csv, row.names=FALSE)
   }
 
   # Write out the annual summary table in transposed format?
-  file.stat.trans<- NA
+  file.stat.trans.csv<- NA
   Year <- Q.stat[,"Year"]
   Q.stat.trans <- t(Q.stat[, !grepl('^Year', names(Q.stat))])
   colnames(Q.stat.trans) <- paste("Y",Year,sep="")
-  if(write.stat.trans){
-    file.stat.trans <-file.path(report.dir,paste(Station.Code,"-annual-summary-stat-trans.csv",sep=""))
-    write.csv(Q.stat.trans, file=file.stat.trans, row.names=TRUE)
+  if(write.stat.trans.csv){
+    file.stat.trans.csv <-file.path(report.dir,paste(Station.Code,"-annual-summary-stat-trans.csv",sep=""))
+    write.csv(Q.stat.trans, file=file.stat.trans.csv, row.names=TRUE)
   }
   return(list(Q.stat.annual=Q.stat,
                Q.stat.annual.trans=Q.stat.trans,
                dates.missing.flows=dates.missing.flows,
-               file.stat=file.stat,
-               file.stat.trans=file.stat.trans,
+               file.stat.csv=file.stat.csv,
+               file.stat.trans.csv=file.stat.trans.csv,
                na.rm = na.rm,
+               Version=Version,
                Date=Sys.time()))
 } # end of function
 

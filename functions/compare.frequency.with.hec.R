@@ -10,8 +10,8 @@ compare.frequency.with.hec <- function(Q.file.stat,
                                        Q.file.plotdata,
                                        Q.file.quantile,
                                        HEC.filename,
-                                       save.comparison=FALSE,
-                                       save.plots=FALSE,
+                                       write.comparison.csv=FALSE,
+                                       write.plots.pdf=FALSE,
                                        report.dir='.'){
 #  Input
 #    Q.file.stat   - file name of csv file containing the frequency statistics
@@ -28,6 +28,7 @@ compare.frequency.with.hec <- function(Q.file.stat,
 #############################################################
 #  Some basic error checking on the input parameters
 #
+   Version <- '2017-01-01'
    if( !is.character(Q.file.stat))    {stop("Q.file.stat must be a character string.")}
    if( !file.exists(Q.file.stat))     {stop('Q.file.stat does not exist')}
    if(length(Q.file.stat)>1)          {stop("Q.file.stat cannot have length > 1")}
@@ -41,8 +42,8 @@ compare.frequency.with.hec <- function(Q.file.stat,
    if( !is.character(HEC.filename))  {stop("HEC.filename must be a character string.")}
    if( !file.exists(HEC.filename))   {stop('HEC.filename does not exist')}
 
-   if(! is.logical(save.comparison)) {stop("save.comparison should be logical")}
-   if(! is.logical(save.plots))      {stop("save.plots should be logical")}
+   if(! is.logical(write.comparison.csv)) {stop("write.comparison.csv should be logical")}
+   if(! is.logical(write.plots.pdf))      {stop("write.plots.pdf should be logical")}
    if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exits")}
 
    #  Load the packages used 
@@ -134,16 +135,16 @@ compare.frequency.with.hec <- function(Q.file.stat,
                      plot.pp=plot.pp,
                      plot.quant=plot.quant)
 
-   file.comparison <- NA
-   if(save.comparison){
-      file.comparison <- file.path(report.dir, "comparison-vfa-R-vs-HEC.csv")
-      write.csv(diff.stat, file.comparison, row.names=FALSE)
+   file.comparison.csv <- NA
+   if(write.comparison.csv){
+      file.comparison.csv <- file.path(report.dir, "comparison-vfa-R-vs-HEC.csv")
+      write.csv(diff.stat, file.comparison.csv, row.names=FALSE)
    }
    
-   file.plots <- NA
-   if(save.plots){
-      file.plots <- file.path(report.dir, "comparison-vfa-R-vs-HEC.pdf")
-      pdf(file=file.plots)
+   file.plots.pdf <- NA
+   if(write.plots.pdf){
+      file.plots.pdf <- file.path(report.dir, "comparison-vfa-R-vs-HEC.pdf")
+      pdf(file=file.plots.pdf)
       l_ply(plot.list, function(x){plot(x)})
       dev.off()
    }
@@ -155,8 +156,9 @@ compare.frequency.with.hec <- function(Q.file.stat,
         diff.stat=diff.stat,
         plot.list=plot.list,
         stat.not.plotted=stat.not.plotted,
-        file.comparison=file.comparison,
-        file.plots=file.plots,
+        file.comparison.csv=file.comparison.csv,
+        file.plots.pdf=file.plots.pdf,
+        Version=Version,
         Date=Sys.time())
 }
 

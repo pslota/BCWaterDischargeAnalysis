@@ -4,9 +4,10 @@
 #     2017-01-30 CJS First Edition
 
 compare.percentile.longterm.stat <- function(Q.filename, E.filename,
-                                             save.comparison=FALSE,
-                                             save.plots=FALSE,
-                                             report.dir="."){
+                                             write.comparison.csv=FALSE,
+                                             write.plots.pdf=FALSE,
+                                             report.dir=".",
+                                             debug=FALSE){
 #  Input
 #    Q.filename - file name of csv file containing the annual statistics
 #    E.filename - Excel workbook with the statistics
@@ -23,6 +24,7 @@ compare.percentile.longterm.stat <- function(Q.filename, E.filename,
 #############################################################
 #  Some basic error checking on the input parameters
 #
+   Version <- "2017-02-01"
    if( !is.character(Q.filename))    {stop("Q.filename  muste be a character string.")}
    if( !is.character(E.filename))    {stop("E.filename  muste be a character string.")}
    if( !file.exists(Q.filename))     {stop('Q.filename does not exist')}
@@ -30,8 +32,8 @@ compare.percentile.longterm.stat <- function(Q.filename, E.filename,
    if(length(Q.filename)>1)          {stop("Q.filename cannot have length > 1")}
    if(length(E.filename)>1)          {stop("E.filename cannot have length > 1")}
 
-   if(! is.logical(save.comparison)) {stop("save.comparison should be logical")}
-   if(! is.logical(save.plots))      {stop("save.plots should be logical")}
+   if(! is.logical(write.comparison.csv)) {stop("write.comparison.csv should be logical")}
+   if(! is.logical(write.plots.pdf))      {stop("write.plots.pdf should be logical")}
    if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exits")}
 
    #  Load the packages used 
@@ -44,7 +46,8 @@ compare.percentile.longterm.stat <- function(Q.filename, E.filename,
 
    # Get the data from the Excel spreadsheet
    E.stat.in <- openxlsx::readWorkbook(E.filename, sheet='HydroDataSummary',  rows=7:29)
-   E.stat.in <- E.stat.in[, 151:163]  # CG1: CT5 but readWorkBook skips blank columns in the first 5 rows
+   if(debug)browser()
+   E.stat.in <- E.stat.in[, (ncol(E.stat.in)-12):ncol(E.stat.in)]  # CG1: CT5 but readWorkBook skips blank columns in the first 5 rows
 
    # Transpose the Excel sheet 
    E.stat.in[,1] <- paste("P",formatC(as.numeric(E.stat.in[,1]), width=2, format="d", flag="0"), sep="")
@@ -110,15 +113,15 @@ compare.percentile.longterm.stat <- function(Q.filename, E.filename,
    plot.list <- list(plot.allstat=plot.allstat)
 
    file.comparison <- NA
-   if(save.comparison){
-      file.comparison <- file.path(report.dir, "comparison-percentile-longterm-R-vs-Excel.csv")
-      write.csv(diff.stat, file.comparison, row.names=FALSE)
+   if(write.comparison.csv){
+      file.comparison.csv <- file.path(report.dir, "comparison-percentile-longterm-R-vs-Excel.csv")
+      write.csv(diff.stat, file.comparison.csv, row.names=FALSE)
    }
    
-   file.plots <- NA
-   if(save.plots){
-      file.plots <- file.path(report.dir, "comparison-percentile-longterm-R-vs-Excel.pdf")
-      pdf(file=file.plots)
+   file.plots.pdf <- NA
+   if(write.plots.pdf){
+      file.plots.pdf <- file.path(report.dir, "comparison-percentile-longterm-R-vs-Excel.pdf")
+      pdf(file=file.plots.pdf)
       l_ply(plot.list, function(x){plot(x)})
       dev.off()
    }
@@ -128,7 +131,8 @@ compare.percentile.longterm.stat <- function(Q.filename, E.filename,
         diff.stat=diff.stat,
         plot.list=plot.list,
         stat.not.plotted=stat.not.plotted,
-        file.cmparsion=file.comparison,
-        file.plots=file.plots,
+        file.cmparsion.csv=file.comparison.csv,
+        file.plots.pdf=file.plots.pdf,
+        Version=Version,
         Date=Sys.time())
 }

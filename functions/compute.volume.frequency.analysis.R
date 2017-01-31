@@ -12,13 +12,14 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
                          fit.distr=c("weibull","PIII"),
                          fit.quantiles=c(.975, .99, .98, .95, .90, .80, .50, .20, .10, .05, .01),
                          na.rm=list(na.rm.global=TRUE),
-                         write.stat=FALSE, write.stat.trans=FALSE,
-                         write.plotdata=FALSE,  # write out the plotting data
-                         write.quantiles=FALSE, # write out the fitted quantiles
-                         write.quantiles.trans=FALSE, # write out fitted quantiles (transposed)
+                         write.stat.csv=FALSE, write.stat.trans.csv=FALSE,
+                         write.plotdata.csv=FALSE,  # write out the plotting data
+                         write.quantiles.csv=FALSE, # write out the fitted quantiles
+                         write.quantiles.trans.csv=FALSE,
                          report.dir='.'
                          )
   {
+   Version <- '2017-02-01'
    library(ggplot2); library(plyr); 
    library(reshape2); library(zoo); 
    library(PearsonDS); library(e1071)
@@ -75,8 +76,8 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exits")}
 
    if( !is.list(na.rm))              {stop("na.rm is not a list") }
-   if( !is.logical(write.stat))      {stop("write.stat must be logical (TRUE/FALSE")}
-   if( !is.logical(write.stat.trans)){stop("write.stat.trans must be logical (TRUE/FALSE")}
+   if( !is.logical(write.stat.csv))  {stop("write.stat.csv must be logical (TRUE/FALSE")}
+   if( !is.logical(write.stat.trans.csv)){stop("write.stat.trans.csv must be logical (TRUE/FALSE")}
    if(! is.logical(unlist(na.rm))){  {stop("na.rm is list of logical (TRUE/FALSE) values only.")}
    if(! is.logical(use.log))         {stop("use.log must be logical (TRUE/FALSE)")}
    if(! is.logical(use.max))         {stop("use.max must be logical (TRUE/FALSE)")}
@@ -93,11 +94,11 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    if(  fit.distr[1]=='weibull' & use.log){stop("Cannot fit Weibull distribution on log-scale")}
    if(  fit.distr[1]=='weibull' & any(flow$Q<0)){stop("cannot fit weibull distribution with negative flow values")}
 
-   if( !is.logical(write.stat))      {stop("write.stat must be logical (TRUE/FALSE")}
-   if( !is.logical(write.stat.trans)){stop("write.stat.trans must be logical (TRUE/FALSE")}
-   if( !is.logical(write.plotdata))  {stop("write.plotdata must be logical (TRUE/FALSE")}
-   if( !is.logical(write.quantiles))  {stop("write.quantiles must be logical (TRUE/FALSE")}
-   if( !is.logical(write.quantiles.trans)){stop("write.quantiles.trans must be logical (TRUE/FALSE")}
+   if( !is.logical(write.stat.csv))      {stop("write.stat.csv must be logical (TRUE/FALSE")}
+   if( !is.logical(write.stat.trans.csv)){stop("write.stat.trans.csv must be logical (TRUE/FALSE")}
+   if( !is.logical(write.plotdata.csv))  {stop("write.plotdata.csv must be logical (TRUE/FALSE")}
+   if( !is.logical(write.quantiles.csv)) {stop("write.quantiles.csv must be logical (TRUE/FALSE")}
+   if( !is.logical(write.quantiles.trans.csv)){stop("write.quantiles.trans.csv must be logical (TRUE/FALSE")}
 
    # merge the specified na.rm options with my options
    my.na.rm <- list(na.rm.global=TRUE)
@@ -237,39 +238,39 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    # get the transposed version
    fitted.quantiles.trans <- reshape2::dcast(fitted.quantiles, distr+prob~Measure , value.var="quantile")
    
-   file.stat <- NA
-   if(write.stat){
+   file.stat.csv <- NA
+   if(write.stat.csv){
      # Write out the summary table for comparison to HEC spreadsheet
-     file.stat<- file.path(report.dir,paste(Station.Code,"-annual-vfa-stat.csv", sep=""))
-     write.csv(Q.stat,file=file.stat, row.names=FALSE)
+     file.stat.csv <- file.path(report.dir,paste(Station.Code,"-annual-vfa-stat.csv", sep=""))
+     write.csv(Q.stat,file=file.stat.csv, row.names=FALSE)
    }
    
-   file.stat.trans <- NA
-   if(write.stat.trans){
+   file.stat.trans.csv <- NA
+   if(write.stat.trans.csv){
      # Write out the  transposed summary table for comparison to HEC spreadsheet
-     file.stat.trans<- file.path(report.dir, paste(Station.Code,"-annual-vfa-stat-trans.csv", sep=""))
-     write.csv(Q.stat.trans,file=file.stat.trans, row.names=FALSE)
+     file.stat.trans.csv <- file.path(report.dir, paste(Station.Code,"-annual-vfa-stat-trans.csv", sep=""))
+     write.csv(Q.stat.trans,file=file.stat.trans.csv, row.names=FALSE)
    }
    
-   file.plotdata <- NA
-   if(write.plotdata){
+   file.plotdata.csv <- NA
+   if(write.plotdata.csv){
      # Write out the plotdata for comparison with HEC output
-     file.plotdata<- file.path(report.dir, paste(Station.Code,"-annual-vfa-plotdata.csv", sep=""))
-     write.csv(plotdata,file=file.plotdata, row.names=FALSE)
+     file.plotdata.csv <- file.path(report.dir, paste(Station.Code,"-annual-vfa-plotdata.csv", sep=""))
+     write.csv(plotdata,file=file.plotdata.csv, row.names=FALSE)
    }
 
-   file.quantile <- NA
-   if(write.quantiles){
+   file.quantile.csv <- NA
+   if(write.quantiles.csv){
      # Write out the summary table for comparison to HEC spreadsheet
-     file.quantile<- file.path(report.dir, paste(Station.Code,"-annual-vfa-quantiles.csv", sep=""))
-     write.csv(fitted.quantiles,file=file.quantile, row.names=FALSE)
+     file.quantile.csv<- file.path(report.dir, paste(Station.Code,"-annual-vfa-quantiles.csv", sep=""))
+     write.csv(fitted.quantiles,file=file.quantile.csv, row.names=FALSE)
    }
    
-   file.quantile.trans <- NA
-   if(write.quantiles.trans){
+   file.quantile.trans.csv <- NA
+   if(write.quantiles.trans.csv){
      # Write out the  transposed summary table for comparison to HEC spreadsheet
-     file.quantile.trans<- file.path(report.dir, paste(Station.Code,"-annual-vfa-quantiles-trans.csv", sep=""))
-     write.csv(fitted.quantiles.trans,file=file.quantile.trans, row.names=FALSE)
+     file.quantile.trans.csv <- file.path(report.dir, paste(Station.Code,"-annual-vfa-quantiles-trans.csv", sep=""))
+     write.csv(fitted.quantiles.trans,file=file.quantile.trans.csv, row.names=FALSE)
    }
    
    list(start.year=start.year,
@@ -286,11 +287,12 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
         fit = fit,               # list of fits of freq.distr to each measure
         fitted.quantiles=fitted.quantiles,             # fitted quantiles and their transposition
         fitted.quantiles.trans=fitted.quantiles.trans,
-        file.stat = file.stat,   # file with rolling average statistics
-        file.stat.trans=file.stat.trans,
-        file.plotdata=file.plotdata, # file with plotting information
-        file.quantile=file.quantile,
-        file.quantile.trans=file.quantile.trans,
+        file.stat.csv = file.stat.csv,   # file with rolling average statistics
+        file.stat.trans.csv=file.stat.trans.csv,
+        file.plotdata.csv=file.plotdata.csv, # file with plotting information
+        file.quantile.csv=file.quantile.csv,
+        file.quantile.trans.csv=file.quantile.trans.csv,
+        Version = Version, 
         date=Sys.time())
 } 
    

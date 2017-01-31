@@ -8,8 +8,8 @@ compute.Q.percentile.longterm <- function(
                           flow, 
                           start.year=9999, 
                           end.year=0,
-                          write.stat=FALSE,        # write out statistics 
-                          write.stat.trans=FALSE,  # write out statistics in transposed format
+                          write.stat.csv=FALSE,        # write out statistics 
+                          write.stat.trans.csv=FALSE,  # write out statistics in transposed format
                           report.dir=".",
                           na.rm=list(na.rm.global=TRUE)
                           ){
@@ -25,8 +25,8 @@ compute.Q.percentile.longterm <- function(
 #           All missing values are automatically excluded
 #
 #    start.year, end year - starting and ending year for statistics e.g. start.year=1960, end.year=2013
-#    write.stat   - write out statistics to csv file - file name is returned
-#    write.stat.trans - write out transposed statistics to csv file - file name is returned
+#    write.stat.csv   - write out statistics to csv file - file name is returned
+#    write.stat.trans.csv - write out transposed statistics to csv file - file name is returned
 #
 #
 #  Output: List with the following objects
@@ -38,6 +38,7 @@ compute.Q.percentile.longterm <- function(
 #############################################################
 #  Some basic error checking on the input parameters
 #
+   Version <- '2017-02-01'
    library(plyr)        # split-apply-combine 
    library(reshape2)    # reorganize data (melting and casting)
 
@@ -55,8 +56,8 @@ compute.Q.percentile.longterm <- function(
    if(! (is.numeric(start.year) & is.numeric(end.year))){
                                       stop("start.year and end.year not numberic.")}
    if(! (start.year <= end.year))    {stop("start.year > end.year")}
-   if( !is.logical(write.stat))      {stop("write.stat must be logical (TRUE/FALSE")}
-   if( !is.logical(write.stat.trans)){stop("write.stat.trans must be logical (TRUE/FALSE")}
+   if( !is.logical(write.stat.csv))  {stop("write.stat.csv must be logical (TRUE/FALSE")}
+   if( !is.logical(write.stat.trans.csv)){stop("write.stat.trans.csv must be logical (TRUE/FALSE")}
    if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exist")}
 
    if( !is.list(na.rm))              {stop("na.rm is not a list") }
@@ -79,26 +80,27 @@ compute.Q.percentile.longterm <- function(
    Q.per.longterm$Month <- month.abb[Q.per.longterm$Month]
 
 #  Write out the summary table for comparison to excel spreadsheet
-   file.stat <- NA
-   if(write.stat){
-      file.stat <- file.path(report.dir,paste(Station.Code,"-longterm-percentile-stat.csv", sep=""))
-      write.csv(Q.per.longterm, file=file.stat, row.names=FALSE)
+   file.stat.csv <- NA
+   if(write.stat.csv){
+      file.stat.csv <- file.path(report.dir,paste(Station.Code,"-longterm-percentile-stat.csv", sep=""))
+      write.csv(Q.per.longterm, file=file.stat.csv, row.names=FALSE)
    }
    
 #  Write out thesummary table in transposed format
    Month <- Q.per.longterm[,"Month"]
    Q.per.longterm.trans <- t(Q.per.longterm[, !grepl('^Month', names(Q.per.longterm))])
    colnames(Q.per.longterm.trans) <-  toupper(month.abb[1:12])
-   file.stat.trans<- NA
-   if(write.stat.trans){
-     file.stat.trans <-file.path(report.dir, paste(Station.Code,"-longterm-percentile-stat-trans.csv", sep=""))
-     write.csv(Q.per.longterm.trans, file=file.stat.trans, row.names=TRUE)
+   file.stat.trans.csv<- NA
+   if(write.stat.trans.csv){
+     file.stat.trans.csv <-file.path(report.dir, paste(Station.Code,"-longterm-percentile-stat-trans.csv", sep=""))
+     write.csv(Q.per.longterm.trans, file=file.stat.trans.csv, row.names=TRUE)
    }
    
    return(list(Q.percentile.stat=Q.per.longterm,
                Q.percentile.stat.trans=Q.per.longterm.trans,
-               file.stat=file.stat,
-               file.stat.trans=file.stat.trans,
+               file.stat.csv=file.stat.csv,
+               file.stat.trans.csv=file.stat.trans.csv,
                na.rm=na.rm,
+               Version=Version,
                Date=Sys.time()))
 } # end of function
