@@ -1,0 +1,74 @@
+Version=1.0
+ProjectName=GREELEY
+Extents=-Infinity,-Infinity,-Infinity,-Infinity
+Grow Extents=true
+Created=1485809534726
+Created By=rgpike
+UnitSystemID=2
+SyncMapWindows=false
+
+CoordinateInfoBegin
+type=X-Y
+units=U.S. Feet
+unitMult=1.0
+spheroid=
+CoordinateInfoEnd
+
+AdditionalProjectInfoBegin
+AdditionalProjectInfoEnd
+
+ManagerBegin
+Name=Base Map
+Description=
+File=DataStore.LST
+Class=hec2.ssp.model.DataStore
+ModifiedTime=1485809776607
+CreatedBy=rgpike
+CreatedOn=1485809534679
+ModifiedBy=rgpike
+ManagerEnd
+
+ManagerBegin
+Name=Base Map
+Description=
+File=Base_Map.map
+Class=hec2.ssp.model.Map
+ModifiedTime=1485809534695
+CreatedBy=rgpike
+CreatedOn=1485809534695
+ModifiedBy=rgpike
+ManagerEnd
+
+ManagerBegin
+Name=GREELEY-FLOW-DAY
+Description=Imported from H:\A_Data_For_CARL\ILLECILLEWAET RIVER AT GREELEY\08ND013_Date_HEC.xls
+File=DataStore.LST
+Class=hec2.ssp.model.Data
+ModifiedTime=1485809776607
+CreatedBy=rgpike
+CreatedOn=1485809776607
+ModifiedBy=rgpike
+ManagerEnd
+
+ManagerBegin
+Name=GREELEY_FREQ
+Description=
+File=GREELEY_FREQ.vfa
+Class=hec2.ssp.model.VolumeFrequencyAnalysis
+ModifiedTime=1485809829583
+CreatedBy=rgpike
+CreatedOn=1485809824576
+ModifiedBy=rgpike
+ManagerEnd
+
+ManagerBegin
+Name=PlotProbLines
+Description=
+File=PlotProbLines.ppl
+Class=hec2.ssp.model.PlotProbLinesMgr
+ModifiedTime=1485809829583
+CreatedBy=rgpike
+CreatedOn=1485809826557
+ModifiedBy=rgpike
+ManagerEnd
+

@@ -1,0 +1,29 @@
+Node: VolumeFrequency
+Name: Liard_Freq
+LastModified:1485809375810
+DSSFileName:LIARD.dss
+AllowDurationTableEditing:false
+UseLogTransform:true
+PlottingPosition:WEIBULL
+PlottingConstantA:-3.4028234663852886E38
+PlottingConstantB:-3.4028234663852886E38
+DistributionType:NONE
+ExpectedProbablyCurve:Compute Expected Prob
+ParameterLabel:
+UnitsLabel:
+UseParameterLabel:false
+UseUnitsLabel:false
+SkewType:STATION
+UseDefaultFrequencies:true
+UseMaximumAnalysis:true
+DefaultFlowDurations:false
+YearType:WATER_YEAR
+AnalysisStartDate:01OCT1900
+UseSeasonal:false
+UseUserStartDate:false
+UseUserEndDate:false
+UseHistoricData:false
+HistoricStartYear:0
+HistoricEndYear:0
+UseLowOutlierThreshold:false
+UseHighOutlierThreshold:false

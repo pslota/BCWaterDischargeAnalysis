@@ -1,7 +1,7 @@
 #--------------------------------------------------------------
 # Compute the statistics on an (calendar and water) year basis
 # 
-#   2017-01-30 CSJ First edition
+#   2017-01-30 CJS First edition
 
 compute.Q.stat.annual <- function(Station.code='XXXXX', 
                           Station.Area=NA, 
@@ -10,6 +10,8 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
                           end.year=0,
                           write.stat.csv=FALSE,        # write out statistics 
                           write.stat.trans.csv=FALSE,  # write out statistics in transposed format
+                          write.flow.summary.csv=TRUE, # write out a summary of period of record
+                          plot.stat.trend=TRUE,       # should you plot all of stat trends?
                           report.dir=".",
                           na.rm=list(na.rm.global=FALSE)){
 #  Compute statistics on an annual (calendar and water) year basis
@@ -53,13 +55,13 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
 #############################################################
 #  Some basic error checking on the input parameters
 #
-   Version <- '2017-02-01'
+   Version <- '2017-02-04'
    library(car)         # recode function
    library(plyr)        # split-apply-combine 
    library(reshape2)    # reorganize data (melting and casting)
    library(zoo)         # rolling averages
 
-   if( !is.character(Station.Code))  {stop("Station Code muste be a character string.")}
+   if( !is.character(Station.Code))  {stop("Station Code must be a character string.")}
    if(length(Station.Code)>1)        {stop("Station.Code cannot have length > 1")}
    if( !is.numeric(Station.Area))    {stop("Station.Area must be numeric")}
    if(length(Station.Area)>1)        {stop("Station.Area cannot have length > 1")}
@@ -75,6 +77,9 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
    if(! (start.year <= end.year))    {stop("start.year > end.year")}
    if( !is.logical(write.stat.csv))  {stop("write.stat.csv must be logical (TRUE/FALSE")}
    if( !is.logical(write.stat.trans.csv)){stop("write.stat.trans.csv must be logical (TRUE/FALSE")}
+   if( !is.logical(write.flow.summary.csv)){stop("write.flow.summary.csv must be logical (TRUE/FALSE")}
+   if( !is.logical(plot.stat.trend)) {stop("plot.stat.trend must be logical (TRUE/FALSE")}
+
    if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exist")}
    if( !is.list(na.rm))              {stop("na.rm is not a list") }
    if(! is.logical(unlist(na.rm))){   stop("na.rm is list of logical (TRUE/FALSE) values only.")}
@@ -117,64 +122,93 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
    dates.missing.flows <- flow$Date[ is.na(flow$Q) & 
                                as.numeric(format(flow$Date,"%Y"))>=start.year &
                                as.numeric(format(flow$Date,"%Y"))<=end.year  ]
+   
+#  simple summary statistics   
+   flow.sum <- plyr::ddply(flow[ flow$Year >= start.year & flow$Year <=end.year,], "Year", plyr::summarize,
+         n.days   = length(Year),
+         n.Q      = sum (!is.na(Q)),
+         n.miss.Q = sum ( is.na(Q)),
+         min.Q    = min (Q, na.rm=TRUE),
+         max.Q    = max (Q, na.rm=TRUE),
+         mean.Q   = mean(Q,na.rm=TRUE),
+         sd.Q     = sd  (Q,na.rm=TRUE))
+   flow.sum
 
 #  Compute statistics on annual basis
 #  
    Q.stat.annual <- plyr::ddply(flow[ flow$Year >= start.year,], "Year", function(fy, Station.Area, na.rm){
      # process each year's flow values (fy)
-     SW_1_day_MIN    = min(fy$Q, na.rm=na.rm$na.rm.global)	      # Annual Min Daily Q 
-     SW_1_day_MINDOY = as.numeric(format( fy$Date[which.min( fy$Q)], "%j"))        # Date of Annual Min Daily Q
-     if(length(SW_1_day_MINDOY)==0) SW_1_day_MINDOY <- NA
-     SW_3_day_MIN	   = min(fy$Q.03DAvg, na.rm=na.rm$na.rm.global) # Min Annual Rolling 3 day avg 
-     SW_3_day_MINDOY = as.numeric(format( fy$Date[which.min( fy$Q.03DAvg)], "%j")) # Date of Min Annual Rolling 3 day avg
-     if(length(SW_3_day_MINDOY)==0) SW_3_day_MINDOY <- NA
-     SW_7_day_MIN	   = min(fy$Q.07DAvg, na.rm=na.rm$na.rm.global) # Min Annual Rolling 7 day avg 
-     SW_7_day_MINDOY = as.numeric(format( fy$Date[which.min( fy$Q.07DAvg)], "%j")) # Date of Min Annual Rolling 7 day avg
-     if(length(SW_7_day_MINDOY)==0) SW_7_day_MINDOY <- NA
-     SW_30_day_MIN	 = min(fy$Q.30DAvg, na.rm=na.rm$na.rm.global) # Min Annual Rolling 30 day avg 
-     SW_30_day_MINDOY= as.numeric(format( fy$Date[which.min( fy$Q.30DAvg)], "%j")) # Date of Min Annual Rolling 30 day avg
-     if(length(SW_30_day_MINDOY)==0) SW_30_day_MINDOY <- NA
-     SW_ANNUAL_MIN   = min (fy$Q, na.rm=na.rm$na.rm.global)	    # Annual Min Daily Q 	Annual Min Daily Q
-     SW_ANNUAL_MAX	 = max (fy$Q, na.rm=na.rm$na.rm.global)      # Annual Max Daily Q
-     SW_ANNUAL_MEAN  = mean(fy$Q, na.rm=na.rm$na.rm.global)     # Annual Mean Discharge (Based on Daily avgs)
-     SW_ANNUAL_TOTALQ= mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Q)*60*60*24    # Yearly sum of daily avg (cms) *60*60*24 # deal with missing values
-     SW_ANNUAL_YIELDMM=mean(fy$Q, na.rm=na.rm$na.rm.global)*60*60*24*365.25/Station.Area/1000   #	(Annual Mean*60*60*24*365.25)/(area in km2*1000000))*1000
+     ANNUAL_MIN_01Day_SW    = min(fy$Q, na.rm=na.rm$na.rm.global)	      # Annual Min Daily Q 
+     ANNUAL_MINDOY_01Day_SW = as.numeric(format( fy$Date[which.min( fy$Q)], "%j"))        # Date of Annual Min Daily Q
+     if(length(ANNUAL_MINDOY_01Day_SW)==0) ANNUAL_MINDOY_01Day_SW <- NA
 
+     ANNUAL_MIN_03Day_SW	   = min(fy$Q.03DAvg, na.rm=na.rm$na.rm.global) # Min Annual Rolling 3 day avg 
+     ANNUAL_MINDOY_03Day_SW = as.numeric(format( fy$Date[which.min( fy$Q.03DAvg)], "%j")) # Date of Min Annual Rolling 3 day avg
+     if(length(ANNUAL_MINDOY_03Day_SW)==0) ANNUAL_MINDOY_03Day_SW <- NA
+
+     ANNUAL_MIN_07Day_SW	   = min(fy$Q.07DAvg, na.rm=na.rm$na.rm.global) # Min Annual Rolling 7 day avg 
+     ANNUAL_MINDOY_07Day_SW = as.numeric(format( fy$Date[which.min( fy$Q.07DAvg)], "%j")) # Date of Min Annual Rolling 7 day avg
+     if(length(ANNUAL_MINDOY_07Day_SW)==0) ANNUAL_MINDOY_07Day_SW <- NA
+
+     ANNUAL_MIN_30Day_SW	 = min(fy$Q.30DAvg, na.rm=na.rm$na.rm.global) # Min Annual Rolling 30 day avg 
+     ANNUAL_MINDOY_30Day_SW= as.numeric(format( fy$Date[which.min( fy$Q.30DAvg)], "%j")) # Date of Min Annual Rolling 30 day avg
+     if(length(ANNUAL_MINDOY_30Day_SW)==0) ANNUAL_MINDOY_30Day_SW <- NA
+
+     ANNUAL_MIN_DAILY_SW   = min (fy$Q, na.rm=na.rm$na.rm.global)	    # Annual Min Daily Q 	Annual Min Daily Q
+     ANNUAL_MAX_DAILY_SW	 = max (fy$Q, na.rm=na.rm$na.rm.global)      # Annual Max Daily Q
+     ANNUAL_MEAN_DAILY_SW  = mean(fy$Q, na.rm=na.rm$na.rm.global)     # Annual Mean Discharge (Based on Daily avgs)
+     ANNUAL_TOTALQ_DAILY_SW= mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Q)*60*60*24    # Yearly sum of daily avg (cms) *60*60*24 # deal with missing values
+     ANNUAL_CUMQ_DAILY_SW  = ANNUAL_TOTALQ_DAILY_SW/(60*60*24)      # Yearly sum of daily avg (cms) # deal with missing values
+     ANNUAL_YIELDMM_DAILY_SW=mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Q)*60*60*24 /Station.Area/1000   #	(Annual Mean*60*60*24*365.25)/(area in km2*1000000))*1000
+
+     # Get the cumulative Q values 
+     # Notice that if missing values are removed, the individual values are replaced by zero
+     fy$Q2 <- fy$Q
+     if(na.rm$na.rm.globa) fy$Q2[ is.na(fy$Q2)] <- 0
+     fy$CumQ <- cumsum(fy$Q2)    
+     # what is the first date where 25, 50 and 75% of totalQ (see above) are found
+     ANNUAL_Date_25P_CUMQ_DAILY_SW <- fy$Date[ which.max( fy$CumQ > 0.25 *ANNUAL_CUMQ_DAILY_SW)]
+     ANNUAL_Date_50P_CUMQ_DAILY_SW <- fy$Date[ which.max( fy$CumQ > 0.50 *ANNUAL_CUMQ_DAILY_SW)]
+     ANNUAL_Date_75P_CUMQ_DAILY_SW <- fy$Date[ which.max( fy$CumQ > 0.75 *ANNUAL_CUMQ_DAILY_SW)]
+     ANNUAL_Date_25P_CUMQ_DAILY_SW <- as.numeric(format(ANNUAL_Date_25P_CUMQ_DAILY_SW, "%j"))
+     ANNUAL_Date_50P_CUMQ_DAILY_SW <- as.numeric(format(ANNUAL_Date_50P_CUMQ_DAILY_SW, "%j"))
+     ANNUAL_Date_75P_CUMQ_DAILY_SW <- as.numeric(format(ANNUAL_Date_75P_CUMQ_DAILY_SW, "%j"))
+    
      # Assign seasons to the month (JFM, AMJ, JJA, OND)
      fy$Season <- car::recode(fy$Month, 
                        "1:3='JFM'; 4:6='AMJ'; 7:9='JAS'; 10:12='OND'; else=NA")
      fy$Season <- factor(fy$Season, levels=c("JFM",'AMJ','JAS','OND'), order=TRUE)
    
      # compute totalQ and assign variable names for total Q
-     # SW_JFM_TOTALQ	Jan+Feb+Mar sum of daily avg (cms) *60*60*24
-     # SW_AMJ_TOTALQ	Apr+May+Jun  sum of daily avg (cms) *60*60*24
-     # SW_JAS_TOTALQ	Jul+Aug+Sep  sum of daily avg (cms) *60*60*24
-     # SW_OND_TOTALQ	Oct+Nov+Dec  sum of daily avg (cms) *60*60*24
+     # JFM_TOTALQ_DAILY_SW	Jan+Feb+Mar  sum of daily avg (cms) *60*60*24
+     # AMJ_TOTALQ_DAILY_SW	Apr+May+Jun  sum of daily avg (cms) *60*60*24
+     # JAS_TOTALQ	DAILY_SW  Jul+Aug+Sep  sum of daily avg (cms) *60*60*24
+     # OND_TOTALQ_DAILY_SW  Oct+Nov+Dec  sum of daily avg (cms) *60*60*24
      season.stats <- plyr::ddply(fy, "Season", function(fy, na.rm){
-                               vname.totalq  <- paste("SW_",fy$Season[1],"_TOTALQ",sep="")
+                               vname.totalq  <- paste(fy$Season[1],"_TOTALQ_DAILY_SW",sep="")
                                totalq <- mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Season)*60*60*24  # deal with missing values
                                data.frame(vname.totalq, totalq, stringsAsFactors=FALSE)
                                },na.rm=na.rm)
      season.stats$vname.totalq <- factor(season.stats$vname.totalq, levels=season.stats$vname.totalq, order=TRUE) # keep ordering
 
      # compute Yield and assign variable names for yield
-     # SW_JFM_YIELDMM	(JFM_TotalQ/(area in km2*1000000))*1000
-     # SW_AMJ_YIELDMM	(AMJ_TotalQ/(area in km2*1000000))*1000
-     # SW_JAS_YIELDMM	(JAS_TotalQ/(area in km2*1000000))*1000
-     # SW_OND_YIELDMM	(OND_TotalQ/(area in km2*1000000))*1000
+     # JFM_YIELDMM_DAILY_SW	(JFM_TOTALQ_DAILY_SW/(area in km2*1000000))*1000
+     # AMJ_YIELDMM_DAILY_SW	(AMJ_TOTALQ_DAILY_SW/(area in km2*1000000))*1000
+     # JAS_YIELDMM_DAILY_SW	(JAS_TOTALQ_DAILY_SW/(area in km2*1000000))*1000
+     # OND_YIELDM_DAILY_SWM	(OND_TOTALQ_DAILY_SW/(area in km2*1000000))*1000
      season.stats$vname.yieldmm <- sub('TOTALQ','YIELDMM', season.stats$vname.totalq)
      season.stats$yieldmm       <- season.stats$totalq/Station.Area/1000
      season.stats$vname.yieldmm <- factor(season.stats$vname.yieldmm, levels=season.stats$vname.yieldmm, order=TRUE) # keep ordering
   
      # extract the variables for adding to the data frame later
-     SW_Season_TOTALQ <- reshape2::acast(season.stats, .~vname.totalq, value.var='totalq')
-     SW_Season_YIELDMM<- reshape2::acast(season.stats, .~vname.yieldmm,value.var='yieldmm')
+     Season_TOTALQ_DAILY_SW <- reshape2::acast(season.stats, .~vname.totalq, value.var='totalq')
+     Season_YIELDMM_DAILY_SW<- reshape2::acast(season.stats, .~vname.yieldmm,value.var='yieldmm')
     
      # Monthly values 
-     # JAN_MIN_DAILY_SW	Min Daily Avg Q for Jan     
-     # JAN_MAX_DAILY_SW	Max Daily Avg Q for Jan     
-     # JAN_MEAN_SW	Mean Monthly Q for Jan 
-     # JAN_P50_SW	Median Monthly Q for Jan   
+     # JAN_MIN_DAILY_SW	  Min Daily Avg Q for Jan     
+     # JAN_MAX_DAILY_SW	  Max Daily Avg Q for Jan     
+     # JAN_MEAN_DAILY_SW	Mean Monthly Q for Jan 
+     # JAN_P50_DAILY_SW	  Median Monthly Q for Jan   
      # JAN_P90_SW	Low Flow, 90th Percentile for Jan  -- see contract - this is the 10th percentile
      # JAN_P80_SW	Low Flow, 80th Percentile for Jan  -- see contract - this is the 20th percentile
    
@@ -194,10 +228,10 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
      # create variable names for each type of category
      month.stats$vname.min <- paste(month.name[month.stats$Month],"_MIN_DAILY_SW", sep="")
      month.stats$vname.max <- paste(month.name[month.stats$Month],"_MAX_DAILY_SW", sep="")
-     month.stats$vname.mean<- paste(month.name[month.stats$Month],"_MEAN_SW",sep="")
-     month.stats$vname.p50 <- paste(month.name[month.stats$Month],"_P50_SW",sep="")
-     month.stats$vname.p80 <- paste(month.name[month.stats$Month],"_P80_SW",sep="")
-     month.stats$vname.p90 <- paste(month.name[month.stats$Month],"_P90_SW",sep="")
+     month.stats$vname.mean<- paste(month.name[month.stats$Month],"_MEAN_DAILY_SW",sep="")
+     month.stats$vname.p50 <- paste(month.name[month.stats$Month],"_P50_DAILY_SW",sep="")
+     month.stats$vname.p80 <- paste(month.name[month.stats$Month],"_P80_DAILY_SW",sep="")
+     month.stats$vname.p90 <- paste(month.name[month.stats$Month],"_P90_DAILY_SW",sep="")
 
      month.stats$vname.min <- factor(month.stats$vname.min, levels=month.stats$vname.min, order=TRUE)
      month.stats$vname.max <- factor(month.stats$vname.max, levels=month.stats$vname.max, order=TRUE)
@@ -206,36 +240,40 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
      month.stats$vname.p80 <- factor(month.stats$vname.p80, levels=month.stats$vname.p80, order=TRUE)
      month.stats$vname.p90 <- factor(month.stats$vname.p90, levels=month.stats$vname.p90, order=TRUE)
 
-     SW_Month_MIN <- reshape2::acast(month.stats, .~vname.min , value.var='month.min')
-     SW_Month_MAX <- reshape2::acast(month.stats, .~vname.max , value.var='month.max')
-     SW_Month_MEAN<- reshape2::acast(month.stats, .~vname.mean, value.var='month.mean')
-     SW_Month_P50 <- reshape2::acast(month.stats, .~vname.p50,  value.var='month.p50')
-     SW_Month_P80 <- reshape2::acast(month.stats, .~vname.p80,  value.var='month.p80')
-     SW_Month_P90 <- reshape2::acast(month.stats, .~vname.p90,  value.var='month.p90')
+     Month_MIN_DAILY_SW <- reshape2::acast(month.stats, .~vname.min , value.var='month.min')
+     Month_MAX_DAILY_SW <- reshape2::acast(month.stats, .~vname.max , value.var='month.max')
+     Month_MEAN_DAILY_SW<- reshape2::acast(month.stats, .~vname.mean, value.var='month.mean')
+     Month_P50_DAILY_SW <- reshape2::acast(month.stats, .~vname.p50,  value.var='month.p50')
+     Month_P80_DAILY_SW <- reshape2::acast(month.stats, .~vname.p80,  value.var='month.p80')
+     Month_P90_DAILY_SW <- reshape2::acast(month.stats, .~vname.p90,  value.var='month.p90')
 
      # return the annual results
      res <- data.frame(
-             SW_1_day_MIN,
-             SW_1_day_MINDOY, 
-             SW_3_day_MIN,	   
-             SW_3_day_MINDOY, 
-             SW_7_day_MIN,	   
-             SW_7_day_MINDOY, 
-             SW_30_day_MIN,	
-             SW_30_day_MINDOY,
-             SW_ANNUAL_MIN,   
-             SW_ANNUAL_MAX,	 
-             SW_ANNUAL_MEAN,  
-             SW_ANNUAL_TOTALQ,
-             SW_ANNUAL_YIELDMM,
-             SW_Season_TOTALQ,
-             SW_Season_YIELDMM,
-             SW_Month_MIN,
-             SW_Month_MAX,
-             SW_Month_MEAN,
-             SW_Month_P50,
-             SW_Month_P80,
-             SW_Month_P90,
+             ANNUAL_MIN_01Day_SW,
+             ANNUAL_MINDOY_01Day_SW, 
+             ANNUAL_MIN_03Day_SW,	   
+             ANNUAL_MINDOY_03Day_SW, 
+             ANNUAL_MIN_07Day_SW,	   
+             ANNUAL_MINDOY_07Day_SW, 
+             ANNUAL_MIN_30Day_SW,	
+             ANNUAL_MINDOY_30Day_SW,
+             ANNUAL_MIN_DAILY_SW,   
+             ANNUAL_MAX_DAILY_SW,	 
+             ANNUAL_MEAN_DAILY_SW,  
+             ANNUAL_TOTALQ_DAILY_SW,
+             ANNUAL_YIELDMM_DAILY_SW,
+             ANNUAL_CUMQ_DAILY_SW,
+             ANNUAL_Date_25P_CUMQ_DAILY_SW, 
+             ANNUAL_Date_50P_CUMQ_DAILY_SW,
+             ANNUAL_Date_75P_CUMQ_DAILY_SW,
+             Season_TOTALQ_DAILY_SW,
+             Season_YIELDMM_DAILY_SW,
+             Month_MIN_DAILY_SW,
+             Month_MAX_DAILY_SW,
+             Month_MEAN_DAILY_SW,
+             Month_P50_DAILY_SW,
+             Month_P80_DAILY_SW,
+             Month_P90_DAILY_SW,
              stringsAsFactors=FALSE)
    }, Station.Area=Station.Area, na.rm=na.rm)
 
@@ -243,11 +281,11 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
 
   Q.stat.wyear <- plyr::ddply(flow[ flow$WYear >= start.year,], "WYear", function(fy, Station.Area, na.rm){
      # process each waters year's flow values (fy)
-     # SW_Oct_to_Sept_TOTALQ	Oct through Sept sum of daily avg (cms) *60*60*24
-     # SW_Oct_to_Sept_YIELDMM	(Oct_to_Sep_TotalQ/(area in km2*1000000))*1000
+     # Oct_to_Sept_TOTALQ_DAILY_SW	Oct through Sept sum of daily avg (cms) *60*60*24
+     # Oct_to_Sept_YIELDMM_DAILY_SW	(Oct_to_Sep_TotalQ/(area in km2*1000000))*1000
 
-     SW_Oct_to_Sept_TOTALQ <- mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Q)*60*60*24 
-     SW_Oct_to_Sept_YIELDMM<- SW_Oct_to_Sept_TOTALQ /Station.Area/1000
+     Oct_to_Sept_TOTALQ_DAILY_SW <- mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Q)*60*60*24 
+     Oct_to_Sept_YIELDMM_DAILY_SW<- Oct_to_Sept_TOTALQ_DAILY_SW /Station.Area/1000
 
      # half water-year statistics
      # Assign seasons to the month (AMJJAS ONDJFM)
@@ -256,38 +294,45 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
      fy$Season <- factor(fy$Season, levels=c("ONDJFM",'AMJJAS'), order=TRUE)
    
      # compute totalQ and assign variable names for total Q
-     # SW_AMJJAS_TotalQ	Apr through Sep  sum of daily avg (cms) *60*60*24
-     # SW_ONDJFM_TOTALQ	Oct through Mar sum of daily avg (cms) *60*60*24
+     # AMJJAS_TotalQ_DAILY_SW	Apr through Sep  sum of daily avg (cms) *60*60*24
+     # ONDJFM_TOTALQ_DAILY_SW 	Oct through Mar sum of daily avg (cms) *60*60*24
      season.stats <- plyr::ddply(fy, "Season", function(fy, na.rm){
-                               vname.totalq  = paste("SW_",fy$Season[1],"_TOTALQ",sep="")
+                               vname.totalq  = paste(fy$Season[1],"_TOTALQ_DAILY_SW",sep="")
                                totalq = mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Season)*60*60*24  # deal with missing values
                                data.frame(vname.totalq, totalq, stringsAsFactors=FALSE)
                                }, na.rm=na.rm)
      season.stats$vname.totalq <- factor(season.stats$vname.totalq, levels=season.stats$vname.totalq, order=TRUE) # keep ordering
 
      # compute Yield and assign variable names for yield
-     # SW_AMJJAS_YIELDMM	(AMJJAS_TotalQ/(area in km2*1000000))*1000
-     # SW_ONDJFM_YIELDMM	(ONDJFM_TotalQ/(area in km2*1000000))*1000
+     # AMJJAS_YIELDMM_DAILY_SW	(AMJJAS_TotalQ/(area in km2*1000000))*1000
+     # ONDJFM_YIELDMM_DAILY_SW	(ONDJFM_TotalQ/(area in km2*1000000))*1000
      season.stats$vname.yieldmm <- sub('TOTALQ','YIELDMM', season.stats$vname.totalq)
      season.stats$yieldmm       <- season.stats$totalq/Station.Area/1000
      season.stats$vname.yieldmm <- factor(season.stats$vname.yieldmm, levels=season.stats$vname.yieldmm, order=TRUE) # keep ordering
   
      # extract the variables for adding to the data frame later
-     SW_Season_TOTALQ <- reshape2::acast(season.stats, .~vname.totalq, value.var='totalq')
-     SW_Season_YIELDMM<- reshape2::acast(season.stats, .~vname.yieldmm,value.var='yieldmm')
+     Season_TOTALQ_DAILY_SW  <- reshape2::acast(season.stats, .~vname.totalq, value.var='totalq')
+     Season_YIELDMM_DAILY_SW <- reshape2::acast(season.stats, .~vname.yieldmm,value.var='yieldmm')
 
      # return the results
      res <- data.frame(
-             SW_Oct_to_Sept_TOTALQ,
-             SW_Oct_to_Sept_YIELDMM, 
-             SW_Season_TOTALQ,
-             SW_Season_YIELDMM,
+             Oct_to_Sept_TOTALQ_DAILY_SW,
+             Oct_to_Sept_YIELDMM_DAILY_SW, 
+             Season_TOTALQ_DAILY_SW,
+             Season_YIELDMM_DAILY_SW,
              stringsAsFactors=FALSE)
   }, Station.Area=Station.Area,  na.rm=na.rm)
 
   # merge the annual and water year statistics
   Q.stat <- merge(Q.stat.annual, Q.stat.wyear, by.x='Year', by.y="WYear", all.x=TRUE)
 
+  file.summary.csv <- NA
+  if(write.flow.summary.csv){
+     # write out the flow summary
+     file.summary.csv <- file.path(report.dir, paste(Station.Code,"-period-record-summary.csv", sep=""))
+     write.csv(flow.sum,file=file.summary.csv, row.names=FALSE)
+  }
+  
   # See if you want to write out the summary tables?
   file.stat.csv <- NA
   if(write.stat.csv){
@@ -305,11 +350,79 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
     file.stat.trans.csv <-file.path(report.dir,paste(Station.Code,"-annual-summary-stat-trans.csv",sep=""))
     write.csv(Q.stat.trans, file=file.stat.trans.csv, row.names=TRUE)
   }
-  return(list(Q.stat.annual=Q.stat,
+   
+  # Make a plot of all of the statistics over time and save to a pdf file
+  file.stat.trend.pdf <- NA
+  if(plot.stat.trend){
+     file.stat.trend.pdf <- file.path(report.dir, paste(Station.Code,"-annual-trend.pdf",sep=""))
+     plotdata <- reshape2::melt(Q.stat, id.var="Year", variable.name="Statistic", value.name="Value")
+     plotdata$statgroup <- NA
+     plotdata$transform <- ""
+     set.annual.min  <- grepl("^ANNUAL_MIN_", plotdata$Statistic) 
+     plotdata$statgroup [set.annual.min] <- 'Annual Minimums'
+
+     set.annual.mindoy  <- grepl("^ANNUAL_MINDOY", plotdata$Statistic) 
+     plotdata$statgroup [set.annual.mindoy] <- 'Annual Day of Year for Minimums'
+
+     set.month.min     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb,"_MIN",sep=""))
+     plotdata$statgroup [set.month.min] <- 'Monthly minimums'
+     plotdata$transform [set.month.min] <- "log"
+
+     set.month.max     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb,"_MAX",sep=""))
+     set.month.max     <- set.month.max | grepl("ANNUAL_MAX", plotdata$Statistic)
+     plotdata$statgroup [set.month.max] <- 'Monthly/Annual maximums'
+     plotdata$transform [set.month.max] <- "log"
+     
+     set.month.mean     <- substr(plotdata$Statistic,1,8) %in% toupper(paste(month.abb,"_MEAN",sep=""))
+     set.month.mean     <- set.month.mean | grepl("ANNUAL_MEAN", plotdata$Statistic)
+     plotdata$statgroup [set.month.mean] <- 'Monthly/Annual means'
+     plotdata$transform [set.month.mean] <- "log"
+
+     set.month.p50     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb,"_P50",sep=""))
+     plotdata$statgroup [set.month.p50] <- 'Monthly P50'
+     plotdata$transform [set.month.p50] <- "log"
+     
+     set.month.p80     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb,"_P80",sep=""))
+     plotdata$statgroup [set.month.p80] <- 'Monthly P80'
+     plotdata$transform [set.month.p80] <- "log"
+     
+     set.month.p90     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb,"_P90",sep=""))
+     plotdata$statgroup [set.month.p90] <- 'Monthly P90'
+     plotdata$transform [set.month.p90] <- "log"
+
+     set.yieldmm     <- grepl("YIELDMM", plotdata$Statistic)
+     plotdata$statgroup [set.yieldmm] <- 'Yield (MM)'
+     plotdata$transform [set.yieldmm] <- "log"
+
+     set.totalq     <- grepl("TOTALQ", plotdata$Statistic)
+     plotdata$statgroup [set.totalq] <- 'Total Q'
+     plotdata$transform [set.totalq] <- "log"
+ 
+     set.annual.date     <- grepl("ANNUAL_Date", plotdata$Statistic)
+     plotdata$statgroup [set.annual.date] <- 'Annual Date of total discharge milestones'
+
+     plotdata$statgroup[ is.na(plotdata$statgroup)] <- "Misc statistics"
+     pdf(file.stat.trend.pdf, h=8, w=11)
+        d_ply(plotdata, "statgroup", function(x){
+           myplot <- ggplot(data=x, aes(x=Year, y=Value, group=Statistic, color=Statistic, linetype=Statistic))+
+             ggtitle(paste("Trend for ", x$statgroup[1]))+
+             geom_point()+
+             geom_line()+xlab("Year")+ylab("Value of statistic")
+           if(x$transform[1] == 'log'){
+             myplot <- myplot + ylab("Value of log(statistic)")+scale_y_continuous(trans='log10')
+           }
+           plot(myplot)
+        })                           
+      dev.off()
+  }
+  return(list( Q.flow.summary=flow.sum,
+               Q.stat.annual=Q.stat,
                Q.stat.annual.trans=Q.stat.trans,
                dates.missing.flows=dates.missing.flows,
                file.stat.csv=file.stat.csv,
                file.stat.trans.csv=file.stat.trans.csv,
+               file.stat.trend.pdf=file.stat.trend.pdf,
+               file.summary.csv=file.summary.csv,
                na.rm = na.rm,
                Version=Version,
                Date=Sys.time()))

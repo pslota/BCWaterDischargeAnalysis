@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AnalysisResults>
+  <VolumeDurationAnalysis>
+    <ExtractionTime>2017.Jan.30 13:20:52.730</ExtractionTime>
+    <AnalysisTime>2017.Jan.30 13:20:54.071</AnalysisTime>
+    <Name>CARNATION_FREQ</Name>
+    <Description />
+    <DataSetName>CARNATION-FLOW-DAY</DataSetName>
+    <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\CARNATION\CARNATION.dss</DssFileName>
+    <DataPathname>///FLOW-DAY//1DAY//</DataPathname>
+    <ProjectPath />
+    <ReportFilePath />
+    <EventType>Low</EventType>
+    <TimeSpecs>
+      <AnalysisYearType>CALENDAR</AnalysisYearType>
+      <UseSeason>false</UseSeason>
+      <RecordStartDate>01Dec1972</RecordStartDate>
+      <RecordEndDate>31Dec2013</RecordEndDate>
+    </TimeSpecs>
+    <UseDefaultDurations>false</UseDefaultDurations>
+    <DataSet>
+      <DataSetName>CARNATION-FLOW-DAY (1-day Min)</DataSetName>
+      <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\CARNATION\CARNATION.dss</DssFileName>
+      <DataPathname>///FLOW-DAY-PERAVG//IR-CENTURY/Vol-Dur_CARNATION_FREQ_1-day Min/</DataPathname>
+      <StartDate>1 December 1972</StartDate>
+      <EndDate>31 December 2013</EndDate>
+      <UseMaximum>false</UseMaximum>
+      <AnalysisYearType>CALENDAR</AnalysisYearType>
+      <Duration Units="day">1</Duration>
+      <BrokenRecord>False</BrokenRecord>
+      <PlotPositionPathname>///FREQ-FLOW///Vol-Dur_CARNATION_FREQ_1-day Min EVENTS/</PlotPositionPathname>
+      <Statistics>
+        <StatisticsType>Systematic</StatisticsType>
+        <UseLogTransform>true</UseLogTransform>
+        <Mean>-1.7956383080367284000000000000000000000000000000000000</Mean>
+        <StandardDeviation>0.3641879246232065000000000000000000000000000000000000</StandardDeviation>
+        <StationSkew>0.0372403885267720500000000000000000000000000000000000</StationSkew>
+        <RegionalSkew>NaN</RegionalSkew>
+        <WeightedSkew>NaN</WeightedSkew>
+        <AdoptedSkew>0.0372403885267720500000000000000000000000000000000000</AdoptedSkew>
+      </Statistics>
+      <NumberOfEvents>
+        <NumberHistoricEvents>0</NumberHistoricEvents>
+        <NumberHighOutliers>0</NumberHighOutliers>
+        <NumberLowOutliers>0</NumberLowOutliers>
+        <NumberZero>0</NumberZero>
+        <NumberIncompleteMissing>0</NumberIncompleteMissing>
+        <NumberMissing>0</NumberMissing>
+        <NumberSystematicEvents>41</NumberSystematicEvents>
+        <HistoricPeriod>-1</HistoricPeriod>
+      </NumberOfEvents>
+      <SampleFrequencyCurve>
+        <FrequencyCurve>
+          <DistributionType>Pearson Type III</DistributionType>
+          <ParameterLabel>FLOW</ParameterLabel>
+          <UnitsLabel>cms</UnitsLabel>
+          <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\CARNATION\CARNATION.dss</DssFileName>
+          <Pathname>///FREQ-FLOW/Min Analytical//Vol-Dur_CARNATION_FREQ_1-day Min Analytic-Data/</Pathname>
+          <UseLogTransform>true</UseLogTransform>
+          <NumberEvents>41</NumberEvents>
+          <Mean>-1.7956383080367284000000000000000000000000000000000000</Mean>
+          <StandardDeviation>0.3641879246232065000000000000000000000000000000000000</StandardDeviation>
+          <Skew>0.0372403885267720500000000000000000000000000000000000</Skew>
+          <LowerConfidenceLevel>0.95</LowerConfidenceLevel>
+          <UpperConfidenceLevel>0.05</UpperConfidenceLevel>
+        </FrequencyCurve>
+      </SampleFrequencyCurve>
+    </DataSet>
+    <DataSet>
+      <DataSetName>CARNATION-FLOW-DAY (3-day Min)</DataSetName>
+      <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\CARNATION\CARNATION.dss</DssFileName>
+      <DataPathname>///FLOW-DAY-PERAVG//IR-CENTURY/Vol-Dur_CARNATION_FREQ_3-day Min/</DataPathname>
+      <StartDate>1 December 1972</StartDate>
+      <EndDate>31 December 2013</EndDate>
+      <UseMaximum>false</UseMaximum>
+      <AnalysisYearType>CALENDAR</AnalysisYearType>
+      <Duration Units="day">3</Duration>
+      <NumberYearsMissingSomeData>1</NumberYearsMissingSomeData>
+      <BrokenRecord>False</BrokenRecord>
+      <PlotPositionPathname>///FREQ-FLOW///Vol-Dur_CARNATION_FREQ_3-day Min EVENTS/</PlotPositionPathname>
+      <Statistics>
+        <StatisticsType>Systematic</StatisticsType>
+        <UseLogTransform>true</UseLogTransform>
+        <Mean>-1.7784848679726570000000000000000000000000000000000000</Mean>
+        <StandardDeviation>0.3551589549373485000000000000000000000000000000000000</StandardDeviation>
+        <StationSkew>0.0473224605682446500000000000000000000000000000000000</StationSkew>
+        <RegionalSkew>NaN</RegionalSkew>
+        <WeightedSkew>NaN</WeightedSkew>
+        <AdoptedSkew>0.0473224605682446500000000000000000000000000000000000</AdoptedSkew>
+      </Statistics>
+      <NumberOfEvents>
+        <NumberHistoricEvents>0</NumberHistoricEvents>
+        <NumberHighOutliers>0</NumberHighOutliers>
+        <NumberLowOutliers>0</NumberLowOutliers>
+        <NumberZero>0</NumberZero>
+        <NumberIncompleteMissing>0</NumberIncompleteMissing>
+        <NumberMissing>0</NumberMissing>
+        <NumberSystematicEvents>41</NumberSystematicEvents>
+        <HistoricPeriod>-1</HistoricPeriod>
+      </NumberOfEvents>
+      <SampleFrequencyCurve>
+        <FrequencyCurve>
+          <DistributionType>Pearson Type III</DistributionType>
+          <ParameterLabel>FLOW</ParameterLabel>
+          <UnitsLabel>cms</UnitsLabel>
+          <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\CARNATION\CARNATION.dss</DssFileName>
+          <Pathname>///FREQ-FLOW/Min Analytical//Vol-Dur_CARNATION_FREQ_3-day Min Analytic-Data/</Pathname>
+          <UseLogTransform>true</UseLogTransform>
+          <NumberEvents>41</NumberEvents>
+          <Mean>-1.7784848679726570000000000000000000000000000000000000</Mean>
+          <StandardDeviation>0.3551589549373485000000000000000000000000000000000000</StandardDeviation>
+          <Skew>0.0473224605682446500000000000000000000000000000000000</Skew>
+          <LowerConfidenceLevel>0.95</LowerConfidenceLevel>
+          <UpperConfidenceLevel>0.05</UpperConfidenceLevel>
+        </FrequencyCurve>
+      </SampleFrequencyCurve>
+    </DataSet>
+    <DataSet>
+      <DataSetName>CARNATION-FLOW-DAY (7-day Min)</DataSetName>
+      <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\CARNATION\CARNATION.dss</DssFileName>
+      <DataPathname>///FLOW-DAY-PERAVG//IR-CENTURY/Vol-Dur_CARNATION_FREQ_7-day Min/</DataPathname>
+      <StartDate>1 December 1972</StartDate>
+      <EndDate>31 December 2013</EndDate>
+      <UseMaximum>false</UseMaximum>
+      <AnalysisYearType>CALENDAR</AnalysisYearType>
+      <Duration Units="day">7</Duration>
+      <NumberYearsMissingSomeData>1</NumberYearsMissingSomeData>
+      <BrokenRecord>False</BrokenRecord>
+      <PlotPositionPathname>///FREQ-FLOW///Vol-Dur_CARNATION_FREQ_7-day Min EVENTS/</PlotPositionPathname>
+      <Statistics>
+        <StatisticsType>Systematic</StatisticsType>
+        <UseLogTransform>true</UseLogTransform>
+        <Mean>-1.7520069407259993000000000000000000000000000000000000</Mean>
+        <StandardDeviation>0.3456393131462932000000000000000000000000000000000000</StandardDeviation>
+        <StationSkew>0.0124987724445189480000000000000000000000000000000000</StationSkew>
+        <RegionalSkew>NaN</RegionalSkew>
+        <WeightedSkew>NaN</WeightedSkew>
+        <AdoptedSkew>0.0124987724445189480000000000000000000000000000000000</AdoptedSkew>
+      </Statistics>
+      <NumberOfEvents>
+        <NumberHistoricEvents>0</NumberHistoricEvents>
+        <NumberHighOutliers>0</NumberHighOutliers>
+        <NumberLowOutliers>0</NumberLowOutliers>
+        <NumberZero>0</NumberZero>
+        <NumberIncompleteMissing>0</NumberIncompleteMissing>
+        <NumberMissing>0</NumberMissing>
+        <NumberSystematicEvents>41</NumberSystematicEvents>
+        <HistoricPeriod>-1</HistoricPeriod>
+      </NumberOfEvents>
+      <SampleFrequencyCurve>
+        <FrequencyCurve>
+          <DistributionType>Pearson Type III</DistributionType>
+          <ParameterLabel>FLOW</ParameterLabel>
+          <UnitsLabel>cms</UnitsLabel>
+          <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\CARNATION\CARNATION.dss</DssFileName>
+          <Pathname>///FREQ-FLOW/Min Analytical//Vol-Dur_CARNATION_FREQ_7-day Min Analytic-Data/</Pathname>
+          <UseLogTransform>true</UseLogTransform>
+          <NumberEvents>41</NumberEvents>
+          <Mean>-1.7520069407259993000000000000000000000000000000000000</Mean>
+          <StandardDeviation>0.3456393131462932000000000000000000000000000000000000</StandardDeviation>
+          <Skew>0.0124987724445189480000000000000000000000000000000000</Skew>
+          <LowerConfidenceLevel>0.95</LowerConfidenceLevel>
+          <UpperConfidenceLevel>0.05</UpperConfidenceLevel>
+        </FrequencyCurve>
+      </SampleFrequencyCurve>
+    </DataSet>
+    <DataSet>
+      <DataSetName>CARNATION-FLOW-DAY (15-day Min)</DataSetName>
+      <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\CARNATION\CARNATION.dss</DssFileName>
+      <DataPathname>///FLOW-DAY-PERAVG//IR-CENTURY/Vol-Dur_CARNATION_FREQ_15-day Min/</DataPathname>
+      <StartDate>1 December 1972</StartDate>
+      <EndDate>31 December 2013</EndDate>
+      <UseMaximum>false</UseMaximum>
+      <AnalysisYearType>CALENDAR</AnalysisYearType>
+      <Duration Units="day">15</Duration>
+      <NumberYearsMissingSomeData>1</NumberYearsMissingSomeData>
+      <BrokenRecord>False</BrokenRecord>
+      <PlotPositionPathname>///FREQ-FLOW///Vol-Dur_CARNATION_FREQ_15-day Min EVENTS/</PlotPositionPathname>
+      <Statistics>
+        <StatisticsType>Systematic</StatisticsType>
+        <UseLogTransform>true</UseLogTransform>
+        <Mean>-1.7021782795350777000000000000000000000000000000000000</Mean>
+        <StandardDeviation>0.3308243331066098000000000000000000000000000000000000</StandardDeviation>
+        <StationSkew>-0.0186343481495617920000000000000000000000000000000000</StationSkew>
+        <RegionalSkew>NaN</RegionalSkew>
+        <WeightedSkew>NaN</WeightedSkew>
+        <AdoptedSkew>-0.0186343481495617920000000000000000000000000000000000</AdoptedSkew>
+      </Statistics>
+      <NumberOfEvents>
+        <NumberHistoricEvents>0</NumberHistoricEvents>
+        <NumberHighOutliers>0</NumberHighOutliers>
+        <NumberLowOutliers>0</NumberLowOutliers>
+        <NumberZero>0</NumberZero>
+        <NumberIncompleteMissing>0</NumberIncompleteMissing>
+        <NumberMissing>0</NumberMissing>
+        <NumberSystematicEvents>41</NumberSystematicEvents>
+        <HistoricPeriod>-1</HistoricPeriod>
+      </NumberOfEvents>
+      <SampleFrequencyCurve>
+        <FrequencyCurve>
+          <DistributionType>Pearson Type III</DistributionType>
+          <ParameterLabel>FLOW</ParameterLabel>
+          <UnitsLabel>cms</UnitsLabel>
+          <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\CARNATION\CARNATION.dss</DssFileName>
+          <Pathname>///FREQ-FLOW/Min Analytical//Vol-Dur_CARNATION_FREQ_15-day Min Analytic-Data/</Pathname>
+          <UseLogTransform>true</UseLogTransform>
+          <NumberEvents>41</NumberEvents>
+          <Mean>-1.7021782795350777000000000000000000000000000000000000</Mean>
+          <StandardDeviation>0.3308243331066098000000000000000000000000000000000000</StandardDeviation>
+          <Skew>-0.0186343481495617920000000000000000000000000000000000</Skew>
+          <LowerConfidenceLevel>0.95</LowerConfidenceLevel>
+          <UpperConfidenceLevel>0.05</UpperConfidenceLevel>
+        </FrequencyCurve>
+      </SampleFrequencyCurve>
+    </DataSet>
+    <DataSet>
+      <DataSetName>CARNATION-FLOW-DAY (30-day Min)</DataSetName>
+      <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\CARNATION\CARNATION.dss</DssFileName>
+      <DataPathname>///FLOW-DAY-PERAVG//IR-CENTURY/Vol-Dur_CARNATION_FREQ_30-day Min/</DataPathname>
+      <StartDate>1 December 1972</StartDate>
+      <EndDate>31 December 2013</EndDate>
+      <UseMaximum>false</UseMaximum>
+      <AnalysisYearType>CALENDAR</AnalysisYearType>
+      <Duration Units="day">30</Duration>
+      <NumberYearsMissingSomeData>1</NumberYearsMissingSomeData>
+      <BrokenRecord>False</BrokenRecord>
+      <PlotPositionPathname>///FREQ-FLOW///Vol-Dur_CARNATION_FREQ_30-day Min EVENTS/</PlotPositionPathname>
+      <Statistics>
+        <StatisticsType>Systematic</StatisticsType>
+        <UseLogTransform>true</UseLogTransform>
+        <Mean>-1.6009840451742265000000000000000000000000000000000000</Mean>
+        <StandardDeviation>0.2943600816239137500000000000000000000000000000000000</StandardDeviation>
+        <StationSkew>0.0185521470784892930000000000000000000000000000000000</StationSkew>
+        <RegionalSkew>NaN</RegionalSkew>
+        <WeightedSkew>NaN</WeightedSkew>
+        <AdoptedSkew>0.0185521470784892930000000000000000000000000000000000</AdoptedSkew>
+      </Statistics>
+      <NumberOfEvents>
+        <NumberHistoricEvents>0</NumberHistoricEvents>
+        <NumberHighOutliers>0</NumberHighOutliers>
+        <NumberLowOutliers>0</NumberLowOutliers>
+        <NumberZero>0</NumberZero>
+        <NumberIncompleteMissing>0</NumberIncompleteMissing>
+        <NumberMissing>0</NumberMissing>
+        <NumberSystematicEvents>41</NumberSystematicEvents>
+        <HistoricPeriod>-1</HistoricPeriod>
+      </NumberOfEvents>
+      <SampleFrequencyCurve>
+        <FrequencyCurve>
+          <DistributionType>Pearson Type III</DistributionType>
+          <ParameterLabel>FLOW</ParameterLabel>
+          <UnitsLabel>cms</UnitsLabel>
+          <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\CARNATION\CARNATION.dss</DssFileName>
+          <Pathname>///FREQ-FLOW/Min Analytical//Vol-Dur_CARNATION_FREQ_30-day Min Analytic-Data/</Pathname>
+          <UseLogTransform>true</UseLogTransform>
+          <NumberEvents>41</NumberEvents>
+          <Mean>-1.6009840451742265000000000000000000000000000000000000</Mean>
+          <StandardDeviation>0.2943600816239137500000000000000000000000000000000000</StandardDeviation>
+          <Skew>0.0185521470784892930000000000000000000000000000000000</Skew>
+          <LowerConfidenceLevel>0.95</LowerConfidenceLevel>
+          <UpperConfidenceLevel>0.05</UpperConfidenceLevel>
+        </FrequencyCurve>
+      </SampleFrequencyCurve>
+    </DataSet>
+  </VolumeDurationAnalysis>
+</AnalysisResults>
+

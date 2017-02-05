@@ -41,7 +41,7 @@ compute.Q.stat.longterm <- function(
    library(plyr)        # split-apply-combine 
    library(reshape2)    # reorganize data (melting and casting)
 
-   if( !is.character(Station.Code))  {stop("Station Code muste be a character string.")}
+   if( !is.character(Station.Code))  {stop("Station Code must be a character string.")}
    if(length(Station.Code)>1)        {stop("Station.Code cannot have length > 1")}
    if( !is.numeric(Station.Area))    {stop("Station.Area must be numeric")}
    if(length(Station.Area)>1)        {stop("Station.Area cannot have length > 1")}

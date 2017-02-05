@@ -1,0 +1,41 @@
+Version=1.0
+ProjectName=COWICHAN
+Extents=-Infinity,-Infinity,-Infinity,-Infinity
+Grow Extents=true
+Created=1485810024327
+Created By=rgpike
+UnitSystemID=2
+SyncMapWindows=false
+
+CoordinateInfoBegin
+type=X-Y
+units=U.S. Feet
+unitMult=1.0
+spheroid=
+CoordinateInfoEnd
+
+AdditionalProjectInfoBegin
+AdditionalProjectInfoEnd
+
+ManagerBegin
+Name=Base Map
+Description=
+File=DataStore.LST
+Class=hec2.ssp.model.DataStore
+ModifiedTime=1485810024264
+CreatedBy=rgpike
+CreatedOn=1485810024264
+ModifiedBy=rgpike
+ManagerEnd
+
+ManagerBegin
+Name=Base Map
+Description=
+File=Base_Map.map
+Class=hec2.ssp.model.Map
+ModifiedTime=1485810024280
+CreatedBy=rgpike
+CreatedOn=1485810024280
+ModifiedBy=rgpike
+ManagerEnd
+

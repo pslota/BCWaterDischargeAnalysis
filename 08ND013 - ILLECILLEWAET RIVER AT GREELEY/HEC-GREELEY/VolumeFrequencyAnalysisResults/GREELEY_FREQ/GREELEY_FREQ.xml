@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AnalysisResults>
+  <VolumeDurationAnalysis>
+    <ExtractionTime>2017.Jan.30 12:57:04.857</ExtractionTime>
+    <AnalysisTime>2017.Jan.30 12:57:07.602</AnalysisTime>
+    <Name>GREELEY_FREQ</Name>
+    <Description />
+    <DataSetName>GREELEY-FLOW-DAY</DataSetName>
+    <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\GREELEY\GREELEY.dss</DssFileName>
+    <DataPathname>///FLOW-DAY//1DAY//</DataPathname>
+    <ProjectPath />
+    <ReportFilePath />
+    <EventType>Low</EventType>
+    <TimeSpecs>
+      <AnalysisYearType>CALENDAR</AnalysisYearType>
+      <UseSeason>false</UseSeason>
+      <RecordStartDate>01Jan1964</RecordStartDate>
+      <RecordEndDate>31Dec2014</RecordEndDate>
+    </TimeSpecs>
+    <UseDefaultDurations>false</UseDefaultDurations>
+    <DataSet>
+      <DataSetName>GREELEY-FLOW-DAY (1-day Min)</DataSetName>
+      <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\GREELEY\GREELEY.dss</DssFileName>
+      <DataPathname>///FLOW-DAY-PERAVG//IR-CENTURY/Vol-Dur_GREELEY_FREQ_1-day Min/</DataPathname>
+      <StartDate>1 January 1964</StartDate>
+      <EndDate>31 December 2014</EndDate>
+      <UseMaximum>false</UseMaximum>
+      <AnalysisYearType>CALENDAR</AnalysisYearType>
+      <Duration Units="day">1</Duration>
+      <BrokenRecord>False</BrokenRecord>
+      <PlotPositionPathname>///FREQ-FLOW///Vol-Dur_GREELEY_FREQ_1-day Min EVENTS/</PlotPositionPathname>
+      <Statistics>
+        <StatisticsType>Systematic</StatisticsType>
+        <UseLogTransform>true</UseLogTransform>
+        <Mean>0.7362316527451639000000000000000000000000000000000000</Mean>
+        <StandardDeviation>0.0915029838704362000000000000000000000000000000000000</StandardDeviation>
+        <StationSkew>-0.7299564658173728000000000000000000000000000000000000</StationSkew>
+        <RegionalSkew>NaN</RegionalSkew>
+        <WeightedSkew>NaN</WeightedSkew>
+        <AdoptedSkew>-0.7299564658173728000000000000000000000000000000000000</AdoptedSkew>
+      </Statistics>
+      <NumberOfEvents>
+        <NumberHistoricEvents>0</NumberHistoricEvents>
+        <NumberHighOutliers>0</NumberHighOutliers>
+        <NumberLowOutliers>1</NumberLowOutliers>
+        <NumberZero>0</NumberZero>
+        <NumberIncompleteMissing>0</NumberIncompleteMissing>
+        <NumberMissing>0</NumberMissing>
+        <NumberSystematicEvents>51</NumberSystematicEvents>
+        <HistoricPeriod>51</HistoricPeriod>
+      </NumberOfEvents>
+      <SampleFrequencyCurve>
+        <FrequencyCurve>
+          <DistributionType>Pearson Type III</DistributionType>
+          <ParameterLabel>FLOW</ParameterLabel>
+          <UnitsLabel>cms</UnitsLabel>
+          <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\GREELEY\GREELEY.dss</DssFileName>
+          <Pathname>///FREQ-FLOW/Min Analytical//Vol-Dur_GREELEY_FREQ_1-day Min Analytic-Data/</Pathname>
+          <UseLogTransform>true</UseLogTransform>
+          <NumberEvents>51</NumberEvents>
+          <Mean>0.7362316527451639000000000000000000000000000000000000</Mean>
+          <StandardDeviation>0.0915029838704362000000000000000000000000000000000000</StandardDeviation>
+          <Skew>-0.7299564658173728000000000000000000000000000000000000</Skew>
+          <LowerConfidenceLevel>0.95</LowerConfidenceLevel>
+          <UpperConfidenceLevel>0.05</UpperConfidenceLevel>
+        </FrequencyCurve>
+      </SampleFrequencyCurve>
+    </DataSet>
+    <DataSet>
+      <DataSetName>GREELEY-FLOW-DAY (3-day Min)</DataSetName>
+      <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\GREELEY\GREELEY.dss</DssFileName>
+      <DataPathname>///FLOW-DAY-PERAVG//IR-CENTURY/Vol-Dur_GREELEY_FREQ_3-day Min/</DataPathname>
+      <StartDate>1 January 1964</StartDate>
+      <EndDate>31 December 2014</EndDate>
+      <UseMaximum>false</UseMaximum>
+      <AnalysisYearType>CALENDAR</AnalysisYearType>
+      <Duration Units="day">3</Duration>
+      <NumberYearsMissingSomeData>1</NumberYearsMissingSomeData>
+      <BrokenRecord>False</BrokenRecord>
+      <PlotPositionPathname>///FREQ-FLOW///Vol-Dur_GREELEY_FREQ_3-day Min EVENTS/</PlotPositionPathname>
+      <Statistics>
+        <StatisticsType>Systematic</StatisticsType>
+        <UseLogTransform>true</UseLogTransform>
+        <Mean>0.7508007152426686000000000000000000000000000000000000</Mean>
+        <StandardDeviation>0.0847200868903074800000000000000000000000000000000000</StandardDeviation>
+        <StationSkew>-0.5331104471850721000000000000000000000000000000000000</StationSkew>
+        <RegionalSkew>NaN</RegionalSkew>
+        <WeightedSkew>NaN</WeightedSkew>
+        <AdoptedSkew>-0.5331104471850721000000000000000000000000000000000000</AdoptedSkew>
+      </Statistics>
+      <NumberOfEvents>
+        <NumberHistoricEvents>0</NumberHistoricEvents>
+        <NumberHighOutliers>0</NumberHighOutliers>
+        <NumberLowOutliers>0</NumberLowOutliers>
+        <NumberZero>0</NumberZero>
+        <NumberIncompleteMissing>0</NumberIncompleteMissing>
+        <NumberMissing>0</NumberMissing>
+        <NumberSystematicEvents>51</NumberSystematicEvents>
+        <HistoricPeriod>-1</HistoricPeriod>
+      </NumberOfEvents>
+      <SampleFrequencyCurve>
+        <FrequencyCurve>
+          <DistributionType>Pearson Type III</DistributionType>
+          <ParameterLabel>FLOW</ParameterLabel>
+          <UnitsLabel>cms</UnitsLabel>
+          <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\GREELEY\GREELEY.dss</DssFileName>
+          <Pathname>///FREQ-FLOW/Min Analytical//Vol-Dur_GREELEY_FREQ_3-day Min Analytic-Data/</Pathname>
+          <UseLogTransform>true</UseLogTransform>
+          <NumberEvents>51</NumberEvents>
+          <Mean>0.7508007152426686000000000000000000000000000000000000</Mean>
+          <StandardDeviation>0.0847200868903074800000000000000000000000000000000000</StandardDeviation>
+          <Skew>-0.5331104471850721000000000000000000000000000000000000</Skew>
+          <LowerConfidenceLevel>0.95</LowerConfidenceLevel>
+          <UpperConfidenceLevel>0.05</UpperConfidenceLevel>
+        </FrequencyCurve>
+      </SampleFrequencyCurve>
+    </DataSet>
+    <DataSet>
+      <DataSetName>GREELEY-FLOW-DAY (7-day Min)</DataSetName>
+      <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\GREELEY\GREELEY.dss</DssFileName>
+      <DataPathname>///FLOW-DAY-PERAVG//IR-CENTURY/Vol-Dur_GREELEY_FREQ_7-day Min/</DataPathname>
+      <StartDate>1 January 1964</StartDate>
+      <EndDate>31 December 2014</EndDate>
+      <UseMaximum>false</UseMaximum>
+      <AnalysisYearType>CALENDAR</AnalysisYearType>
+      <Duration Units="day">7</Duration>
+      <NumberYearsMissingSomeData>1</NumberYearsMissingSomeData>
+      <BrokenRecord>False</BrokenRecord>
+      <PlotPositionPathname>///FREQ-FLOW///Vol-Dur_GREELEY_FREQ_7-day Min EVENTS/</PlotPositionPathname>
+      <Statistics>
+        <StatisticsType>Systematic</StatisticsType>
+        <UseLogTransform>true</UseLogTransform>
+        <Mean>0.7757941216348538000000000000000000000000000000000000</Mean>
+        <StandardDeviation>0.0756653812986284200000000000000000000000000000000000</StandardDeviation>
+        <StationSkew>-0.0385790929370851600000000000000000000000000000000000</StationSkew>
+        <RegionalSkew>NaN</RegionalSkew>
+        <WeightedSkew>NaN</WeightedSkew>
+        <AdoptedSkew>-0.0385790929370851600000000000000000000000000000000000</AdoptedSkew>
+      </Statistics>
+      <NumberOfEvents>
+        <NumberHistoricEvents>0</NumberHistoricEvents>
+        <NumberHighOutliers>0</NumberHighOutliers>
+        <NumberLowOutliers>0</NumberLowOutliers>
+        <NumberZero>0</NumberZero>
+        <NumberIncompleteMissing>0</NumberIncompleteMissing>
+        <NumberMissing>0</NumberMissing>
+        <NumberSystematicEvents>51</NumberSystematicEvents>
+        <HistoricPeriod>-1</HistoricPeriod>
+      </NumberOfEvents>
+      <SampleFrequencyCurve>
+        <FrequencyCurve>
+          <DistributionType>Pearson Type III</DistributionType>
+          <ParameterLabel>FLOW</ParameterLabel>
+          <UnitsLabel>cms</UnitsLabel>
+          <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\GREELEY\GREELEY.dss</DssFileName>
+          <Pathname>///FREQ-FLOW/Min Analytical//Vol-Dur_GREELEY_FREQ_7-day Min Analytic-Data/</Pathname>
+          <UseLogTransform>true</UseLogTransform>
+          <NumberEvents>51</NumberEvents>
+          <Mean>0.7757941216348538000000000000000000000000000000000000</Mean>
+          <StandardDeviation>0.0756653812986284200000000000000000000000000000000000</StandardDeviation>
+          <Skew>-0.0385790929370851600000000000000000000000000000000000</Skew>
+          <LowerConfidenceLevel>0.95</LowerConfidenceLevel>
+          <UpperConfidenceLevel>0.05</UpperConfidenceLevel>
+        </FrequencyCurve>
+      </SampleFrequencyCurve>
+    </DataSet>
+    <DataSet>
+      <DataSetName>GREELEY-FLOW-DAY (15-day Min)</DataSetName>
+      <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\GREELEY\GREELEY.dss</DssFileName>
+      <DataPathname>///FLOW-DAY-PERAVG//IR-CENTURY/Vol-Dur_GREELEY_FREQ_15-day Min/</DataPathname>
+      <StartDate>1 January 1964</StartDate>
+      <EndDate>31 December 2014</EndDate>
+      <UseMaximum>false</UseMaximum>
+      <AnalysisYearType>CALENDAR</AnalysisYearType>
+      <Duration Units="day">15</Duration>
+      <NumberYearsMissingSomeData>1</NumberYearsMissingSomeData>
+      <BrokenRecord>False</BrokenRecord>
+      <PlotPositionPathname>///FREQ-FLOW///Vol-Dur_GREELEY_FREQ_15-day Min EVENTS/</PlotPositionPathname>
+      <Statistics>
+        <StatisticsType>Systematic</StatisticsType>
+        <UseLogTransform>true</UseLogTransform>
+        <Mean>0.8052428191832229000000000000000000000000000000000000</Mean>
+        <StandardDeviation>0.0697647621757038300000000000000000000000000000000000</StandardDeviation>
+        <StationSkew>-0.0200238208910424420000000000000000000000000000000000</StationSkew>
+        <RegionalSkew>NaN</RegionalSkew>
+        <WeightedSkew>NaN</WeightedSkew>
+        <AdoptedSkew>-0.0200238208910424420000000000000000000000000000000000</AdoptedSkew>
+      </Statistics>
+      <NumberOfEvents>
+        <NumberHistoricEvents>0</NumberHistoricEvents>
+        <NumberHighOutliers>0</NumberHighOutliers>
+        <NumberLowOutliers>0</NumberLowOutliers>
+        <NumberZero>0</NumberZero>
+        <NumberIncompleteMissing>0</NumberIncompleteMissing>
+        <NumberMissing>0</NumberMissing>
+        <NumberSystematicEvents>51</NumberSystematicEvents>
+        <HistoricPeriod>-1</HistoricPeriod>
+      </NumberOfEvents>
+      <SampleFrequencyCurve>
+        <FrequencyCurve>
+          <DistributionType>Pearson Type III</DistributionType>
+          <ParameterLabel>FLOW</ParameterLabel>
+          <UnitsLabel>cms</UnitsLabel>
+          <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\GREELEY\GREELEY.dss</DssFileName>
+          <Pathname>///FREQ-FLOW/Min Analytical//Vol-Dur_GREELEY_FREQ_15-day Min Analytic-Data/</Pathname>
+          <UseLogTransform>true</UseLogTransform>
+          <NumberEvents>51</NumberEvents>
+          <Mean>0.8052428191832229000000000000000000000000000000000000</Mean>
+          <StandardDeviation>0.0697647621757038300000000000000000000000000000000000</StandardDeviation>
+          <Skew>-0.0200238208910424420000000000000000000000000000000000</Skew>
+          <LowerConfidenceLevel>0.95</LowerConfidenceLevel>
+          <UpperConfidenceLevel>0.05</UpperConfidenceLevel>
+        </FrequencyCurve>
+      </SampleFrequencyCurve>
+    </DataSet>
+    <DataSet>
+      <DataSetName>GREELEY-FLOW-DAY (30-day Min)</DataSetName>
+      <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\GREELEY\GREELEY.dss</DssFileName>
+      <DataPathname>///FLOW-DAY-PERAVG//IR-CENTURY/Vol-Dur_GREELEY_FREQ_30-day Min/</DataPathname>
+      <StartDate>1 January 1964</StartDate>
+      <EndDate>31 December 2014</EndDate>
+      <UseMaximum>false</UseMaximum>
+      <AnalysisYearType>CALENDAR</AnalysisYearType>
+      <Duration Units="day">30</Duration>
+      <NumberYearsMissingSomeData>1</NumberYearsMissingSomeData>
+      <BrokenRecord>False</BrokenRecord>
+      <PlotPositionPathname>///FREQ-FLOW///Vol-Dur_GREELEY_FREQ_30-day Min EVENTS/</PlotPositionPathname>
+      <Statistics>
+        <StatisticsType>Systematic</StatisticsType>
+        <UseLogTransform>true</UseLogTransform>
+        <Mean>0.8407840382414536000000000000000000000000000000000000</Mean>
+        <StandardDeviation>0.0707236106187560200000000000000000000000000000000000</StandardDeviation>
+        <StationSkew>0.0656402370278370000000000000000000000000000000000000</StationSkew>
+        <RegionalSkew>NaN</RegionalSkew>
+        <WeightedSkew>NaN</WeightedSkew>
+        <AdoptedSkew>0.0656402370278370000000000000000000000000000000000000</AdoptedSkew>
+      </Statistics>
+      <NumberOfEvents>
+        <NumberHistoricEvents>0</NumberHistoricEvents>
+        <NumberHighOutliers>0</NumberHighOutliers>
+        <NumberLowOutliers>0</NumberLowOutliers>
+        <NumberZero>0</NumberZero>
+        <NumberIncompleteMissing>0</NumberIncompleteMissing>
+        <NumberMissing>0</NumberMissing>
+        <NumberSystematicEvents>51</NumberSystematicEvents>
+        <HistoricPeriod>-1</HistoricPeriod>
+      </NumberOfEvents>
+      <SampleFrequencyCurve>
+        <FrequencyCurve>
+          <DistributionType>Pearson Type III</DistributionType>
+          <ParameterLabel>FLOW</ParameterLabel>
+          <UnitsLabel>cms</UnitsLabel>
+          <DssFileName>C:\Users\rgpike\HEC_FOLDERS_CARL\GREELEY\GREELEY.dss</DssFileName>
+          <Pathname>///FREQ-FLOW/Min Analytical//Vol-Dur_GREELEY_FREQ_30-day Min Analytic-Data/</Pathname>
+          <UseLogTransform>true</UseLogTransform>
+          <NumberEvents>51</NumberEvents>
+          <Mean>0.8407840382414536000000000000000000000000000000000000</Mean>
+          <StandardDeviation>0.0707236106187560200000000000000000000000000000000000</StandardDeviation>
+          <Skew>0.0656402370278370000000000000000000000000000000000000</Skew>
+          <LowerConfidenceLevel>0.95</LowerConfidenceLevel>
+          <UpperConfidenceLevel>0.05</UpperConfidenceLevel>
+        </FrequencyCurve>
+      </SampleFrequencyCurve>
+    </DataSet>
+    <Message>Warning: 1 events occur in first 6 days of analysis year for 1-day duration.</Message>
+    <Message>Warning: 2 events occur in first 8 days of analysis year for 3-day duration.</Message>
+    <Message>Warning: 2 events occur in first 12 days of analysis year for 7-day duration.</Message>
+    <Message>Warning: 6 events occur in first 20 days of analysis year for 15-day duration.</Message>
+    <Message>Warning: 12 events occur in first 35 days of analysis year for 30-day duration.</Message>
+    <Message>Suggest reviewing data and changing the year/season specification on the General tab to capture independent max/min volumes.</Message>
+  </VolumeDurationAnalysis>
+</AnalysisResults>
+

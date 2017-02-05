@@ -33,6 +33,14 @@ flow$Date <- as.Date(paste(flow$Year,flow$Month, flow$Day, sep="-"), "%Y-%m-%d")
 # basic structure of flow
 str(flow)
 
+# Create the directory for the results of the analysis
+# If you are comparing to the spreadsheet, the spreadsheet must also be in this directory.
+# Similarly, if you are comparing to the HEC-SSP results, the vfa.rpt file must also be in this directory
+#report.dir <- file.path("08HA011","MinFlows") # directory for output files and save objects
+report.dir <- '.'  # current director
+dir.create(report.dir)
+cat("Reports and saved files will be found in ", report.dir, "\n")
+E.filename <- file.path(report.dir,"08HA011_STREAMFLOW_SUMMARY.xlsx")
 
 #----------------------------------------------------------------
 # Some preliminary screening
@@ -45,7 +53,7 @@ dim(flow)  # size before removing illegal dates
 flow <- flow[ !is.na(flow$Date),]
 dim(flow)  # size after removing illegal dates
 
-
+flow$Year <- as.numeric(format(flow$Date, "%Y"))
 # Table of simple statistics by year to help check for outliers, etc
 flow.sum <- plyr::ddply(flow[ flow$Year >= start.year & flow$Year <=end.year,], "Year", plyr::summarize,
          n.days   = length(Year),
@@ -112,6 +120,7 @@ stat.annual <- compute.Q.stat.annual(Station.code=Station.Code,
                           end.year=end.year,
                           write.stat.csv=TRUE,        # write out statistics 
                           write.stat.trans.csv=TRUE,  # write out statistics in transposed format
+                          plot.stat.trend=TRUE,
                           report.dir=report.dir,
                           na.rm=na.rm)
 
@@ -126,10 +135,12 @@ head(stat.annual$dates.missing.flows)
 
 stat.annual$file.stat.csv
 stat.annual$file.stat.trans.csv
+stat.annual$file.plot.trend.pdf
 
 # Compare the annual statistics with those in the Excel spreasheet
 compare.annual <- compare.annual.stat(Q.filename=stat.annual$file.stat.csv,
-                                      E.filename=file.path(report.dir,"08HA011_STREAMFLOW_SUMMARY.xlsx"),
+                                      E.filename=E.filename,
+                                      SW_translate=SW_translate,
                                       report.dir=report.dir,
                                       write.plots.pdf=TRUE,
                                       write.comparison.csv=TRUE)
@@ -140,9 +151,12 @@ compare.annual$stats.in.Q.not.in.E
 compare.annual$stats.in.E.not.in.Q
 
 head(compare.annual$diff.stat)
+compare.annual$diff.stat[ grepl("cumq", compare.annual$diff.stat$stat, ignore.case=TRUE),]
+
 
 names(compare.annual$plot.list)
 l_ply(compare.annual$plot.list, function(x){plot(x)})
+
 
 
 
@@ -173,7 +187,7 @@ stat.longterm$file.stat.trans.csv
 
 # Compare the longterm statistics with those in the Excel spreasheet
 compare.longterm <- compare.longterm.stat(Q.filename=stat.longterm$file.stat.csv,
-                                      E.filename=file.path(report.dir,"08HA011_STREAMFLOW_SUMMARY.xlsx"),
+                                      E.filename=E.filename,
                                       report.dir=report.dir,
                                       write.comparison.csv=TRUE,
                                       write.plots.pdf=TRUE)
@@ -215,7 +229,7 @@ percentile.longterm$file.stat.trans.csv
 
 # Compare the longterm percentile statistics with those in the Excel spreasheet
 compare.percentile.longterm <- compare.percentile.longterm.stat(Q.filename=percentile.longterm$file.stat.csv,
-                                      E.filename=file.path(report.dir,"08HA011_STREAMFLOW_SUMMARY.xlsx"),
+                                      E.filename=E.filename,
                                       write.comparison.csv=TRUE,
                                       write.plots.pdf=TRUE,
                                       report.dir=report.dir)
@@ -237,8 +251,8 @@ l_ply(compare.percentile.longterm$plot.list, function(x){plot(x)})
 #--------------------------------------------------------------------------------------------
 # Compute the volume frequency analysis (similar to HEC SSP)
 
-vfa.analysis <- compute.volume.frequency.analysis( Station.Code="08HA011", flow, 
-                      start.year=1965, end.year=2016, use.water.year=FALSE, 
+vfa.analysis <- compute.volume.frequency.analysis( Station.Code=Station.Code, flow, 
+                      start.year=start.year, end.year=end.year, use.water.year=FALSE, 
                       roll.avg.days=c(1,3,7,15),
                       use.log=FALSE,
                       use.max=FALSE,

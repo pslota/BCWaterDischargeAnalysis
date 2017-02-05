@@ -3,10 +3,12 @@
 # Change Log
 #     2017-01-30 CJS First Edition
 
-compare.annual.stat <- function(Q.filename, E.filename, write.comparison.csv=FALSE, write.plots.pdf=FALSE, report.dir){
+compare.annual.stat <- function(Q.filename, E.filename, SW_translate=NULL,
+                                write.comparison.csv=FALSE, write.plots.pdf=FALSE, report.dir, debug=FALSE){
 #  Input
 #    Q.filename - file name of csv file containing the annual statistics
 #    E.filename - Excel workbook with the statistics
+#    SW_translate - dataframe with equivalents between Q.filename variables and E.filename varibles
 #    write.comparison.csv - save the comparsion file in csv format?
 #    write.plots.pdf - should plots comparing the two statistics be saved?
 #    report.dir - directory where reports and statistics should be saved
@@ -28,6 +30,10 @@ compare.annual.stat <- function(Q.filename, E.filename, write.comparison.csv=FAL
    if( !file.exists(E.filename))     {stop('E.filename does not exist')}
    if(length(Q.filename)>1)          {stop("Q.filename cannot have length > 1")}
    if(length(E.filename)>1)          {stop("E.filename cannot have length > 1")}
+   
+   if( !is.data.frame(SW_translate)) {stop("SW_translate is not a data frame.")}
+   if(! all(c("V.Program","V.Excel") %in% names(SW_translate))){
+                                      stop("SW_translate dataframe doesn't contain the variables V.Program and V.Excel.")}
 
    if(! is.logical(write.comparison.csv)) {stop("write.comparison.csv should be logical")}
    if(! is.logical(write.plots.pdf))      {stop("write.plots.pdf should be logical")}
@@ -38,34 +44,42 @@ compare.annual.stat <- function(Q.filename, E.filename, write.comparison.csv=FAL
    library(openxlsx)
    library(plyr)
 
+   if(debug)browser()
    # Get the computed summary statistics created in another file
    Q.stat <- read.csv(file=Q.filename, header=TRUE, as.is=TRUE, strip.white=TRUE)
 
    # Get the data from the Excel spreadsheet
    E.stat <- openxlsx::readWorkbook(E.filename, sheet='HydroTrends_Input')
+   
+   # convert all variable names to lower case
+   names(Q.stat) <- tolower(names(Q.stat))
+   names(E.stat) <- tolower(names(E.stat))
 
+   # Rename any column in E.stat according to the SW_translate table
+   # If E.stat name is not in the translate table, it is left unchanged
+   # We first add the current names in E.stat to the translation table to account
+   # for names that don't exist
+   SW_translate <- rbind(SW_translate, data.frame(V.Program=names(E.stat), V.Excel=names(E.stat), Comment="",stringsAsFactors=FALSE))
+   names(E.stat) <- tolower(SW_translate$V.Program[match( names(E.stat), tolower(SW_translate$V.Excel)) ])
+   
    # check the names in the two data frames
    names(Q.stat)
    names(E.stat)
 
    # which statistics are in Q.stat, but not in E.stat
-   names(Q.stat)[ !names(Q.stat) %in% names(E.stat)]
-   # convert SEP to SEPT for daily min and daily max only
-   names(Q.stat)[ names(Q.stat) %in% c("SEP_MIN_DAILY_SW", "SEP_MAX_DAILY_SW")]<- c("SEPT_MIN_DAILY_SW", "SEPT_MAX_DAILY_SW")
-   # convert TotalQ to TOTALQ
-   names(Q.stat)[ names(Q.stat) %in% c('SW_AMJJAS_TOTALQ')]<- c("SW_AMJJAS_TotalQ")
    stats.in.Q.not.in.E <- names(Q.stat)[ !names(Q.stat) %in% names(E.stat)]
 
    # which statistics are in E.stat but not in Q.stat
    stats.in.E.not.in.Q <- names(E.stat)[ !names(E.stat) %in% names(Q.stat)]
 
    # Now to compare the results from Q.stat to those in E.stat
-   diff.stat <- plyr::ldply( names(Q.stat)[ names(Q.stat) != "Year"], function (stat, Q.stat, E.stat){
+   # don't forget that all variable names are now lower case
+   diff.stat <- plyr::ldply( names(Q.stat)[ names(Q.stat) != "year"], function (stat, Q.stat, E.stat){
      require(plyr) # for rename
      # stat has the name of the column to compare
-     Q.values <- Q.stat[, c("Year",stat)]
-     E.values <- E.stat[, c("Year",stat)]
-     both.values <- merge(Q.values, E.values, by="Year", suffixes=c(".Q",".E"))
+     Q.values <- Q.stat[, c("year",stat)]
+     E.values <- E.stat[, c("year",stat)]
+     both.values <- merge(Q.values, E.values, by="year", suffixes=c(".Q",".E"))
      both.values$diff <-  both.values[,paste(stat,".Q",sep="")] - both.values[,paste(stat,".E",sep="")]  
      both.values$mean <- (both.values[,paste(stat,".Q",sep="")] + both.values[,paste(stat,".E",sep="")])/2
      both.values$pdiff  <- abs(both.values$diff)/ both.values$mean 
@@ -81,12 +95,12 @@ compare.annual.stat <- function(Q.filename, E.filename, write.comparison.csv=FAL
    min(diff.stat$pdiff, na.rm=TRUE)
 
    makediffplot <- function (plotdata){
-     myplot <- ggplot2::ggplot(data=plotdata, aes(x=Year, y=stat, size=pdiff))+
+     myplot <- ggplot2::ggplot(data=plotdata, aes(x=year, y=stat, size=pdiff))+
        ggtitle("Standardized differences between Q.stat and E.Stat")+
        theme(plot.title = element_text(hjust = 0.5))+
        geom_point()+
        scale_size_area(limits=c(0,.01), name="Proportional\ndifference")+
-       ylab("Variables showing \nProportion of abs(diff) to mean")
+       ylab("Variables showing \nProportion of abs(diff) to mean")+xlab("Year")
        # indicate missing values using X
      if(sum(is.na(plotdata$pdiff))){
       myplot <- myplot + geom_label(data=plotdata[is.na(plotdata$pdiff),], aes(label="X", size=NULL),size=4, fill='red',alpha=0.2)
@@ -99,31 +113,41 @@ compare.annual.stat <- function(Q.filename, E.filename, write.comparison.csv=FAL
 
   #plot.allstat <- makediffplot(plotdata)  # all variables
 
-  set.daily  <- grepl("DAILY", plotdata$stat) | grepl("day", plotdata$stat) | grepl("ANNUAL", plotdata$stat)
+  set.daily  <- grepl("day",    plotdata$stat,   ignore.case=TRUE) | 
+                grepl("ANNUAL", plotdata$stat,   ignore.case=TRUE)
   plot.daily <- makediffplot(plotdata[ set.daily,])   # only for daily  statistics
 
-  set.totalq   <- grepl("TOTALQ", plotdata$stat)
-  set.yieldmm  <- grepl("YIELDMM", plotdata$stat)
+  set.totalq   <- grepl("TOTALQ", plotdata$stat,  ignore.case=TRUE)
+  set.yieldmm  <- grepl("YIELDMM", plotdata$stat, ignore.case=TRUE)
   plot.yieldmm <- makediffplot(plotdata[ set.totalq | set.yieldmm,]) 
 
-  set.mean   <- grepl("MEAN", plotdata$stat)
+  set.mean   <- grepl("MEAN", plotdata$stat, ignore.case=TRUE)
   plot.mean  <- makediffplot(plotdata[ set.mean,]) 
 
-  set.per    <- grepl("P50", plotdata$stat) | grepl("P80", plotdata$stat)| grepl("P90", plotdata$stat) 
+  set.per    <- grepl("P50", plotdata$stat, ignore.case=TRUE) | 
+                grepl("P80", plotdata$stat, ignore.case=TRUE) | 
+                grepl("P90", plotdata$stat, ignore.case=TRUE) 
   plot.per   <- makediffplot(plotdata[ set.per,]) 
 
-  set.wyear  <- grepl("Oct_to_Sept", plotdata$stat) | grepl("ONDJFM", plotdata$stat) | grepl("AMJJAS", plotdata$stat)
+  set.wyear  <- grepl("Oct_to_Sept", plotdata$stat, ignore.case=TRUE) | 
+                grepl("ONDJFM",      plotdata$stat, ignore.case=TRUE) | 
+                grepl("AMJJAS",      plotdata$stat, ignore.case=TRUE)
   plot.wyear <- makediffplot(plotdata[ set.wyear,] ) 
 
+  set.cumq  <- grepl("CUMQ", plotdata$stat, ignore.case=TRUE) 
+  plot.cumq <- makediffplot(plotdata[ set.cumq,] ) 
+
   # are there any variables not plotted?
-  stat.not.plotted <- unique( plotdata$stat[ !(set.daily | set.totalq | set.yieldmm | set.mean | set.per | set.wyear)])
+  stat.not.plotted <- unique( plotdata$stat[ !(set.daily | set.totalq | set.yieldmm | 
+                                              set.mean   | set.per    | set.wyear   | set.cumq)])
 
   plot.list <- list(#plot.allstat=plot.allstat,
                      plot.daily  =plot.daily,
                      plot.yieldmm=plot.yieldmm,
                      plot.mean   =plot.mean,
                      plot.per    =plot.per,
-                     plot.wyear  =plot.wyear)
+                     plot.wyear  =plot.wyear,
+                     plot_cumq   =plot.cumq)
    
    file.comparison <- NA
    if(write.comparison.csv){
@@ -133,7 +157,7 @@ compare.annual.stat <- function(Q.filename, E.filename, write.comparison.csv=FAL
    
    file.plots.pdf <- NA
    if(write.plots.pdf){
-      file.plots <- file.path(report.dir, "comparison-annual-R-vs-Excel.pdf")
+      file.plots.pdf <- file.path(report.dir, "comparison-annual-R-vs-Excel.pdf")
       pdf(file=file.plots.pdf)
       l_ply(plot.list, function(x){plot(x)})
       dev.off()

@@ -55,7 +55,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    #   plot - ggplot object
   
    # data checks
-   if( !is.character(Station.Code))  {stop("Station Code muste be a character string.")}
+   if( !is.character(Station.Code))  {stop("Station Code must be a character string.")}
    if(length(Station.Code)>1)        {stop("Station.Code cannot have length > 1")}
    if( !is.data.frame(flow))         {stop("Flow is not a data frame.")}
    if(! all(c("Date","Q") %in% names(flow))){

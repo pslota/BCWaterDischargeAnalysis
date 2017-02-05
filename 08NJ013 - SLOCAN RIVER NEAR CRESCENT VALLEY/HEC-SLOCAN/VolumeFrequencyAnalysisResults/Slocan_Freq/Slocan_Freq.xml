@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AnalysisResults>
+  <VolumeDurationAnalysis>
+    <ExtractionTime>2017.Jan.30 11:10:23.558</ExtractionTime>
+    <AnalysisTime>2017.Jan.30 11:10:34.361</AnalysisTime>
+    <Name>Slocan_Freq</Name>
+    <Description />
+    <DataSetName>Slocan-FLOW-DAY</DataSetName>
+    <DssFileName>H:\A_Data_For_CARL\SLOCAN RIVER NEAR CRESCENT VALLEY\Slocan\Slocan.dss</DssFileName>
+    <DataPathname>///FLOW-DAY//1DAY//</DataPathname>
+    <ProjectPath />
+    <ReportFilePath />
+    <EventType>Low</EventType>
+    <TimeSpecs>
+      <AnalysisYearType>CALENDAR</AnalysisYearType>
+      <UseSeason>false</UseSeason>
+      <RecordStartDate>01Jan1933</RecordStartDate>
+      <RecordEndDate>31Dec2015</RecordEndDate>
+    </TimeSpecs>
+    <UseDefaultDurations>false</UseDefaultDurations>
+    <DataSet>
+      <DataSetName>Slocan-FLOW-DAY (1-day Min)</DataSetName>
+      <DssFileName>H:\A_Data_For_CARL\SLOCAN RIVER NEAR CRESCENT VALLEY\Slocan\Slocan.dss</DssFileName>
+      <DataPathname>///FLOW-DAY-PERAVG//IR-CENTURY/Vol-Dur_Slocan_Freq_1-day Min/</DataPathname>
+      <StartDate>1 January 1933</StartDate>
+      <EndDate>31 December 2015</EndDate>
+      <UseMaximum>false</UseMaximum>
+      <AnalysisYearType>CALENDAR</AnalysisYearType>
+      <Duration Units="day">1</Duration>
+      <BrokenRecord>False</BrokenRecord>
+      <PlotPositionPathname>///FREQ-FLOW///Vol-Dur_Slocan_Freq_1-day Min EVENTS/</PlotPositionPathname>
+      <Statistics>
+        <StatisticsType>Systematic</StatisticsType>
+        <UseLogTransform>true</UseLogTransform>
+        <Mean>1.2599862874533814000000000000000000000000000000000000</Mean>
+        <StandardDeviation>0.0889460096912836800000000000000000000000000000000000</StandardDeviation>
+        <StationSkew>-0.4079999831957540000000000000000000000000000000000000</StationSkew>
+        <RegionalSkew>NaN</RegionalSkew>
+        <WeightedSkew>NaN</WeightedSkew>
+        <AdoptedSkew>-0.4079999831957540000000000000000000000000000000000000</AdoptedSkew>
+      </Statistics>
+      <NumberOfEvents>
+        <NumberHistoricEvents>0</NumberHistoricEvents>
+        <NumberHighOutliers>0</NumberHighOutliers>
+        <NumberLowOutliers>1</NumberLowOutliers>
+        <NumberZero>0</NumberZero>
+        <NumberIncompleteMissing>0</NumberIncompleteMissing>
+        <NumberMissing>0</NumberMissing>
+        <NumberSystematicEvents>83</NumberSystematicEvents>
+        <HistoricPeriod>83</HistoricPeriod>
+      </NumberOfEvents>
+      <SampleFrequencyCurve>
+        <FrequencyCurve>
+          <DistributionType>Pearson Type III</DistributionType>
+          <ParameterLabel>FLOW</ParameterLabel>
+          <UnitsLabel>cms</UnitsLabel>
+          <DssFileName>H:\A_Data_For_CARL\SLOCAN RIVER NEAR CRESCENT VALLEY\Slocan\Slocan.dss</DssFileName>
+          <Pathname>///FREQ-FLOW/Min Analytical//Vol-Dur_Slocan_Freq_1-day Min Analytic-Data/</Pathname>
+          <UseLogTransform>true</UseLogTransform>
+          <NumberEvents>83</NumberEvents>
+          <Mean>1.2599862874533814000000000000000000000000000000000000</Mean>
+          <StandardDeviation>0.0889460096912836800000000000000000000000000000000000</StandardDeviation>
+          <Skew>-0.4079999831957540000000000000000000000000000000000000</Skew>
+          <LowerConfidenceLevel>0.95</LowerConfidenceLevel>
+          <UpperConfidenceLevel>0.05</UpperConfidenceLevel>
+        </FrequencyCurve>
+      </SampleFrequencyCurve>
+    </DataSet>
+    <DataSet>
+      <DataSetName>Slocan-FLOW-DAY (3-day Min)</DataSetName>
+      <DssFileName>H:\A_Data_For_CARL\SLOCAN RIVER NEAR CRESCENT VALLEY\Slocan\Slocan.dss</DssFileName>
+      <DataPathname>///FLOW-DAY-PERAVG//IR-CENTURY/Vol-Dur_Slocan_Freq_3-day Min/</DataPathname>
+      <StartDate>1 January 1933</StartDate>
+      <EndDate>31 December 2015</EndDate>
+      <UseMaximum>false</UseMaximum>
+      <AnalysisYearType>CALENDAR</AnalysisYearType>
+      <Duration Units="day">3</Duration>
+      <NumberYearsMissingSomeData>1</NumberYearsMissingSomeData>
+      <BrokenRecord>False</BrokenRecord>
+      <PlotPositionPathname>///FREQ-FLOW///Vol-Dur_Slocan_Freq_3-day Min EVENTS/</PlotPositionPathname>
+      <Statistics>
+        <StatisticsType>Systematic</StatisticsType>
+        <UseLogTransform>true</UseLogTransform>
+        <Mean>1.2649270154008918000000000000000000000000000000000000</Mean>
+        <StandardDeviation>0.0884866931400688100000000000000000000000000000000000</StandardDeviation>
+        <StationSkew>-0.4349301936860917000000000000000000000000000000000000</StationSkew>
+        <RegionalSkew>NaN</RegionalSkew>
+        <WeightedSkew>NaN</WeightedSkew>
+        <AdoptedSkew>-0.4349301936860917000000000000000000000000000000000000</AdoptedSkew>
+      </Statistics>
+      <NumberOfEvents>
+        <NumberHistoricEvents>0</NumberHistoricEvents>
+        <NumberHighOutliers>0</NumberHighOutliers>
+        <NumberLowOutliers>1</NumberLowOutliers>
+        <NumberZero>0</NumberZero>
+        <NumberIncompleteMissing>0</NumberIncompleteMissing>
+        <NumberMissing>0</NumberMissing>
+        <NumberSystematicEvents>83</NumberSystematicEvents>
+        <HistoricPeriod>83</HistoricPeriod>
+      </NumberOfEvents>
+      <SampleFrequencyCurve>
+        <FrequencyCurve>
+          <DistributionType>Pearson Type III</DistributionType>
+          <ParameterLabel>FLOW</ParameterLabel>
+          <UnitsLabel>cms</UnitsLabel>
+          <DssFileName>H:\A_Data_For_CARL\SLOCAN RIVER NEAR CRESCENT VALLEY\Slocan\Slocan.dss</DssFileName>
+          <Pathname>///FREQ-FLOW/Min Analytical//Vol-Dur_Slocan_Freq_3-day Min Analytic-Data/</Pathname>
+          <UseLogTransform>true</UseLogTransform>
+          <NumberEvents>83</NumberEvents>
+          <Mean>1.2649270154008918000000000000000000000000000000000000</Mean>
+          <StandardDeviation>0.0884866931400688100000000000000000000000000000000000</StandardDeviation>
+          <Skew>-0.4349301936860917000000000000000000000000000000000000</Skew>
+          <LowerConfidenceLevel>0.95</LowerConfidenceLevel>
+          <UpperConfidenceLevel>0.05</UpperConfidenceLevel>
+        </FrequencyCurve>
+      </SampleFrequencyCurve>
+    </DataSet>
+    <DataSet>
+      <DataSetName>Slocan-FLOW-DAY (7-day Min)</DataSetName>
+      <DssFileName>H:\A_Data_For_CARL\SLOCAN RIVER NEAR CRESCENT VALLEY\Slocan\Slocan.dss</DssFileName>
+      <DataPathname>///FLOW-DAY-PERAVG//IR-CENTURY/Vol-Dur_Slocan_Freq_7-day Min/</DataPathname>
+      <StartDate>1 January 1933</StartDate>
+      <EndDate>31 December 2015</EndDate>
+      <UseMaximum>false</UseMaximum>
+      <AnalysisYearType>CALENDAR</AnalysisYearType>
+      <Duration Units="day">7</Duration>
+      <NumberYearsMissingSomeData>1</NumberYearsMissingSomeData>
+      <BrokenRecord>False</BrokenRecord>
+      <PlotPositionPathname>///FREQ-FLOW///Vol-Dur_Slocan_Freq_7-day Min EVENTS/</PlotPositionPathname>
+      <Statistics>
+        <StatisticsType>Systematic</StatisticsType>
+        <UseLogTransform>true</UseLogTransform>
+        <Mean>1.2713069320875432000000000000000000000000000000000000</Mean>
+        <StandardDeviation>0.0893838350560232200000000000000000000000000000000000</StandardDeviation>
+        <StationSkew>-0.3633390372422407600000000000000000000000000000000000</StationSkew>
+        <RegionalSkew>NaN</RegionalSkew>
+        <WeightedSkew>NaN</WeightedSkew>
+        <AdoptedSkew>-0.3633390372422407600000000000000000000000000000000000</AdoptedSkew>
+      </Statistics>
+      <NumberOfEvents>
+        <NumberHistoricEvents>0</NumberHistoricEvents>
+        <NumberHighOutliers>0</NumberHighOutliers>
+        <NumberLowOutliers>1</NumberLowOutliers>
+        <NumberZero>0</NumberZero>
+        <NumberIncompleteMissing>0</NumberIncompleteMissing>
+        <NumberMissing>0</NumberMissing>
+        <NumberSystematicEvents>83</NumberSystematicEvents>
+        <HistoricPeriod>83</HistoricPeriod>
+      </NumberOfEvents>
+      <SampleFrequencyCurve>
+        <FrequencyCurve>
+          <DistributionType>Pearson Type III</DistributionType>
+          <ParameterLabel>FLOW</ParameterLabel>
+          <UnitsLabel>cms</UnitsLabel>
+          <DssFileName>H:\A_Data_For_CARL\SLOCAN RIVER NEAR CRESCENT VALLEY\Slocan\Slocan.dss</DssFileName>
+          <Pathname>///FREQ-FLOW/Min Analytical//Vol-Dur_Slocan_Freq_7-day Min Analytic-Data/</Pathname>
+          <UseLogTransform>true</UseLogTransform>
+          <NumberEvents>83</NumberEvents>
+          <Mean>1.2713069320875432000000000000000000000000000000000000</Mean>
+          <StandardDeviation>0.0893838350560232200000000000000000000000000000000000</StandardDeviation>
+          <Skew>-0.3633390372422407600000000000000000000000000000000000</Skew>
+          <LowerConfidenceLevel>0.95</LowerConfidenceLevel>
+          <UpperConfidenceLevel>0.05</UpperConfidenceLevel>
+        </FrequencyCurve>
+      </SampleFrequencyCurve>
+    </DataSet>
+    <DataSet>
+      <DataSetName>Slocan-FLOW-DAY (15-day Min)</DataSetName>
+      <DssFileName>H:\A_Data_For_CARL\SLOCAN RIVER NEAR CRESCENT VALLEY\Slocan\Slocan.dss</DssFileName>
+      <DataPathname>///FLOW-DAY-PERAVG//IR-CENTURY/Vol-Dur_Slocan_Freq_15-day Min/</DataPathname>
+      <StartDate>1 January 1933</StartDate>
+      <EndDate>31 December 2015</EndDate>
+      <UseMaximum>false</UseMaximum>
+      <AnalysisYearType>CALENDAR</AnalysisYearType>
+      <Duration Units="day">15</Duration>
+      <NumberYearsMissingSomeData>1</NumberYearsMissingSomeData>
+      <BrokenRecord>False</BrokenRecord>
+      <PlotPositionPathname>///FREQ-FLOW///Vol-Dur_Slocan_Freq_15-day Min EVENTS/</PlotPositionPathname>
+      <Statistics>
+        <StatisticsType>Systematic</StatisticsType>
+        <UseLogTransform>true</UseLogTransform>
+        <Mean>1.2810257582200197000000000000000000000000000000000000</Mean>
+        <StandardDeviation>0.0898034988329187400000000000000000000000000000000000</StandardDeviation>
+        <StationSkew>-0.3203306581207377400000000000000000000000000000000000</StationSkew>
+        <RegionalSkew>NaN</RegionalSkew>
+        <WeightedSkew>NaN</WeightedSkew>
+        <AdoptedSkew>-0.3203306581207377400000000000000000000000000000000000</AdoptedSkew>
+      </Statistics>
+      <NumberOfEvents>
+        <NumberHistoricEvents>0</NumberHistoricEvents>
+        <NumberHighOutliers>0</NumberHighOutliers>
+        <NumberLowOutliers>1</NumberLowOutliers>
+        <NumberZero>0</NumberZero>
+        <NumberIncompleteMissing>0</NumberIncompleteMissing>
+        <NumberMissing>0</NumberMissing>
+        <NumberSystematicEvents>83</NumberSystematicEvents>
+        <HistoricPeriod>83</HistoricPeriod>
+      </NumberOfEvents>
+      <SampleFrequencyCurve>
+        <FrequencyCurve>
+          <DistributionType>Pearson Type III</DistributionType>
+          <ParameterLabel>FLOW</ParameterLabel>
+          <UnitsLabel>cms</UnitsLabel>
+          <DssFileName>H:\A_Data_For_CARL\SLOCAN RIVER NEAR CRESCENT VALLEY\Slocan\Slocan.dss</DssFileName>
+          <Pathname>///FREQ-FLOW/Min Analytical//Vol-Dur_Slocan_Freq_15-day Min Analytic-Data/</Pathname>
+          <UseLogTransform>true</UseLogTransform>
+          <NumberEvents>83</NumberEvents>
+          <Mean>1.2810257582200197000000000000000000000000000000000000</Mean>
+          <StandardDeviation>0.0898034988329187400000000000000000000000000000000000</StandardDeviation>
+          <Skew>-0.3203306581207377400000000000000000000000000000000000</Skew>
+          <LowerConfidenceLevel>0.95</LowerConfidenceLevel>
+          <UpperConfidenceLevel>0.05</UpperConfidenceLevel>
+        </FrequencyCurve>
+      </SampleFrequencyCurve>
+    </DataSet>
+    <DataSet>
+      <DataSetName>Slocan-FLOW-DAY (30-day Min)</DataSetName>
+      <DssFileName>H:\A_Data_For_CARL\SLOCAN RIVER NEAR CRESCENT VALLEY\Slocan\Slocan.dss</DssFileName>
+      <DataPathname>///FLOW-DAY-PERAVG//IR-CENTURY/Vol-Dur_Slocan_Freq_30-day Min/</DataPathname>
+      <StartDate>1 January 1933</StartDate>
+      <EndDate>31 December 2015</EndDate>
+      <UseMaximum>false</UseMaximum>
+      <AnalysisYearType>CALENDAR</AnalysisYearType>
+      <Duration Units="day">30</Duration>
+      <NumberYearsMissingSomeData>1</NumberYearsMissingSomeData>
+      <BrokenRecord>False</BrokenRecord>
+      <PlotPositionPathname>///FREQ-FLOW///Vol-Dur_Slocan_Freq_30-day Min EVENTS/</PlotPositionPathname>
+      <Statistics>
+        <StatisticsType>Systematic</StatisticsType>
+        <UseLogTransform>true</UseLogTransform>
+        <Mean>1.2970791863954672000000000000000000000000000000000000</Mean>
+        <StandardDeviation>0.0932076759169880900000000000000000000000000000000000</StandardDeviation>
+        <StationSkew>-0.0946446091458408200000000000000000000000000000000000</StationSkew>
+        <RegionalSkew>NaN</RegionalSkew>
+        <WeightedSkew>NaN</WeightedSkew>
+        <AdoptedSkew>-0.0946446091458408200000000000000000000000000000000000</AdoptedSkew>
+      </Statistics>
+      <NumberOfEvents>
+        <NumberHistoricEvents>0</NumberHistoricEvents>
+        <NumberHighOutliers>0</NumberHighOutliers>
+        <NumberLowOutliers>1</NumberLowOutliers>
+        <NumberZero>0</NumberZero>
+        <NumberIncompleteMissing>0</NumberIncompleteMissing>
+        <NumberMissing>0</NumberMissing>
+        <NumberSystematicEvents>83</NumberSystematicEvents>
+        <HistoricPeriod>83</HistoricPeriod>
+      </NumberOfEvents>
+      <SampleFrequencyCurve>
+        <FrequencyCurve>
+          <DistributionType>Pearson Type III</DistributionType>
+          <ParameterLabel>FLOW</ParameterLabel>
+          <UnitsLabel>cms</UnitsLabel>
+          <DssFileName>H:\A_Data_For_CARL\SLOCAN RIVER NEAR CRESCENT VALLEY\Slocan\Slocan.dss</DssFileName>
+          <Pathname>///FREQ-FLOW/Min Analytical//Vol-Dur_Slocan_Freq_30-day Min Analytic-Data/</Pathname>
+          <UseLogTransform>true</UseLogTransform>
+          <NumberEvents>83</NumberEvents>
+          <Mean>1.2970791863954672000000000000000000000000000000000000</Mean>
+          <StandardDeviation>0.0932076759169880900000000000000000000000000000000000</StandardDeviation>
+          <Skew>-0.0946446091458408200000000000000000000000000000000000</Skew>
+          <LowerConfidenceLevel>0.95</LowerConfidenceLevel>
+          <UpperConfidenceLevel>0.05</UpperConfidenceLevel>
+        </FrequencyCurve>
+      </SampleFrequencyCurve>
+    </DataSet>
+    <Message>Warning: 4 events occur in first 6 days of analysis year for 1-day duration.</Message>
+    <Message>Warning: 4 events occur in first 8 days of analysis year for 3-day duration.</Message>
+    <Message>Warning: 4 events occur in first 12 days of analysis year for 7-day duration.</Message>
+    <Message>Warning: 8 events occur in first 20 days of analysis year for 15-day duration.</Message>
+    <Message>Warning: 7 events occur in first 35 days of analysis year for 30-day duration.</Message>
+    <Message>Suggest reviewing data and changing the year/season specification on the General tab to capture independent max/min volumes.</Message>
+  </VolumeDurationAnalysis>
+</AnalysisResults>
+

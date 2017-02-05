@@ -1,0 +1,8 @@
+30Jan2017:12:52:14-INFO-rgpike-Added Manager Base Map type hec2.ssp.model.DataStore
+30Jan2017:12:52:14-INFO-rgpike-Added Manager Base Map type hec2.ssp.model.Map
+30Jan2017:12:52:14-INFO-rgpike-Created by rgpike
+30Jan2017:12:52:15-INFO-rgpike-Coordinate System now X-Y
+30Jan2017:12:56:16-INFO-rgpike-Added Manager GREELEY-FLOW-DAY type hec2.ssp.model.Data
+30Jan2017:12:57:04-INFO-rgpike-Added Manager GREELEY_FREQ type hec2.ssp.model.VolumeFrequencyAnalysis
+30Jan2017:12:57:06-INFO-rgpike-Added Manager PlotProbLines type hec2.ssp.model.PlotProbLinesMgr
+30Jan2017:12:57:53-INFO-rgpike-Project Closed

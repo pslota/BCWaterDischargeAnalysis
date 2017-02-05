@@ -1,0 +1,52 @@
+Version=1.0
+ProjectName=COLDWATER
+Extents=-Infinity,-Infinity,-Infinity,-Infinity
+Grow Extents=true
+Created=1485810694766
+Created By=rgpike
+UnitSystemID=2
+SyncMapWindows=false
+
+CoordinateInfoBegin
+type=X-Y
+units=U.S. Feet
+unitMult=1.0
+spheroid=
+CoordinateInfoEnd
+
+AdditionalProjectInfoBegin
+AdditionalProjectInfoEnd
+
+ManagerBegin
+Name=Base Map
+Description=
+File=DataStore.LST
+Class=hec2.ssp.model.DataStore
+ModifiedTime=1485810741416
+CreatedBy=rgpike
+CreatedOn=1485810694704
+ModifiedBy=rgpike
+ManagerEnd
+
+ManagerBegin
+Name=Base Map
+Description=
+File=Base_Map.map
+Class=hec2.ssp.model.Map
+ModifiedTime=1485810694719
+CreatedBy=rgpike
+CreatedOn=1485810694719
+ModifiedBy=rgpike
+ManagerEnd
+
+ManagerBegin
+Name=COLDWATER-FLOW-DAY
+Description=Imported from H:\A_Data_For_CARL\COLDWATER RIVER NEAR BROOKMERE\08LG048_Date_HEC.xls
+File=DataStore.LST
+Class=hec2.ssp.model.Data
+ModifiedTime=1485810741416
+CreatedBy=rgpike
+CreatedOn=1485810741416
+ModifiedBy=rgpike
+ManagerEnd
+
