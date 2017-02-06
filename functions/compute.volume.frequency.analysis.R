@@ -5,10 +5,10 @@
 compute.volume.frequency.analysis <- function(Station.Code, flow, 
                          start.year=9999, end.year=0000, use.water.year=FALSE, 
                          roll.avg.days=c(1,3,7,30,60,90),
-                         use.log=TRUE,
+                         use.log=FALSE,
                          use.max=FALSE,
                          prob.plot.position=c("weibull","median","hazen"),
-                         prob.scale.points=c(.9999, .999, .99, .9, .5, .2, .1, .02, .01, .001, .001),
+                         prob.scale.points=c(.9999, .999, .99, .9, .5, .2, .1, .02, .01, .001, .0001),
                          fit.distr=c("PIII","weibull"),
                          fit.distr.method=ifelse(fit.distr=="PIII","MOM","MLE"),
                          fit.quantiles=c(.975, .99, .98, .95, .90, .80, .50, .20, .10, .05, .01),
@@ -17,6 +17,8 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
                          write.plotdata.csv=FALSE,  # write out the plotting data
                          write.quantiles.csv=FALSE, # write out the fitted quantiles
                          write.quantiles.trans.csv=FALSE,
+                         write.frequency.plot=TRUE,  # write out the frequency plot
+                         write.frequency.plot.suffix=c("pdf","png"),
                          report.dir='.', debug=FALSE
                          )
   {
@@ -102,7 +104,9 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    if( !is.logical(write.plotdata.csv))  {stop("write.plotdata.csv must be logical (TRUE/FALSE")}
    if( !is.logical(write.quantiles.csv)) {stop("write.quantiles.csv must be logical (TRUE/FALSE")}
    if( !is.logical(write.quantiles.trans.csv)){stop("write.quantiles.trans.csv must be logical (TRUE/FALSE")}
-
+   if( !is.logical(write.frequency.plot)) {stop("write.frequency.plot must be logical (TRUE/FALSE)")}
+   if( !write.frequency.plot.suffix[1] %in% c("pdf","png")){stop("write.frequency.plot.suffix must be pdf or png")}
+   
    # merge the specified na.rm options with my options
    my.na.rm <- list(na.rm.global=TRUE)
    if( !all(names(na.rm) %in% names(my.na.rm))){stop("Illegal element in na.rm")}
@@ -154,7 +158,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    # make the plot. Remove any missing or infinite or NaN values
    Q.stat <- Q.stat[ is.finite(Q.stat$value),]  # remove missing/ Inf/ NaN values
 
-      # get the plotting positions
+   # get the plotting positions
    # From the HEC-SSP package, the  plotting positions are (m-a)/(n+1-a-b)
    a <- 0; b <- 0
    if(prob.plot.position[1]=='weibull'){a <- 0; b <- 0}
@@ -165,23 +169,25 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
        x <- x[ order(x$value),]
        x$prob <- ((1:length(x$value))-a)/((length(x$value)+1-a-b))
        if(use.max)x$prob <- 1- x$prob   # they like to use p(exceedance) if using a minimum
-       x$dist.prob <- log(-log(1-x$prob))
+       x$dist.prob <- qnorm(1-x$prob)
        x
    }, a=a, b=b, use.max=use.max)
-   
-   freqplot <- ggplot2::ggplot(data=plotdata, aes(x=dist.prob, y=value, group=Measure, color=Measure))+
+   if(debug)browser()
+   freqplot <- ggplot2::ggplot(data=plotdata, aes(x=prob, y=value, group=Measure, color=Measure),environment=environment())+
       geom_point()+
       xlab("Probability")+
-      scale_x_continuous(breaks=log(-log(1-prob.scale.points)),
-                         labels=prob.scale.points,
-                         sec.axis=sec_axis(~1/(exp(-exp(.))),
+      scale_x_continuous(trans=probability_trans("norm", lower.tail=FALSE), 
+                         breaks=prob.scale.points,
+                         sec.axis=sec_axis(trans=~1/.,
                                            breaks=c(1.01,1.1,2,5,10,20,100,1000),
-                                           labels=function(x){ifelse(x<2,x,round(x,0))}))+
-      theme(legend.justification=c(1,1), legend.position=c(1,1))
+                                           labels=function(x){ifelse(x<2,x,round(x,0))}))
+      
+   if(!use.max){ freqplot <- freqplot+theme(legend.justification=c(1,1), legend.position=c(1,1))}
+   if( use.max){ freqplot <- freqplot+theme(legend.justification=c(1,0), legend.position=c(1,0))}
    if(!use.log){ freqplot <- freqplot + scale_y_log10(breaks=function(x){pretty(x)})}
-   if( use.log & use.max ){freqplot <- freqplot + ylab("ln(Max Value)")}  # adjust the Y axis label
+   if( use.log &  use.max ){freqplot <- freqplot + ylab("ln(Max Value)")}  # adjust the Y axis label
    if( use.log & !use.max){freqplot <- freqplot + ylab("ln(Min Value)")}
-   if(!use.log & use.max ){freqplot <- freqplot + ylab("Max Value")}  
+   if(!use.log &  use.max ){freqplot <- freqplot + ylab("Max Value")}  
    if(!use.log & !use.max){freqplot <- freqplot + ylab("Min Value")}
 
    
@@ -191,12 +197,13 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
       # compute (centered) empirical centered moments of the data
       if(order==1) return(mean(x))
       if(order==2) return(var(x))
-      if(order==3) return(e1071::skewness(log10(cow$Min), type=2))
+      if(order==3) return(e1071::skewness(x, type=2))
    }
    
    fit <- dlply(Q.stat, "Measure", function(x, distr, fit.method){
       start=NULL
-      if(distr=='PIII'){x$value <- log10(x$value)} # PIII is fit to log-of values
+      # PIII is fit to log-of values unless use.log has been set, in which case data has previous been logged
+      if(distr=='PIII' & !use.log){x$value <- log10(x$value)} 
       # get starting values
       if(distr=='PIII'){
          # Note that the above forgot to mulitply the scale by the sign of skewness .
@@ -235,14 +242,14 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
       if( use.max) prob <- 1-prob
       quant <- quantile(x, prob=prob)
       quant <- unlist(quant$quantiles)
-      if(x$distname=='PIII')quant <- 10^quant # PIII was fit to the log-values
+      if(x$distname=='PIII' & !use.log)quant <- 10^quant # PIII was fit to the log-values
       if(  use.max) prob <- 1-prob  # reset for adding to data frame
-      if(  use.log) quant <- 10^quant # transforma back to original scale
+      if(  use.log) quant <- exp(quant) # transforma back to original scale
       res <- data.frame(Measure=measure, distr=x$distname, prob=prob, quantile=quant ,stringsAsFactors=FALSE)
       rownames(res) <- NULL
       res
     }, prob=fit.quantiles, fit=fit, use.max=use.max, use.log=use.log)
-   
+   if(debug)browser()
    # get the transposed version
    fitted.quantiles.trans <- reshape2::dcast(fitted.quantiles, distr+prob~Measure , value.var="quantile")
    
@@ -281,6 +288,12 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
      write.csv(fitted.quantiles.trans,file=file.quantile.trans.csv, row.names=FALSE)
    }
    
+   file.frequency.plot <- NA
+   if(write.frequency.plot){
+      file.frequency.plot <- file.path(report.dir, paste(Station.Code,"-frequency-plot.",write.frequency.plot.suffix[1],sep=""))
+      ggsave(plot=freqplot, file=file.frequency.plot, h=4, w=6, units="in", dpi=300)
+   }
+   
    list(start.year=start.year,
         end.year  =end.year,
         use.water.year=use.water.year,
@@ -300,6 +313,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
         file.plotdata.csv=file.plotdata.csv, # file with plotting information
         file.quantile.csv=file.quantile.csv,
         file.quantile.trans.csv=file.quantile.trans.csv,
+        file.frequency.plot=file.frequency.plot,
         Version = Version, 
         date=Sys.time())
 } 

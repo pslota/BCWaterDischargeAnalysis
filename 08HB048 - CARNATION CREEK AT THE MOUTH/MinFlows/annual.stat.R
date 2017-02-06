@@ -10,10 +10,10 @@ options(width=200)  # how wide to print output
 
 # load the functions used in the analysis
 # This will also load the relevant libraries -- see the loadlibraries file in the Functions folder for details
-dummy <- lapply(file.path("../../Functions",list.files(path=file.path("../../Functions"), pattern = "(?i)[.]r$", recursive = TRUE)), 
+invisible(lapply(file.path("../../Functions",list.files(path=file.path("../../Functions"), pattern = "(?i)[.]r$", recursive = TRUE)), 
        function(x){
          cat("Loading ",x,"\n");
-         source(x)})
+         source(x)}))
 
 # Define variables that provide options for the analysis
 
@@ -23,6 +23,9 @@ Station.Area <- 10.3    # square km's
 
 start.year   <- 1973  # when do you want the analysis to start at.
 end.year     <- 2013  # what is last year with complete data
+
+start.year.vfa <- start.year
+end.year.vfa   <- end.year
 
 # Get the data
 flow <- read.csv(file.path("08HB048_Date.csv"), header=TRUE, as.is=TRUE, strip.white=TRUE, skip=1)
@@ -137,7 +140,8 @@ stat.annual$file.stat.csv
 stat.annual$file.stat.trans.csv
 
 # Compare the annual statistics with those in the Excel spreasheet
-compare.annual <- compare.annual.stat(Q.filename=stat.annual$file.stat.csv,
+compare.annual <- compare.annual.stat(Station.Code,
+                                      Q.filename=stat.annual$file.stat.csv,
                                       E.filename=E.filename,
                                       SW_translate=SW_translate,
                                       report.dir=report.dir,
@@ -190,7 +194,8 @@ stat.longterm$file.stat.trans.csv
 
 
 # Compare the longterm statistics with those in the Excel spreasheet
-compare.longterm <- compare.longterm.stat(Q.filename=stat.longterm$file.stat.csv,
+compare.longterm <- compare.longterm.stat(Station.Code,
+                                      Q.filename=stat.longterm$file.stat.csv,
                                       E.filename=E.filename,
                                       report.dir=report.dir,
                                       write.comparison.csv=TRUE,
@@ -233,7 +238,8 @@ percentile.longterm$file.stat.trans.csv
 
 
 # Compare the longterm percentile statistics with those in the Excel spreasheet
-compare.percentile.longterm <- compare.percentile.longterm.stat(Q.filename=percentile.longterm$file.stat.csv,
+compare.percentile.longterm <- compare.percentile.longterm.stat(Station.Code,
+                                      Q.filename=percentile.longterm$file.stat.csv,
                                       E.filename=E.filename,
                                       write.comparison.csv=TRUE,
                                       write.plots.pdf=TRUE,
@@ -257,7 +263,7 @@ l_ply(compare.percentile.longterm$plot.list, function(x){plot(x)})
 # Compute the volume frequency analysis (similar to HEC SSP)
 
 vfa.analysis <- compute.volume.frequency.analysis( Station.Code=Station.Code, flow, 
-                      start.year=start.year, end.year=end.year, use.water.year=FALSE, 
+                      start.year=start.year.vfa, end.year=end.year.vfa, use.water.year=FALSE, 
                       roll.avg.days=c(1,3,7,15),
                       use.log=FALSE,
                       use.max=FALSE,
@@ -280,7 +286,8 @@ ggsave(plot=vfa.analysis$freqplot,
 vfa.analysis$fitted.quantiles.trans
   
 HEC.filename <- file.path(report.dir,"CARNATION_FREQ.rpt")
-compare.with.HEC <- compare.frequency.with.hec(Q.file.stat=vfa.analysis$file.stat.csv, 
+compare.with.HEC <- compare.frequency.with.hec(Station.Code,
+                                               Q.file.stat=vfa.analysis$file.stat.csv, 
                                                Q.file.plotdata=vfa.analysis$file.plotdata.csv,
                                                Q.file.quantile=vfa.analysis$file.quantile.csv,
                                                HEC.filename=HEC.filename,

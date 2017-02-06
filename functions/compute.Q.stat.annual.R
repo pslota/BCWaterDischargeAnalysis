@@ -405,7 +405,7 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
      pdf(file.stat.trend.pdf, h=8, w=11)
         d_ply(plotdata, "statgroup", function(x){
            myplot <- ggplot(data=x, aes(x=Year, y=Value, group=Statistic, color=Statistic, linetype=Statistic))+
-             ggtitle(paste("Trend for ", x$statgroup[1]))+
+             ggtitle(paste(Station.Code, " - Trend for ", x$statgroup[1]))+
              geom_point()+
              geom_line()+xlab("Year")+ylab("Value of statistic")
            if(x$transform[1] == 'log'){

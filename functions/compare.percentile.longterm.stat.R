@@ -3,12 +3,14 @@
 # Change Log
 #     2017-01-30 CJS First Edition
 
-compare.percentile.longterm.stat <- function(Q.filename, E.filename,
+compare.percentile.longterm.stat <- function(Station.Code,
+                                             Q.filename, E.filename,
                                              write.comparison.csv=FALSE,
                                              write.plots.pdf=FALSE,
                                              report.dir=".",
                                              debug=FALSE){
 #  Input
+#    Station.Code - prefix for file names
 #    Q.filename - file name of csv file containing the annual statistics
 #    E.filename - Excel workbook with the statistics
 #    save.comparison - save the csv file of comparisons
@@ -25,6 +27,8 @@ compare.percentile.longterm.stat <- function(Q.filename, E.filename,
 #  Some basic error checking on the input parameters
 #
    Version <- "2017-02-01"
+   if( !is.character(Station.Code))  {stop("Station Code must be a character string.")}
+   if(length(Station.Code)>1)        {stop("Station.Code cannot have length > 1")}
    if( !is.character(Q.filename))    {stop("Q.filename  muste be a character string.")}
    if( !is.character(E.filename))    {stop("E.filename  muste be a character string.")}
    if( !file.exists(Q.filename))     {stop('Q.filename does not exist')}
@@ -89,7 +93,7 @@ compare.percentile.longterm.stat <- function(Q.filename, E.filename,
    
    makediffplot <- function (plotdata){
      myplot <- ggplot2::ggplot(data=plotdata, aes(x=Month, y=stat, size=pdiff))+
-       ggtitle("Standardized differences between Q.stat and E.stat")+
+       ggtitle(paste(Station.Code, " - Standardized differences between Q.stat and E.Stat",sep=""))+
        theme(plot.title = element_text(hjust = 0.5))+
        geom_point()+
        scale_size_area(limits=c(0,.01), name="Proportional\ndifference")+
@@ -114,13 +118,13 @@ compare.percentile.longterm.stat <- function(Q.filename, E.filename,
 
    file.comparison <- NA
    if(write.comparison.csv){
-      file.comparison.csv <- file.path(report.dir, "comparison-percentile-longterm-R-vs-Excel.csv")
+      file.comparison.csv <- file.path(report.dir, paste(Station.Code,"-comparison-percentile-longterm-R-vs-Excel.csv",sep=""))
       write.csv(diff.stat, file.comparison.csv, row.names=FALSE)
    }
    
    file.plots.pdf <- NA
    if(write.plots.pdf){
-      file.plots.pdf <- file.path(report.dir, "comparison-percentile-longterm-R-vs-Excel.pdf")
+      file.plots.pdf <- file.path(report.dir, paste(Station.Code,"-comparison-percentile-longterm-R-vs-Excel.pdf",sep=""))
       pdf(file=file.plots.pdf)
       l_ply(plot.list, function(x){plot(x)})
       dev.off()

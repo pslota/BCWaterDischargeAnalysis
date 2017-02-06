@@ -6,7 +6,7 @@
 # Change Log
 #     2017-01-30 CJS First Edition
 
-compare.frequency.with.hec <- function(Q.file.stat, 
+compare.frequency.with.hec <- function(Station.Code,Q.file.stat, 
                                        Q.file.plotdata,
                                        Q.file.quantile,
                                        HEC.filename,
@@ -14,6 +14,7 @@ compare.frequency.with.hec <- function(Q.file.stat,
                                        write.plots.pdf=FALSE,
                                        report.dir='.', debug=FALSE){
 #  Input
+#    Station.Code - prefix for file names
 #    Q.file.stat   - file name of csv file containing the frequency statistics
 #    Q.file.plotdata     file name of csv file containing the plotting information
 #    HEC.filename - HEC VFA rpt file
@@ -29,6 +30,8 @@ compare.frequency.with.hec <- function(Q.file.stat,
 #  Some basic error checking on the input parameters
 #
    Version <- '2017-01-01'
+   if( !is.character(Station.Code))  {stop("Station Code must be a character string.")}
+   if(length(Station.Code)>1)        {stop("Station.Code cannot have length > 1")}
    if( !is.character(Q.file.stat))    {stop("Q.file.stat must be a character string.")}
    if( !file.exists(Q.file.stat))     {stop('Q.file.stat does not exist')}
    if(length(Q.file.stat)>1)          {stop("Q.file.stat cannot have length > 1")}
@@ -97,7 +100,7 @@ compare.frequency.with.hec <- function(Q.file.stat,
 
    makediffplot <- function (plotdata){
      myplot <- ggplot(data=plotdata, aes(x=Year, y=Measure, size=pdiff))+
-       ggtitle("Standardized differences between Q.stat and HEC.stat")+
+       ggtitle(paste(Station.Code, " - Standardized differences between Q.stat and E.Stat",sep=""))+
        theme(plot.title = element_text(hjust = 0.5))+
        geom_point()+
        scale_size_area(limits=c(0,.01), name="Proportional\ndifference")+
@@ -137,13 +140,13 @@ compare.frequency.with.hec <- function(Q.file.stat,
 
    file.comparison.csv <- NA
    if(write.comparison.csv){
-      file.comparison.csv <- file.path(report.dir, "comparison-vfa-R-vs-HEC.csv")
+      file.comparison.csv <- file.path(report.dir, paste(Station.Code,"-comparison-vfa-R-vs-HEC.csv",sep=""))
       write.csv(diff.stat, file.comparison.csv, row.names=FALSE)
    }
    
    file.plots.pdf <- NA
    if(write.plots.pdf){
-      file.plots.pdf <- file.path(report.dir, "comparison-vfa-R-vs-HEC.pdf")
+      file.plots.pdf <- file.path(report.dir, paste(Station.Code, "-comparison-vfa-R-vs-HEC.pdf",sep=""))
       pdf(file=file.plots.pdf)
       l_ply(plot.list, function(x){plot(x)})
       dev.off()
