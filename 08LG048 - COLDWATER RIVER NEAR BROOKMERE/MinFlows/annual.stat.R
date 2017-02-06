@@ -256,8 +256,9 @@ l_ply(compare.percentile.longterm$plot.list, function(x){plot(x)})
 #--------------------------------------------------------------------------------------------
 # Compute the volume frequency analysis (similar to HEC SSP)
 
+****** Notice that HEC starts 2 years later ******
 vfa.analysis <- compute.volume.frequency.analysis( Station.Code=Station.Code, flow, 
-                      start.year=start.year, end.year=end.year, use.water.year=FALSE, 
+                      start.year=start.year+2, end.year=end.year, use.water.year=FALSE, 
                       roll.avg.days=c(1,3,7,15),
                       use.log=FALSE,
                       use.max=FALSE,

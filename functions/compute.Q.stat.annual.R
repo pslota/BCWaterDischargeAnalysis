@@ -284,8 +284,8 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
      # Oct_to_Sept_TOTALQ_DAILY_SW	Oct through Sept sum of daily avg (cms) *60*60*24
      # Oct_to_Sept_YIELDMM_DAILY_SW	(Oct_to_Sep_TotalQ/(area in km2*1000000))*1000
 
-     Oct_to_Sept_TOTALQ_DAILY_SW <- mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Q)*60*60*24 
-     Oct_to_Sept_YIELDMM_DAILY_SW<- Oct_to_Sept_TOTALQ_DAILY_SW /Station.Area/1000
+     Oct_to_Sep_TOTALQ_DAILY_SW <- mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Q)*60*60*24 
+     Oct_to_Sep_YIELDMM_DAILY_SW<- Oct_to_Sep_TOTALQ_DAILY_SW /Station.Area/1000
 
      # half water-year statistics
      # Assign seasons to the month (AMJJAS ONDJFM)
@@ -316,8 +316,8 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
 
      # return the results
      res <- data.frame(
-             Oct_to_Sept_TOTALQ_DAILY_SW,
-             Oct_to_Sept_YIELDMM_DAILY_SW, 
+             Oct_to_Sep_TOTALQ_DAILY_SW,
+             Oct_to_Sep_YIELDMM_DAILY_SW, 
              Season_TOTALQ_DAILY_SW,
              Season_YIELDMM_DAILY_SW,
              stringsAsFactors=FALSE)

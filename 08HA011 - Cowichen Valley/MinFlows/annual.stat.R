@@ -253,7 +253,7 @@ l_ply(compare.percentile.longterm$plot.list, function(x){plot(x)})
 
 vfa.analysis <- compute.volume.frequency.analysis( Station.Code=Station.Code, flow, 
                       start.year=start.year, end.year=end.year, use.water.year=FALSE, 
-                      roll.avg.days=c(1,3,7,15),
+                      roll.avg.days=c(1,3,7,15,30,60,90),
                       use.log=FALSE,
                       use.max=FALSE,
                       fit.distr="PIII",
@@ -295,6 +295,8 @@ l_ply(compare.with.HEC$plot.list, function(x){plot(x)})
 # show the differences between the MLE and moment estimates (?) from HEC
 compare.with.HEC$diff.stat[ grepl('-q$', compare.with.HEC$diff.stat$Measure),] 
   
+compare.with.HEC$diff.stat[ grepl("Q003-avg", compare.with.HEC$diff.stat$Measure),]
+compare.with.HEC$diff.stat[ grepl("Q007-avg", compare.with.HEC$diff.stat$Measure),]
 
 
 

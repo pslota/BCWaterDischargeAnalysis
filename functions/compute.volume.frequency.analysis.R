@@ -4,19 +4,20 @@
 
 compute.volume.frequency.analysis <- function(Station.Code, flow, 
                          start.year=9999, end.year=0000, use.water.year=FALSE, 
-                         roll.avg.days=c(1,3,7,30),
+                         roll.avg.days=c(1,3,7,30,60,90),
                          use.log=TRUE,
                          use.max=FALSE,
                          prob.plot.position=c("weibull","median","hazen"),
                          prob.scale.points=c(.9999, .999, .99, .9, .5, .2, .1, .02, .01, .001, .001),
-                         fit.distr=c("weibull","PIII"),
+                         fit.distr=c("PIII","weibull"),
+                         fit.distr.method=ifelse(fit.distr=="PIII","MOM","MLE"),
                          fit.quantiles=c(.975, .99, .98, .95, .90, .80, .50, .20, .10, .05, .01),
                          na.rm=list(na.rm.global=TRUE),
                          write.stat.csv=FALSE, write.stat.trans.csv=FALSE,
                          write.plotdata.csv=FALSE,  # write out the plotting data
                          write.quantiles.csv=FALSE, # write out the fitted quantiles
                          write.quantiles.trans.csv=FALSE,
-                         report.dir='.'
+                         report.dir='.', debug=FALSE
                          )
   {
    Version <- '2017-02-01'
@@ -43,6 +44,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    #   prob.plot.position - type of plotting positions to be used. See HEC-SSP manual for details. The first one specified is used.
    #   prob.scale.points  - points on bottom scale to plot
    #   fit.distr - which distribution to fit to the data
+   #   fit.distr.method - method to use when fitting distr (MOM only supported for PIII)
    #   fit.quantiles  - what quantiles are extracted from fitted distribution to the data 
   
   
@@ -93,7 +95,8 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
        stop("fit.quantiles must be numeric and between 0 and 1 (not inclusive)")}
    if(  fit.distr[1]=='weibull' & use.log){stop("Cannot fit Weibull distribution on log-scale")}
    if(  fit.distr[1]=='weibull' & any(flow$Q<0)){stop("cannot fit weibull distribution with negative flow values")}
-
+   if(  fit.distr[1]!="PIII" & fit.distr.method[1]=="MOM"){stop('MOM only can be used with PIII distribution')}
+   
    if( !is.logical(write.stat.csv))      {stop("write.stat.csv must be logical (TRUE/FALSE")}
    if( !is.logical(write.stat.trans.csv)){stop("write.stat.trans.csv must be logical (TRUE/FALSE")}
    if( !is.logical(write.plotdata.csv))  {stop("write.plotdata.csv must be logical (TRUE/FALSE")}
@@ -157,7 +160,6 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    if(prob.plot.position[1]=='weibull'){a <- 0; b <- 0}
    if(prob.plot.position[1]=='median' ){a <-.3; b <-.3}
    if(prob.plot.position[1]=='hazen'  ){a <-.5; b <-.5}
-
    plotdata <- plyr::ddply(Q.stat, "Measure", function(x,a,b,use.max){
        # sort the data
        x <- x[ order(x$value),]
@@ -185,40 +187,45 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    
    # fit the distribution to each measure
    # log-Pearson III implies that the log(x) has a 3-parameter gamma distribution 
+   ePIII <- function(x,order){
+      # compute (centered) empirical centered moments of the data
+      if(order==1) return(mean(x))
+      if(order==2) return(var(x))
+      if(order==3) return(e1071::skewness(log10(cow$Min), type=2))
+   }
    
-   dPIII<<-function(x, shape, location, scale) PearsonDS::dpearsonIII(x, shape, location, scale, log=FALSE)
-   pPIII<<-function(q, shape, location, scale) PearsonDS::ppearsonIII(q, shape, location, scale, lower.tail = TRUE, log.p = FALSE)
-   qPIII<<-function(p, shape, location, scale) PearsonDS::qpearsonIII(p, shape, location, scale, lower.tail = TRUE, log.p = FALSE)
-
-   myfit.distr <- fit.distr[1]
-   fit <- dlply(Q.stat, "Measure", function(x, distr){
-       start=NULL
-       # get starting values
-       if(distr=='PIII'){
-         #http://stackoverflow.com/questions/15003362/problems-fitting-log-pearson-iii-in-r
-         # Note that the above forgot to mulitple the scale by the sign of skewness .
+   fit <- dlply(Q.stat, "Measure", function(x, distr, fit.method){
+      start=NULL
+      if(distr=='PIII'){x$value <- log10(x$value)} # PIII is fit to log-of values
+      # get starting values
+      if(distr=='PIII'){
+         # Note that the above forgot to mulitply the scale by the sign of skewness .
          # Refer to Page 24 of the Bulletin 17c
          m <- mean(x$value)
          v <- var (x$value)
          s <- sd  (x$value)
-         g <- e1071::skewness(x$value, type=1)
+         g <- e1071::skewness(x$value, type=2)
 
+         # This can be corrected, but HEC Bulletin 17b does not do these corrections
          # Correct the sample skew for bias using the recommendation of 
          # Bobee, B. and R. Robitaille (1977). "The use of the Pearson Type 3 and Log Pearson Type 3 distributions revisited." 
          # Water Resources Reseach 13(2): 427-443, as used by Kite
-
-         n <- length(x$value)
-         g <- g*(sqrt(n*(n-1))/(n-2))*(1+8.5/n)
+         #n <- length(x$value)
+         #g <- g*(sqrt(n*(n-1))/(n-2))*(1+8.5/n)
          # We will use method of moment estimates as starting values for the MLE search
 
          my.shape <- (2/g)^2
          my.scale <- sqrt(v)/sqrt(my.shape)*sign(g)
          my.location <- m-my.scale*my.shape
 
-         start=list(location=my.location, shape=my.shape, scale=my.scale)
-       }
-      fitdistrplus::fitdist(x$value, distr, start=start, control=list(maxit=1000)) # , trace=1, REPORT=1))
-   }, distr=myfit.distr)
+         start=list(shape=my.shape, location=my.location, scale=my.scale)
+      }
+      if(debug)browser()
+      if(fit.method=="MLE") {fit <- fitdistrplus::fitdist(x$value, distr, start=start, control=list(maxit=1000)) }# , trace=1, REPORT=1))
+      if(fit.method=="MOM") {fit <- fitdistrplus::fitdist(x$value, distr, start=start,
+                                    method="mme", order=1:3, memp=ePIII, control=list(maxit=1000))
+      } # fixed at MOM estimates
+   }, distr=fit.distr[1], fit.method=fit.distr.method[1])
   
    # extracted the fitted quantiles from the fitted distribution
    fitted.quantiles <- ldply(names(fit), function (measure, prob,fit, use.max, use.log){
@@ -228,8 +235,9 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
       if( use.max) prob <- 1-prob
       quant <- quantile(x, prob=prob)
       quant <- unlist(quant$quantiles)
+      if(x$distname=='PIII')quant <- 10^quant # PIII was fit to the log-values
       if(  use.max) prob <- 1-prob  # reset for adding to data frame
-      if(  use.log) quant <- exp(quant) # transforma back to original scale
+      if(  use.log) quant <- 10^quant # transforma back to original scale
       res <- data.frame(Measure=measure, distr=x$distname, prob=prob, quantile=quant ,stringsAsFactors=FALSE)
       rownames(res) <- NULL
       res

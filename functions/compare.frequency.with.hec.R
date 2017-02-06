@@ -12,7 +12,7 @@ compare.frequency.with.hec <- function(Q.file.stat,
                                        HEC.filename,
                                        write.comparison.csv=FALSE,
                                        write.plots.pdf=FALSE,
-                                       report.dir='.'){
+                                       report.dir='.', debug=FALSE){
 #  Input
 #    Q.file.stat   - file name of csv file containing the frequency statistics
 #    Q.file.plotdata     file name of csv file containing the plotting information
@@ -83,7 +83,7 @@ compare.frequency.with.hec <- function(Q.file.stat,
 
    # which statistics are in E.stat but not in Q.stat
    stats.in.HEC.not.in.Q <- unique(HEC.stat$Measure)[ !unique(HEC.stat$Measure) %in% unique(Q.stat$Measure)]
-
+   if(debug)browser()
    # Now to compare the results from Q.stat to those in E.stat
    diff.stat <- merge(Q.stat, HEC.stat, by=c("Year","Measure"), suffixes=c(".Q",".HEC"))
    diff.stat$diff <-  diff.stat[,"value.Q"] - diff.stat[,"value.HEC"]  
@@ -165,6 +165,11 @@ compare.frequency.with.hec <- function(Q.file.stat,
 
 
 # read a HEC-SSP VFA report - groan - in such a bad format
+# Note that there may be one or two sections of output for each statistic
+#    Preliminary output if outliers are detected
+#      followed by final report excluding outliers  - we want the prelimnary report
+#    Just a final report if there are no outliers.
+#    So the rule of thumb is choose only the first statisic if there are two.
 read.hec.vfa.rpt <- function(file){
   # read the hec vfa report file to extract the statistics computed
   hec <- readLines(file)
@@ -192,6 +197,7 @@ read.hec.vfa.rpt <- function(file){
    })
    data.frame(Measure=measure, extract.text, stringsAsFactors=FALSE)
   },hec=hec)
+  extract.stat <- extract.stat[ ! duplicated(extract.stat[,c("Year","Measure")]),]
   
   extract.pp <- ldply(where.pp, function(x, hec){
    # extract the plotting positions for each group of statistics starting a line x in the hec report file
@@ -212,6 +218,7 @@ read.hec.vfa.rpt <- function(file){
    })
    data.frame(Measure=measure, extract.text, stringsAsFactors=FALSE)
   },hec=hec)
+  extract.pp <- extract.pp[ ! duplicated(extract.pp[,c("Year","Measure")]),] # get first record
   
   where.quant <- grep("<< Frequency Curve >>", hec, fixed=TRUE)
   extract.quant <- ldply(where.quant, function(x, hec){
@@ -232,6 +239,7 @@ read.hec.vfa.rpt <- function(file){
    }, Measure=measure)
    extract.text
   },hec=hec)
+  extract.quant <- extract.quant[ ! duplicated(extract.quant[,c("Year","Measure")]),] # get first record
 
   rbind(extract.stat, extract.pp, extract.quant)
 }

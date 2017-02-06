@@ -5,7 +5,7 @@ library(plyr)
 
 # Get the directories
 dir.list <- dir()
-dir.list <- dir.list[ (grepl("^08", dir.list) | grepl("^10", dir.list)) & !(grepl("CARN",dir.list))]
+dir.list <- dir.list[ (grepl("^08", dir.list) | grepl("^10", dir.list)) ]
 dir.list
 
 savewd <- getwd()
