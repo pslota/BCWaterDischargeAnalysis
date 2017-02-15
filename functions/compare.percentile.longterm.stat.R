@@ -8,6 +8,7 @@ compare.percentile.longterm.stat <- function(Station.Code,
                                              write.comparison.csv=FALSE,
                                              write.plots.pdf=FALSE,
                                              report.dir=".",
+                                             csv.nddigits=3,  # number of decimal digits to write out
                                              debug=FALSE){
 #  Input
 #    Station.Code - prefix for file names
@@ -26,7 +27,7 @@ compare.percentile.longterm.stat <- function(Station.Code,
 #############################################################
 #  Some basic error checking on the input parameters
 #
-   Version <- "2017-02-01"
+   Version <- "2017-02-15"
    if( !is.character(Station.Code))  {stop("Station Code must be a character string.")}
    if(length(Station.Code)>1)        {stop("Station.Code cannot have length > 1")}
    if( !is.character(Q.filename))    {stop("Q.filename  muste be a character string.")}
@@ -40,6 +41,8 @@ compare.percentile.longterm.stat <- function(Station.Code,
    if(! is.logical(write.plots.pdf))      {stop("write.plots.pdf should be logical")}
    if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exits")}
 
+   if(!is.numeric(csv.nddigits)){ stop("csv.nddigits must be numeric")}
+   csv.nddigits <- round(csv.nddigits)[1]
    #  Load the packages used 
    library(ggplot2)
    library(openxlsx)
@@ -54,7 +57,7 @@ compare.percentile.longterm.stat <- function(Station.Code,
    E.stat.in <- E.stat.in[, (ncol(E.stat.in)-12):ncol(E.stat.in)]  # CG1: CT5 but readWorkBook skips blank columns in the first 5 rows
 
    # Transpose the Excel sheet 
-   E.stat.in[,1] <- paste("P",formatC(as.numeric(E.stat.in[,1]), width=2, format="d", flag="0"), sep="")
+   E.stat.in[,1] <- paste("P",formatC(100-as.numeric(E.stat.in[,1]), width=2, format="d", flag="0"), sep="")
    E.stat <-as.data.frame(t(E.stat.in[,-1]), stringsAsFactors=FALSE)
    names(E.stat) <- E.stat.in[,1]
    E.stat$Month <- row.names(E.stat)
@@ -71,7 +74,8 @@ compare.percentile.longterm.stat <- function(Station.Code,
    stats.in.E.not.in.Q <- names(E.stat)[ !names(E.stat) %in% names(Q.stat)]
    #browser()
    # Now to compare the results from Q.stat to those in E.stat
-   diff.stat <- ldply( names(Q.stat)[ names(Q.stat) != "Month"], function (stat, Q.stat, E.stat){
+   diff.stat <- ldply( names(Q.stat)[ names(Q.stat) != "Month" & !(names(Q.stat) %in% stats.in.Q.not.in.E)], 
+                      function (stat, Q.stat, E.stat){
       # stat has the name of the column to compare
       Q.values <- Q.stat[, c("Month",stat)]
       E.values <- E.stat[, c("Month",stat)]

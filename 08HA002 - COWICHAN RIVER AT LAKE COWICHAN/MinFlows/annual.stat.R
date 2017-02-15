@@ -264,7 +264,7 @@ l_ply(compare.percentile.longterm$plot.list, function(x){plot(x)})
 
 vfa.analysis <- compute.volume.frequency.analysis( Station.Code=Station.Code, flow, 
                       start.year=start.year, end.year=end.year, use.water.year=FALSE, 
-                      roll.avg.days=c(1,3,7,15),
+                      roll.avg.days=c(1,3,7,15,30,60),
                       use.log=FALSE,
                       use.max=FALSE,
                       fit.distr="PIII",
@@ -273,6 +273,10 @@ vfa.analysis <- compute.volume.frequency.analysis( Station.Code=Station.Code, fl
                       write.quantiles.csv=TRUE,
                       report.dir=report.dir)
 names(vfa.analysis)
+
+
+vfa.analysis$freqplot
+
 
 vfa.analysis$file.stat.csv
 

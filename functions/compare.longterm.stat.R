@@ -70,7 +70,8 @@ compare.longterm.stat <- function(Station.Code,
    stats.in.E.not.in.Q <- names(E.stat)[ !names(E.stat) %in% names(Q.stat)]
 
    # Now to compare the results from Q.stat to those in E.stat
-   diff.stat <- ldply( names(Q.stat)[ names(Q.stat) != "Month"], function (stat, Q.stat, E.stat){
+   diff.stat <- ldply( names(Q.stat)[ names(Q.stat) != "Month" & !(names(Q.stat) %in% stats.in.Q.not.in.E)], 
+                                    function (stat, Q.stat, E.stat){
       # stat has the name of the column to compare
       Q.values <- Q.stat[, c("Month",stat)]
       E.values <- data.frame(Month=E.stat$Month, stat=as.numeric(as.vector(E.stat[, stat])),stringsAsFactors=FALSE)

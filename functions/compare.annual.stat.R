@@ -24,7 +24,7 @@ compare.annual.stat <- function(Station.Code, Q.filename, E.filename, SW_transla
 #############################################################
 #  Some basic error checking on the input parameters
 #
-   Version <- '2017-02-01'
+   Version <- '2017-02-15'
    if( !is.character(Station.Code))  {stop("Station Code must be a character string.")}
    if(length(Station.Code)>1)        {stop("Station.Code cannot have length > 1")}
    if( !is.character(Q.filename))    {stop("Q.filename  muste be a character string.")}
@@ -77,7 +77,8 @@ compare.annual.stat <- function(Station.Code, Q.filename, E.filename, SW_transla
 
    # Now to compare the results from Q.stat to those in E.stat
    # don't forget that all variable names are now lower case
-   diff.stat <- plyr::ldply( names(Q.stat)[ names(Q.stat) != "year"], function (stat, Q.stat, E.stat){
+   diff.stat <- plyr::ldply( names(Q.stat)[ names(Q.stat) != "year" & !(names(Q.stat) %in% stats.in.Q.not.in.E)],
+                             function (stat, Q.stat, E.stat){
      require(plyr) # for rename
      # stat has the name of the column to compare
      Q.values <- Q.stat[, c("year",stat)]
@@ -128,8 +129,8 @@ compare.annual.stat <- function(Station.Code, Q.filename, E.filename, SW_transla
   plot.mean  <- makediffplot(plotdata[ set.mean,]) 
 
   set.per    <- grepl("P50", plotdata$stat, ignore.case=TRUE) | 
-                grepl("P80", plotdata$stat, ignore.case=TRUE) | 
-                grepl("P90", plotdata$stat, ignore.case=TRUE) 
+                grepl("P20", plotdata$stat, ignore.case=TRUE) | 
+                grepl("P10", plotdata$stat, ignore.case=TRUE) 
   plot.per   <- makediffplot(plotdata[ set.per,]) 
 
   set.wyear  <- grepl("Oct_to_Sept", plotdata$stat, ignore.case=TRUE) | 

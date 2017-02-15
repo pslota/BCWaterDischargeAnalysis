@@ -11,6 +11,7 @@ compute.Q.stat.longterm <- function(
                           write.stat.csv=FALSE,         # write out statistics 
                           write.stat.trans.csv=FALSE,   # write out statistics in transposed format
                           report.dir='.',
+                          csv.nddigits=3,               # decimal digit for csv files.
                           na.rm=list(na.rm.global=TRUE)){
 #  Input
 #    Station.Code - character string indentifying the station with the flow
@@ -58,6 +59,9 @@ compute.Q.stat.longterm <- function(
    if( !is.logical(write.stat.csv))  {stop("write.stat.csv must be logical (TRUE/FALSE")}
    if( !is.logical(write.stat.trans.csv)){stop("write.stat.trans.csv must be logical (TRUE/FALSE")}
    if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exist")}
+   
+   if(!is.numeric(csv.nddigits)){ stop("csv.nddigits must be numeric")}
+   csv.nddigits <- round(csv.nddigits)[1]
 
    if( !is.list(na.rm))              {stop("na.rm is not a list") }
    if(! is.logical(unlist(na.rm))){   stop("na.rm is list of logical (TRUE/FALSE) values only.")}
@@ -89,7 +93,9 @@ compute.Q.stat.longterm <- function(
    file.stat.csv <- NA
    if(write.stat.csv){
       file.stat.csv <-file.path(report.dir, paste(Station.Code,"-longterm-summary-stat.csv", sep="")) 
-      write.csv(Q.longterm, file=file.stat.csv, row.names=FALSE)
+      temp <- Q.longterm
+      temp <- round(temp, csv.nddigits)  # round the output
+      write.csv(temp, file=file.stat.csv, row.names=FALSE)
    }
    
 #  Write out thesummary table in transposed format
@@ -99,7 +105,9 @@ compute.Q.stat.longterm <- function(
    file.stat.trans.csv <- NA
    if(write.stat.trans.csv){
      file.stat.trans.csv <-file.path(report.dir,paste(Station.Code,"-longterm-summary-stat-trans.csv", sep=""))
-     write.csv(Q.longterm.trans, file=file.stat.trans.csv, row.names=TRUE)
+     temp <- Q.longterm.trans
+     temp <- round(temp, csv.nddigits) # round the output
+     write.csv(temp, file=file.stat.trans.csv, row.names=TRUE)
    }
    return(list(Q.stat.longterm=Q.longterm,
                Q.stat.longterm.trans=Q.longterm.trans,

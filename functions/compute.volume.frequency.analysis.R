@@ -4,7 +4,7 @@
 
 compute.volume.frequency.analysis <- function(Station.Code, flow, 
                          start.year=9999, end.year=0000, use.water.year=FALSE, 
-                         roll.avg.days=c(1,3,7,30,60,90),
+                         roll.avg.days=c(1,3,7,15,30,60,90),
                          use.log=FALSE,
                          use.max=FALSE,
                          prob.plot.position=c("weibull","median","hazen"),
@@ -15,11 +15,12 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
                          na.rm=list(na.rm.global=TRUE),
                          write.stat.csv=FALSE, write.stat.trans.csv=FALSE,
                          write.plotdata.csv=FALSE,  # write out the plotting data
-                         write.quantiles.csv=FALSE, # write out the fitted quantiles
-                         write.quantiles.trans.csv=FALSE,
+                         write.quantiles.csv=TRUE, # write out the fitted quantiles
+                         write.quantiles.trans.csv=TRUE,
                          write.frequency.plot=TRUE,  # write out the frequency plot
                          write.frequency.plot.suffix=c("pdf","png"),
-                         report.dir='.', debug=FALSE
+                         report.dir='.', 
+                         csv.nddigits=3, debug=FALSE
                          )
   {
    Version <- '2017-02-01'
@@ -107,6 +108,9 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    if( !is.logical(write.frequency.plot)) {stop("write.frequency.plot must be logical (TRUE/FALSE)")}
    if( !write.frequency.plot.suffix[1] %in% c("pdf","png")){stop("write.frequency.plot.suffix must be pdf or png")}
    
+   if( !is.numeric(csv.nddigits)){      stop("csv.nddigits must be numeric")}
+   csv.nddigits = round(csv.nddigits)[1]
+   
    # merge the specified na.rm options with my options
    my.na.rm <- list(na.rm.global=TRUE)
    if( !all(names(na.rm) %in% names(my.na.rm))){stop("Illegal element in na.rm")}
@@ -173,22 +177,29 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
        x
    }, a=a, b=b, use.max=use.max)
    if(debug)browser()
-   freqplot <- ggplot2::ggplot(data=plotdata, aes(x=prob, y=value, group=Measure, color=Measure),environment=environment())+
+   # change the measure labels in the plot
+   plotdata2<- plotdata
+   plotdata2$Measure <- paste(formatC(as.numeric(substr(plotdata2$Measure,2,4)),width=3),"-day Avg",sep="")
+   freqplot <- ggplot2::ggplot(data=plotdata2, aes(x=prob, y=value, group=Measure, color=Measure),environment=environment())+
+      ggtitle(paste(Station.Code, " Volume Frequency Analysis"))+
       geom_point()+
       xlab("Probability")+
       scale_x_continuous(trans=probability_trans("norm", lower.tail=FALSE), 
                          breaks=prob.scale.points,
                          sec.axis=sec_axis(trans=~1/.,
+                                           name='Return Period',
                                            breaks=c(1.01,1.1,2,5,10,20,100,1000),
-                                           labels=function(x){ifelse(x<2,x,round(x,0))}))
+                                           labels=function(x){ifelse(x<2,x,round(x,0))}))+
+      theme(axis.title.x.top = element_text(size=8),
+            legend.title=element_blank(), legend.key.size=unit(.1,"in"))
       
    if(!use.max){ freqplot <- freqplot+theme(legend.justification=c(1,1), legend.position=c(1,1))}
    if( use.max){ freqplot <- freqplot+theme(legend.justification=c(1,0), legend.position=c(1,0))}
    if(!use.log){ freqplot <- freqplot + scale_y_log10(breaks=function(x){pretty(x)})}
-   if( use.log &  use.max ){freqplot <- freqplot + ylab("ln(Max Value)")}  # adjust the Y axis label
-   if( use.log & !use.max){freqplot <- freqplot + ylab("ln(Min Value)")}
-   if(!use.log &  use.max ){freqplot <- freqplot + ylab("Max Value")}  
-   if(!use.log & !use.max){freqplot <- freqplot + ylab("Min Value")}
+   if( use.log &  use.max ){freqplot <- freqplot + ylab("ln(Max Flow (cms))")}  # adjust the Y axis label
+   if( use.log & !use.max){freqplot <- freqplot + ylab("ln(Min Flow (cms))")}
+   if(!use.log &  use.max ){freqplot <- freqplot + ylab("Max Flow (cms)")}  
+   if(!use.log & !use.max){freqplot <- freqplot + ylab("Min Flow (cms)")}
 
    
    # fit the distribution to each measure
@@ -251,20 +262,25 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
     }, prob=fit.quantiles, fit=fit, use.max=use.max, use.log=use.log)
    if(debug)browser()
    # get the transposed version
-   fitted.quantiles.trans <- reshape2::dcast(fitted.quantiles, distr+prob~Measure , value.var="quantile")
+   fitted.quantiles$Return <- 1/fitted.quantiles$prob
+   fitted.quantiles.trans <- reshape2::dcast(fitted.quantiles, distr+prob+Return~Measure , value.var="quantile")
    
    file.stat.csv <- NA
    if(write.stat.csv){
      # Write out the summary table for comparison to HEC spreadsheet
      file.stat.csv <- file.path(report.dir,paste(Station.Code,"-annual-vfa-stat.csv", sep=""))
-     write.csv(Q.stat,file=file.stat.csv, row.names=FALSE)
+     temp <- Q.stat
+     temp$value <- round(temp$value, csv.nddigits)
+     write.csv(temp,file=file.stat.csv, row.names=FALSE)
    }
    
    file.stat.trans.csv <- NA
    if(write.stat.trans.csv){
      # Write out the  transposed summary table for comparison to HEC spreadsheet
      file.stat.trans.csv <- file.path(report.dir, paste(Station.Code,"-annual-vfa-stat-trans.csv", sep=""))
-     write.csv(Q.stat.trans,file=file.stat.trans.csv, row.names=FALSE)
+     temp <- Q.stat.trans
+     temp <- round(temp, csv.nddigits)
+     write.csv(temp,file=file.stat.trans.csv, row.names=FALSE)
    }
    
    file.plotdata.csv <- NA
@@ -278,19 +294,23 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    if(write.quantiles.csv){
      # Write out the summary table for comparison to HEC spreadsheet
      file.quantile.csv<- file.path(report.dir, paste(Station.Code,"-annual-vfa-quantiles.csv", sep=""))
-     write.csv(fitted.quantiles,file=file.quantile.csv, row.names=FALSE)
+     temp <- fitted.quantiles
+     temp$quantile <- round(temp$quantile, csv.nddigits)
+     write.csv(temp,file=file.quantile.csv, row.names=FALSE)
    }
    
    file.quantile.trans.csv <- NA
    if(write.quantiles.trans.csv){
      # Write out the  transposed summary table for comparison to HEC spreadsheet
      file.quantile.trans.csv <- file.path(report.dir, paste(Station.Code,"-annual-vfa-quantiles-trans.csv", sep=""))
-     write.csv(fitted.quantiles.trans,file=file.quantile.trans.csv, row.names=FALSE)
+     temp <- fitted.quantiles.trans
+     temp[,3:ncol(temp)]<- round(temp[,3:ncol(temp)], csv.nddigits)
+     write.csv(temp,file=file.quantile.trans.csv, row.names=FALSE)
    }
    
    file.frequency.plot <- NA
    if(write.frequency.plot){
-      file.frequency.plot <- file.path(report.dir, paste(Station.Code,"-frequency-plot.",write.frequency.plot.suffix[1],sep=""))
+      file.frequency.plot <- file.path(report.dir, paste(Station.Code,"-annual-vfa-frequency-plot.",write.frequency.plot.suffix[1],sep=""))
       ggsave(plot=freqplot, file=file.frequency.plot, h=4, w=6, units="in", dpi=300)
    }
    

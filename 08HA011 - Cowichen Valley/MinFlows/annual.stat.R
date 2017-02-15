@@ -125,7 +125,7 @@ stat.annual <- compute.Q.stat.annual(Station.code=Station.Code,
                           write.stat.trans.csv=TRUE,  # write out statistics in transposed format
                           plot.stat.trend=TRUE,
                           report.dir=report.dir,
-                          na.rm=na.rm)
+                          na.rm=na.rm, debug=FALSE)
 
 
 names(stat.annual)
@@ -138,7 +138,7 @@ head(stat.annual$dates.missing.flows)
 
 stat.annual$file.stat.csv
 stat.annual$file.stat.trans.csv
-stat.annual$file.plot.trend.pdf
+stat.annual$file.stat.trend.pdf
 
 # Compare the annual statistics with those in the Excel spreasheet
 compare.annual <- compare.annual.stat(Station.Code,
@@ -155,7 +155,7 @@ compare.annual$stats.in.Q.not.in.E
 compare.annual$stats.in.E.not.in.Q
 
 head(compare.annual$diff.stat)
-compare.annual$diff.stat[ grepl("cumq", compare.annual$diff.stat$stat, ignore.case=TRUE),]
+compare.annual$diff.stat[ grepl("CY_YIELD", compare.annual$diff.stat$stat, ignore.case=TRUE),]
 
 
 names(compare.annual$plot.list)
@@ -219,7 +219,7 @@ percentile.longterm <- compute.Q.percentile.longterm(Station.code=Station.Code,
                           end.year=end.year,
                           write.stat.csv=TRUE,        # write out statistics 
                           write.stat.trans.csv=TRUE,  # write out statistics in transposed format
-                          report.dir=report.dir)
+                          report.dir=report.dir, debug=FALSE)
 
 names(percentile.longterm)
 

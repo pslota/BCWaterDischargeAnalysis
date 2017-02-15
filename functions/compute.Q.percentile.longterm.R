@@ -8,10 +8,13 @@ compute.Q.percentile.longterm <- function(
                           flow, 
                           start.year=9999, 
                           end.year=0,
+                          per.list=c(1,2,seq(5,95,5),98,99),  # these the standard percentiles
                           write.stat.csv=FALSE,        # write out statistics 
                           write.stat.trans.csv=FALSE,  # write out statistics in transposed format
                           report.dir=".",
-                          na.rm=list(na.rm.global=TRUE)
+                          csv.nddigits=3,              # number of decimal digits for csv file
+                          na.rm=list(na.rm.global=TRUE),
+                          debug=FALSE
                           ){
 #  Input
 #    Station.Code - character string indentifying the station with the flow
@@ -38,7 +41,7 @@ compute.Q.percentile.longterm <- function(
 #############################################################
 #  Some basic error checking on the input parameters
 #
-   Version <- '2017-02-01'
+   Version <- '2017-02-15'
    library(plyr)        # split-apply-combine 
    library(reshape2)    # reorganize data (melting and casting)
 
@@ -56,9 +59,16 @@ compute.Q.percentile.longterm <- function(
    if(! (is.numeric(start.year) & is.numeric(end.year))){
                                       stop("start.year and end.year not numberic.")}
    if(! (start.year <= end.year))    {stop("start.year > end.year")}
+   
+   if(!is.numeric(per.list))         {stop("per.list must be numeric")}
+   if(!all(per.list <100 & per.list >0)){stop('per.list must be between 0 to 100 (exclusive)')}
+   
    if( !is.logical(write.stat.csv))  {stop("write.stat.csv must be logical (TRUE/FALSE")}
    if( !is.logical(write.stat.trans.csv)){stop("write.stat.trans.csv must be logical (TRUE/FALSE")}
    if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exist")}
+   
+   if( !is.numeric(csv.nddigits)){stop("csv.nddigits must be numeric")}
+   csv.nddigits <- round(csv.nddigits)[1]
 
    if( !is.list(na.rm))              {stop("na.rm is not a list") }
    if(! is.logical(unlist(na.rm))){   stop("na.rm is list of logical (TRUE/FALSE) values only.")}
@@ -71,29 +81,45 @@ compute.Q.percentile.longterm <- function(
    flow$Year  <- as.numeric(format(flow$Date, "%Y"))
    flow$Month <- as.numeric(format(flow$Date, '%m'))
 
-   Q.per.longterm <- plyr::ddply(flow[flow$Year >= start.year & flow$Year <=end.year,], "Month", function(fy){
-        per.list <- c(1,2,5,seq(10,95,5),99)  # these the percentiles from the TOP
-        per <- matrix(quantile(fy$Q, prob=1-per.list/100,na.rm=na.rm$na.rm.global), nrow=1)
+   Q.per.month <- plyr::ddply(flow[flow$Year >= start.year & flow$Year <=end.year,], "Month", function(fy){
+        per <- matrix(quantile(fy$Q, prob=per.list/100,na.rm=na.rm$na.rm.global), nrow=1)
         colnames(per) <- paste("P", formatC(per.list, width=2, format="d", flag="0"), sep="")
         data.frame(per, stringsAsFactors=FALSE)
    })
-   Q.per.longterm$Month <- month.abb[Q.per.longterm$Month]
+   Q.per.month$Month <- month.abb[Q.per.month$Month]
+   
+   if(debug)browser()
+   # compute the percentiles for the entire period of record
+   flow$Month <- 99
+   Q.per.all   <-plyr::ddply(flow[flow$Year >= start.year & flow$Year <=end.year,], "Month",  function(fy){
+        per <- matrix(quantile(fy$Q, prob=per.list/100,na.rm=na.rm$na.rm.global), nrow=1)
+        colnames(per) <- paste("P", formatC(per.list, width=2, format="d", flag="0"), sep="")
+        data.frame(per, stringsAsFactors=FALSE)
+   })
+   Q.per.all$Month <- "All years"
+
+   Q.per.longterm <- rbind(Q.per.month, Q.per.all)
+   
 
 #  Write out the summary table for comparison to excel spreadsheet
    file.stat.csv <- NA
    if(write.stat.csv){
       file.stat.csv <- file.path(report.dir,paste(Station.Code,"-longterm-percentile-stat.csv", sep=""))
-      write.csv(Q.per.longterm, file=file.stat.csv, row.names=FALSE)
+      temp <- Q.per.longterm
+      temp[, 2:ncol(Q.per.longterm)] <- round(temp[,2:ncol(Q.per.longterm)], csv.nddigits)
+      write.csv(temp, file=file.stat.csv, row.names=FALSE)
    }
    
 #  Write out thesummary table in transposed format
    Month <- Q.per.longterm[,"Month"]
    Q.per.longterm.trans <- t(Q.per.longterm[, !grepl('^Month', names(Q.per.longterm))])
-   colnames(Q.per.longterm.trans) <-  toupper(month.abb[1:12])
+   colnames(Q.per.longterm.trans) <-  c(toupper(month.abb[1:12]),"All data")
    file.stat.trans.csv<- NA
    if(write.stat.trans.csv){
      file.stat.trans.csv <-file.path(report.dir, paste(Station.Code,"-longterm-percentile-stat-trans.csv", sep=""))
-     write.csv(Q.per.longterm.trans, file=file.stat.trans.csv, row.names=TRUE)
+     temp<- Q.per.longterm.trans
+     temp <- round(temp, csv.nddigits)
+     write.csv(temp, file=file.stat.trans.csv, row.names=TRUE)
    }
    
    return(list(Q.percentile.stat=Q.per.longterm,

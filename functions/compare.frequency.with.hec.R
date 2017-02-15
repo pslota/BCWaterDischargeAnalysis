@@ -70,9 +70,10 @@ compare.frequency.with.hec <- function(Station.Code,Q.file.stat,
    Q.quantile$quantile <- NULL
    Q.quantile$distr <- NULL
    
+   if(debug)browser()
    Q.stat <- rbind(Q.stat, 
                    Q.pp[,c("Year","Measure","value")],
-                   Q.quantile)  # put both together to merge later
+                   Q.quantile[,c("Year","Measure","value")])  # put both together to merge later
    
    # Get the data from the Excel spreadsheet
    HEC.stat <- read.hec.vfa.rpt(HEC.filename)
