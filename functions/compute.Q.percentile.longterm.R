@@ -80,22 +80,25 @@ compute.Q.percentile.longterm <- function(
 #  create the year (annual ) and month variables
    flow$Year  <- as.numeric(format(flow$Date, "%Y"))
    flow$Month <- as.numeric(format(flow$Date, '%m'))
-
-   Q.per.month <- plyr::ddply(flow[flow$Year >= start.year & flow$Year <=end.year,], "Month", function(fy){
-        per <- matrix(quantile(fy$Q, prob=per.list/100,na.rm=na.rm$na.rm.global), nrow=1)
-        colnames(per) <- paste("P", formatC(per.list, width=2, format="d", flag="0"), sep="")
-        data.frame(per, stringsAsFactors=FALSE)
-   })
-   Q.per.month$Month <- month.abb[Q.per.month$Month]
-   
    if(debug)browser()
+   Q.per.month <- plyr::ddply(flow[flow$Year >= start.year & flow$Year <=end.year,], "Month", function(fy, na.rm){
+         per <- try(quantile(fy$Q, prob=per.list/100,na.rm=na.rm$na.rm.global), silent=TRUE)
+         if(class(per) == "try-error") per <- rep(NA, length(per.list))
+         per <- matrix(per, nrow=1)
+         colnames(per) <- paste("P", formatC(per.list, width=2, format="d", flag="0"), sep="")
+        data.frame(per, stringsAsFactors=FALSE)
+   }, na.rm=na.rm)
+   Q.per.month$Month <- month.abb[Q.per.month$Month]
+
    # compute the percentiles for the entire period of record
    flow$Month <- 99
-   Q.per.all   <-plyr::ddply(flow[flow$Year >= start.year & flow$Year <=end.year,], "Month",  function(fy){
-        per <- matrix(quantile(fy$Q, prob=per.list/100,na.rm=na.rm$na.rm.global), nrow=1)
+   Q.per.all   <-plyr::ddply(flow[flow$Year >= start.year & flow$Year <=end.year,], "Month",  function(fy, na.rm){
+        per <- try(quantile(fy$Q, prob=per.list/100,na.rm=na.rm$na.rm.global), silent=TRUE)
+        if(class(per) == "try-error") per <- rep(NA, length(per.list))
+        per <- matrix(per, nrow=1)
         colnames(per) <- paste("P", formatC(per.list, width=2, format="d", flag="0"), sep="")
         data.frame(per, stringsAsFactors=FALSE)
-   })
+   }, na.rm=na.rm)
    Q.per.all$Month <- "All years"
 
    Q.per.longterm <- rbind(Q.per.month, Q.per.all)

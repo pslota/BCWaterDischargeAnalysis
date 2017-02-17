@@ -152,18 +152,22 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
    CY_MIN_01Day_SW    = min(fy$Q, na.rm=na.rm$na.rm.global)	      # CY Min Daily Q 
    CY_MINDOY_01Day_SW = as.numeric(format( fy$Date[which.min( fy$Q)], "%j"))        # Date of CY Min Daily Q
    if(length(CY_MINDOY_01Day_SW)==0) CY_MINDOY_01Day_SW <- NA
+   if(is.na(CY_MIN_01Day_SW)) CY_MINDOY_01Day_SW = NA                       # no date of min if missing
 
    CY_MIN_03Day_SW	   = min(fy$Q.03DAvg, na.rm=na.rm$na.rm.global) # Min CY Rolling 3 day avg 
    CY_MINDOY_03Day_SW = as.numeric(format( fy$Date[which.min( fy$Q.03DAvg)], "%j")) # Date of Min CY Rolling 3 day avg
    if(length(CY_MINDOY_03Day_SW)==0) CY_MINDOY_03Day_SW <- NA
+   if(is.na(CY_MIN_03Day_SW)) CY_MINDOY_03Day_SW = NA                       # no date of min if missing
 
    CY_MIN_07Day_SW	   = min(fy$Q.07DAvg, na.rm=na.rm$na.rm.global) # Min CY Rolling 7 day avg 
    CY_MINDOY_07Day_SW = as.numeric(format( fy$Date[which.min( fy$Q.07DAvg)], "%j")) # Date of Min CY Rolling 7 day avg
    if(length(CY_MINDOY_07Day_SW)==0) CY_MINDOY_07Day_SW <- NA
+   if(is.na(CY_MIN_07Day_SW)) CY_MINDOY_07Day_SW = NA                       # no date of min if missing
 
    CY_MIN_30Day_SW	 = min(fy$Q.30DAvg, na.rm=na.rm$na.rm.global) # Min CY Rolling 30 day avg 
    CY_MINDOY_30Day_SW= as.numeric(format( fy$Date[which.min( fy$Q.30DAvg)], "%j")) # Date of Min CY Rolling 30 day avg
    if(length(CY_MINDOY_30Day_SW)==0) CY_MINDOY_30Day_SW <- NA
+   if(is.na(CY_MIN_30Day_SW)) CY_MINDOY_30Day_SW = NA                       # no date of min if missing
 
    CY_MIN_DAILY_SW   = min (fy$Q, na.rm=na.rm$na.rm.global)	    # CY Min Daily Q 	CY Min Daily Q
    CY_MAX_DAILY_SW	 = max (fy$Q, na.rm=na.rm$na.rm.global)      # CY Max Daily Q
@@ -293,20 +297,24 @@ compute.Q.stat.annual <- function(Station.code='XXXXX',
 Q.stat.wy <- plyr::ddply(flow[ flow$WYear >= start.year,], "WYear", function(fy, Station.Area, na.rm){
    # process each waters year's flow values (fy)
    WY_MIN_01Day_SW    = min(fy$Q, na.rm=na.rm$na.rm.global)	                # WY Min Daily Q 
-   WY_MINDOY_01Day_SW = as.numeric(fy$Date[which.min( fy$Q)]-fy$Date[1]+1)    # Date of WY Min Daily Q
+   WY_MINDOY_01Day_SW = as.numeric(fy$Date[which.min( fy$Q)]-fy$Date[1]+1)  # Date of WY Min Daily Q
+   if(is.na(WY_MIN_01Day_SW)) WY_MINDOY_01Day_SW = NA                       # no date of min if missing
    if(length(WY_MINDOY_01Day_SW)==0) WY_MINDOY_01Day_SW <- NA
 
    WY_MIN_03Day_SW	   = min(fy$Q.03DAvg, na.rm=na.rm$na.rm.global)                  # Min WY Rolling 3 day avg 
    WY_MINDOY_03Day_SW =  as.numeric(fy$Date[which.min( fy$Q.03DAvg)] - fy$Date[1]+1) # Date of Min WY Rolling 3 day avg
    if(length(WY_MINDOY_03Day_SW)==0) WY_MINDOY_03Day_SW <- NA
+   if(is.na(WY_MIN_03Day_SW)) WY_MINDOY_03Day_SW = NA                       # no date of min if missing
 
    WY_MIN_07Day_SW	   = min(fy$Q.07DAvg, na.rm=na.rm$na.rm.global)                   # Min WY Rolling 7 day avg 
    WY_MINDOY_07Day_SW = as.numeric(fy$Date[which.min( fy$Q.07DAvg)] - fy$Date[1]+1)   # Date of Min WY Rolling 7 day avg
    if(length(WY_MINDOY_07Day_SW)==0) WY_MINDOY_07Day_SW <- NA
+   if(is.na(WY_MIN_07Day_SW)) WY_MINDOY_07Day_SW = NA                       # no date of min if missing
 
    WY_MIN_30Day_SW	 = min(fy$Q.30DAvg, na.rm=na.rm$na.rm.global)                     # Min WY Rolling 30 day avg 
    WY_MINDOY_30Day_SW= as.numeric(fy$Date[which.min( fy$Q.30DAvg)] - fy$Date[1]+1)    # Date of Min WY Rolling 30 day avg
    if(length(WY_MINDOY_30Day_SW)==0) WY_MINDOY_30Day_SW <- NA
+   if(is.na(WY_MIN_30Day_SW)) WY_MINDOY_30Day_SW = NA                       # no date of min if missing
 
    WY_MIN_DAILY_SW   = min (fy$Q, na.rm=na.rm$na.rm.global)	    # WY Min Daily Q 	WY Min Daily Q
    WY_MAX_DAILY_SW	 = max (fy$Q, na.rm=na.rm$na.rm.global)     # WY Max Daily Q

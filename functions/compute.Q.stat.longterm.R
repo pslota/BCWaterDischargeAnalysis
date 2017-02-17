@@ -74,11 +74,13 @@ compute.Q.stat.longterm <- function(
    flow$Year  <- as.numeric(format(flow$Date, "%Y"))
    flow$Month <- as.numeric(format(flow$Date, '%m'))
   
-   Q.month.longterm <- plyr::ddply(flow[flow$Year >= start.year & flow$Year<=end.year,], "Month", plyr::summarize,    # all missing values always excluded
-                          mean  = mean  (Q, na.rm=na.rm$na.rm.global),
-                          median= median(Q, na.rm=na.rm$na.rm.global),
-                          max   = max   (Q, na.rm=na.rm$na.rm.global),
-                          min   = min   (Q, na.rm=na.rm$na.rm.global))
+   Q.month.longterm <- plyr::ddply(flow[flow$Year >= start.year & flow$Year<=end.year,], "Month", function(x,na.rm){    # all missing values always excluded
+      mean  = mean  (x$Q, na.rm=na.rm$na.rm.global)
+      median= median(x$Q, na.rm=na.rm$na.rm.global)
+      max   = max   (x$Q, na.rm=na.rm$na.rm.global)
+      min   = min   (x$Q, na.rm=na.rm$na.rm.global)
+      data.frame(mean=mean, median=median, max=max, min=min)
+   }, na.rm=na.rm)
    Q.all.longterm <- plyr::summarize( flow[flow$Year >= start.year & flow$Year<=end.year,],
                           mean  = mean  (Q, na.rm=na.rm$na.rm.global),
                           median= median(Q, na.rm=na.rm$na.rm.global),

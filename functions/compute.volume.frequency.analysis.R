@@ -13,7 +13,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
                          fit.distr.method=ifelse(fit.distr=="PIII","MOM","MLE"),
                          fit.quantiles=c(.975, .99, .98, .95, .90, .80, .50, .20, .10, .05, .01),
                          na.rm=list(na.rm.global=TRUE),
-                         write.stat.csv=FALSE, write.stat.trans.csv=FALSE,
+                         write.stat.csv=TRUE, write.stat.trans.csv=TRUE,
                          write.plotdata.csv=FALSE,  # write out the plotting data
                          write.quantiles.csv=TRUE, # write out the fitted quantiles
                          write.quantiles.trans.csv=TRUE,
@@ -147,7 +147,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    # Compute the yearly min (unless max flag is set)
    Q.stat <- ddply(flow, c("Year","Measure"), function(x,use.max=FALSE, na.rm){
        # compute min or max of Q for the year-measure combination
-       value <- ifelse(use.max, max(x$Q,na.rm=na.rm$na.rm.global), min(x$Q,na.rm=TRUE) )
+       value <- ifelse(use.max, max(x$Q,na.rm=na.rm$na.rm.global), min(x$Q,na.rm=na.rm$na.rm.global) )
        data.frame(value=value)
    },use.max=use.max, na.rm=na.rm)
    if(nrow(Q.stat)==0){stop("Start.year and end.year eliminated ALL data values")}
