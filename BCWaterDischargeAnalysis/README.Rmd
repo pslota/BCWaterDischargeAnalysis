@@ -23,7 +23,7 @@ by Carl James Schwarz (cschwarz.stat.sfu.ca@gmail.com).
 
 ## Usage
 An example of the usage of this package is available
-in the [vignette](https://htmlpreview.github.com/?https://github.com/bcgov/water-discharge-analysis/master/inst/doc/example-analysis.html). In your R session, you can type `vignette("BCWaterDischargeAnalysis")` to see the vignette.
+in the [vignette](https://htmlpreview.github.com/?https://github.com/bcgov/water-discharge-analysis/master/vignettes/example-analysis.html). In your R session, you can type `vignette("BCWaterDischargeAnalysis")` to see the vignette.
 
 
 
@@ -31,13 +31,10 @@ in the [vignette](https://htmlpreview.github.com/?https://github.com/bcgov/water
 
 To install the latest version of BCWaterDischargeAnalysis:
 
+
 ```{r, eval = FALSE}
-# install the devtools package if it's not already installed
-# install.packages("devtools")
-library(devtools)
-install_github("bcgov/water-discharge-analysis/BCWaterDischargeAnalysis", build_vignettes = TRUE)
-# Using `build_vignettes = TRUE` will slow down the install, but is necessary if 
-# you want to read the vignette, which is recommended
+library(devtools)   # has the install_github() function
+install_github("bcgov/water-discharge-analysis")
 library(BCwater-discharge-analysis)
 ```
 
