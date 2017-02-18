@@ -21,12 +21,6 @@ This package was written for the B.C. Ministry of Environment
 by Carl James Schwarz (cschwarz.stat.sfu.ca@gmail.com).
 
 
-## Usage
-An example of the usage of this package is available
-in the [vignette](https://htmlpreview.github.com/?https://github.com/bcgov/water-discharge-analysis/master/vignettes/example-analysis.html). In your R session, you can type `vignette("BCWaterDischargeAnalysis")` to see the vignette.
-
-
-
 ### Installing the package.
 
 To install the latest version of BCWaterDischargeAnalysis:
@@ -39,6 +33,16 @@ install_github("bcgov/water-discharge-analysis/BCWaterDischargeAnalysis", build_
 # Using `build_vignettes = TRUE` will slow down the install, but is necessary if 
 # you want to read the vignette, which is recommended
 library(BCWaterDischargeAnalysis)
+```
+
+You can see the vignette names using
+```{r, eval=FALSE}
+vignette(package="BCWaterDischargeAnalysis")
+```
+
+You can read the vignette using:
+```{r, eval=FALSE}
+vignette("example-analysis", package="BCWaterDischargeAnalysis")
 ```
 
 
