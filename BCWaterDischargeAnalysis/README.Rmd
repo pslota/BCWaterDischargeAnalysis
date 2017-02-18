@@ -1,0 +1,87 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit the README.Rmd file -->
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+# Water Discharge Analysis
+
+This package was developed to help analyze stream discharge data. 
+It is an alternative to using the HEC package.
+
+This package was written for the B.C. Ministry of Environment
+by Carl James Schwarz (cschwarz.stat.sfu.ca@gmail.com).
+
+
+## Usage
+An example of the usage of this package is available
+in the [vignette](https://htmlpreview.github.com/?https://github.com/bcgov/wwater-discharge-analysis/master/inst/doc/example-analysis.html). In your R session, you can type `vignette("BCWaterDischargeAnalysis")` to see the vignette.
+
+
+
+### Installing the package.
+
+To install the latest version of BCWaterDischargeAnalysis:
+
+```{r, eval = FALSE}
+# install the devtools package if it's not already installed
+# install.packages("devtools")
+library(devtools)
+install_github("bcgov/water-discharge-analysis", build_vignettes = TRUE)
+# Using `build_vignettes = TRUE` will slow down the install, but is necessary if 
+# you want to read the vignette, which is recommended
+library(BCwater-discharge-analysis)
+```
+
+
+### Data
+Create a data frame (e.g. \code{df}) with two varibles:
+\describe{
+\item{Date}{The data of the reading in standard R date class format. 
+For example to convert a 4-digit year, numeric month, and numeric day of the
+month use \code{as.Date{paste(df$Year,'-',df$Month,'-',df$Day,sep="")}}.
+\item {Q}{The average daily flow as a numeric value.}
+}
+
+Missing values can be indicated by leaving out dates with missing
+discharge values, or by setting the value of \code{Q} to missing (\code{NA}).
+
+The treatment of missing values in the analysis is explained in more
+detail in the vignette.
+
+
+
+
+### Project Status
+This project is complete.
+
+### Getting Help or Reporting an Issue
+
+To report bugs/issues/feature requests, please file an [issue](https://github.com/bcgov/<repo-name>/issues/).
+
+### License
+
+    Copyright 2017 Province of British Columbia
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at 
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+
+

@@ -30,15 +30,16 @@ data(S08HA011)
 head( S08HA011[ as.numeric(format(S08HA011$Date, "%Y"))==1965,])
 ```
 
-**Notice that the flow dataframw MUST have two variables: Date, the day in standard R format, and
+**Notice that the flow dataframe MUST have two variables: Date, the day in standard R format, and
 Q - the daily discharge value.**
 
 Missing values can be entered in two ways. First, the date with the missing value
 of Q can be dropped from the data frame. Second, the value of Q can be set to missing (NA).
-Both methods can be used together.
+Both methods can be used together. An example of the impact of missing values occurs in the second half
+of this vignette.
 
 We now set the variables limiting the years for which the analysis should be done
-and setting up needed variables.
+and setting up other needed variables for the analysis.
 
 ```{r}
 Station.Code <- '08HA011'
@@ -116,6 +117,11 @@ This has many, many statistics some of which are shown below:
 ```{r}
 head(stat.annual$Q.stat.annual[, 1:10])
 ```
+Notice the defaut acton (see below) is to propogate missing values. Despite a complete data record starting
+in 1965, there was no data available for 1964-12-31 which implies that a three-day rolling average that
+includes 1964-12-31 cannot be computed which gives a missing values for the 3-day rolling average minimum
+flow for 1965. This also occurs for other rolling averages that include any 1964 data such as water year computation
+for the 1965 water year which started on 1964-10-01.
 
 These statistics can be then processed as you desire.
 
@@ -150,7 +156,8 @@ This has the long term summary statistics (mean, min, max, etc) by month some of
 ```{r}
 head(stat.longterm$Q.stat.longterm)
 ```
-
+Because these statistics are computed on the calendar year basis and there were no missing values
+in the period of record, there are no missing summary statistics (see below for more details).
 These statistics can be then processed as you desire.
 
 As well, the default arguments will also create several *.csv file with the summary statistics and
@@ -183,6 +190,8 @@ This has the long term summary statistics (mean, min, max, etc) by month some of
 ```{r}
 head(percentile.longterm$Q.percentile.stat)
 ```
+Because these statistics are computed on the calendar year basis and there were no missing values
+in the period of record, there are no missing summary statistics (see below for more details).
 
 These statistics can be then processed as you desire.
 
@@ -204,6 +213,8 @@ vfa.analysis <- compute.volume.frequency.analysis(
                       end.year       =end.year)
 
 ```
+Because these statistics are computed on the calendar year basis and there were no missing values
+in the period of record, there was no impact of missingness on the computations.
 
 This will create a list object with many elements:
 ```{r}
@@ -232,3 +243,209 @@ vfa.analysis$file.quantile.csv
 vfa.analysis$file.frequency.plot
 
 ```
+
+
+# Missing Values
+
+Accoding to the WSC, 
+> monthly or annual values are not calculated unless there is complete daily record. 
+> If the gauge went down and the daily record cannot be reasonable estimated,
+> then summaries at longer time scales (monthly, annual) are not computed.
+
+
+This is controlled in all of function using the **na.rm** argument (similar to many R functions such as mean etc), but usage is slightly different from the standard R usage to allow future versions of the software to have finer control on dealing with missing values.
+
+The treatment of missing values for all function is controlled through the **na.rm=list(na.rm.global=XXXXX)** argument. The current default actions are:
+
+Function | Default Action
+---------|-----------------
+compute.Q.stat.annual | na.rm=list(na.rm.global=FALSE)
+compute.Q.stat.longterm  | na.rm=list(na.rm.global=TRUE)
+compute.Q.percentile.longterm  | na.rm=list(na.rm.global=TRUE)
+compute.volume.frequency.analysis  | na.rm=list(na.rm.global=TRUE)
+
+
+If **na.rm=list(na.rm.global=FALSE)**, i.e. do NOT remove missing values before computing statistics, then if there is a missing value present in a series, the missingness is propagated forward. For example, if a month is missing a value, then the minimum flow for that month in that year is not computed, but the minimum flows in the other months are computed. The minimum flow for that year that has the missing value is also not computed. If the missing value was in January, then the JFM season missing is also not computed, but the minimum for AMJ etc are computed. Similarly for the 6 month averages if they have a complete record.  The rule is the same for both the CY (calendar year) and WY (water year) statistics.
+
+The missing value also affect an rolling average that includes the missing value. This may cross month boundaries, e.g. if the missing value occurred on 31 January, then the 3 day rolling average for the 1 Feb is also missing so the Feb statistics on the 3 day rolling average are also not computed. If the missing value occurred at the end of a year, the rolling average in january of the next year may be affected, and so on.
+
+There is also an unintended consequence with the rolling averages. In the first year of the series, the 3, 7, and 30 day rolling averages for the 1st january will be missing and so any monthly/ season/ yearly statistic on the rolling averages will also be missing. The way around this is to INCLUDE data prior to 1 January, e.g. the actual data record runs from 1940 onwards, but you set the **start.year=1941**. Then the rolling average for 1941-01-01 can be computed etc.
+
+Because the first year water year starts in the previous October, many off the water year statistics will be missing for the first year, unless you again include more data before the start.year (as above).
+
+
+If **na.rm=list(na.rm.glob=TRUE)**,
+then ALL statistics are computed with the missing value excluded, i.e. in a month with a missing value, the statistic is computed on the remaining values.
+
+For example, the default action to deal missing values for the long-term statistics is to EXCLUDE all missing values, and so statistics are still computed. For example, if 1942-05-12 has a missing value, any statistics about May will ignore this missing value and at the long-term averages will still be computed, 
+
+The default rule of the volume frequency analysis is to exclude all missing values so so you will get statistics for years without a complete record. If the **na.rm** argument is set to TRUE, then if a year has a missing values in finding the min etc, that year has a NA for the statistic and that year is then EXCLUDED from fitting the distribution. So if you had 40 years on the record, and 1 year had a missing value, then 39 years would be used in the analysis. Because the rolling average is always missing in the first year, any rolling average will miss the first year.
+
+There is a bit of weirdness if  you choose to analyze on the water year and set the **na.rm.global=TRUE**, because it will compute statistics for the first water year even though you may be missing data from the previous Cctober. Be careful.
+
+## Example of analysis with missing values.
+We will take the previous dataset that is complete and create a few missing values.
+
+```{r}
+data(S08HA011)
+head( S08HA011[ as.numeric(format(S08HA011$Date, "%Y"))==1965,])
+```
+
+**Notice that the flow dataframw MUST have two variables: Date, the day in standard R format, and
+Q - the daily discharge value.**
+
+We now set the variables limiting the years for which the analysis should be done
+and setting up needed variables.
+
+```{r}
+Station.Code <- '08HA011'
+Station.Name <- 'Upper Cowichan River'
+Station.Area <- 826    # square km's
+
+start.year   <- 1965  # when do you want the analysis to start at.
+end.year     <- 2012  # what is last year with complete data
+
+# add Year to the data frame
+S08HA011$Year <- as.numeric(format(S08HA011$Date, "%Y")) # add the year to the data frame
+```
+
+We now create some missing values.
+```{r}
+# Create 1% missing values (approximately)
+set.seed(3423432)
+sum(is.na(S08HA011[ start.year <= S08HA011$Year & S08HA011$Year <= end.year, "Q"]))
+
+missing <- sample(1:nrow(S08HA011), .0003*nrow(S08HA011))
+S08HA011$Q[ missing ] <- NA
+sum(is.na(S08HA011[ start.year <= S08HA011$Year & S08HA011$Year <= end.year, "Q"]))
+```
+
+The simple summary statistics are computed as before.
+```{r}
+# get a simple summary of the data
+# Table of simple statistics by year to help check for outliers, etc
+S08HA011.sum <- plyr::ddply(S08HA011[ S08HA011$Year >= start.year & S08HA011$Year <=end.year,], "Year", plyr::summarize,
+         n.days   = length(Year),
+         n.Q      = sum (!is.na(Q)),
+         n.miss.Q = sum ( is.na(Q)),
+         min.Q    = min (Q, na.rm=TRUE),
+         max.Q    = max (Q, na.rm=TRUE),
+         mean.Q   = mean(Q,na.rm=TRUE),
+         sd.Q     = sd  (Q,na.rm=TRUE))
+S08HA011.sum
+```
+
+We see that there are now missing values in a few years (e.g. 1967).
+
+
+## Computing the Annual Statistics (on calendar and water year)
+We compute the plethora of annual statistics with the default action to propogate missing values.
+```{r, warning=FALSE}
+stat.annual <- compute.Q.stat.annual(
+                          Station.Code  =Station.Code,
+                          Station.Area  =Station.Area,
+                          flow          =S08HA011,
+                          start.year    =start.year,
+                          end.year      =end.year)
+
+```
+
+This has many, many statistics some of which are shown below. Notice that some are now missing (e.g. in 1967) over
+and above the missing in the rolling averages for the first year.
+```{r}
+head(stat.annual$Q.stat.annual[, 1:10])
+```
+
+To ignore the missing values, we set the \code{na.rm} parameter:
+```{r, warning=FALSE}
+stat.annual.ignore.missing <- compute.Q.stat.annual(
+                          Station.Code  =Station.Code,
+                          Station.Area  =Station.Area,
+                          flow          =S08HA011,
+                          start.year    =start.year,
+                          end.year      =end.year,
+                          na.rm=list(na.rm.global=TRUE))
+head(stat.annual.ignore.missing$Q.stat.annual[, 1:10])
+```
+Notice that all statistics are computed even if there were missing values.
+
+## Computing the long term summary statistics
+The long-term summary statistics default action is to IGNORE the missing values.
+```{r, warning=FALSE}
+stat.longterm <- compute.Q.stat.longterm(
+                          Station.Code =Station.Code,
+                          Station.Area =Station.Area,
+                          flow         =S08HA011,
+                          start.year   =start.year,
+                          end.year     =end.year)
+head(stat.longterm$Q.stat.longterm)
+```
+
+If you wish missing values to propogate, use:
+```{r, warning=FALSE}
+stat.longterm.missing <- compute.Q.stat.longterm(
+                          Station.Code =Station.Code,
+                          Station.Area =Station.Area,
+                          flow         =S08HA011,
+                          start.year   =start.year,
+                          end.year     =end.year,
+                          na.rm=list(na.rm.global=FALSE))
+head(stat.longterm.missing$Q.stat.longterm)
+```
+
+## Computing the long term percentile statistics
+The long-term percentile statistics default action is to IGNORE the missing values.
+
+```{r, warning=FALSE}
+percentile.longterm <- compute.Q.percentile.longterm(
+                          Station.Code=Station.Code,
+                          Station.Area=Station.Area,
+                          flow        =S08HA011,
+                          start.year  =start.year,
+                          end.year    =end.year)
+head(percentile.longterm$Q.percentile.stat)
+```
+
+If you want to propogate missing values, again set the **na.rm** argument:
+```{r, warning=FALSE}
+percentile.longterm.missing <- compute.Q.percentile.longterm(
+                          Station.Code=Station.Code,
+                          Station.Area=Station.Area,
+                          flow        =S08HA011,
+                          start.year  =start.year,
+                          end.year    =end.year,
+                          na.rm=list(na.rm.global=FALSE))
+head(percentile.longterm.missing$Q.percentile.stat)
+```
+
+## Computing a volume frequency analysis
+The volume frequence analysis automatically drops missing values:
+```{r, warning=FALSE}
+vfa.analysis <- compute.volume.frequency.analysis( 
+                      Station.Code   =Station.Code, S08HA011,
+                      start.year     =start.year, 
+                      end.year       =end.year)
+vfa.analysis$fitted.quantiles.trans
+```
+
+If you set the **na.rm** parameter the output appears to be unaffected:
+```{r, warning=FALSE}
+vfa.analysis.missing <- compute.volume.frequency.analysis( 
+                      Station.Code   =Station.Code, S08HA011,
+                      start.year     =start.year, 
+                      end.year       =end.year,
+                      na.rm=list(na.rm.global=FALSE))
+vfa.analysis.missing$fitted.quantiles.trans
+```
+The years with the missing values will be DROPPED from the analysis, and the analysis
+will continue with the remaining years of data, i.e. the sample size for fitting the
+distributions will be reduced. It is difficult to see this in action other than by 
+actually looking at the plotting data for the frequency plot and comparing to the
+same summary with no missing data.
+
+```{r, warning=FALSE}
+plyr::ddply(vfa.analysis.missing$plotdata, "Measure", plyr::summarize, n.years=length(Measure))
+plyr::ddply(vfa.analysis$plotdata        , "Measure", plyr::summarize, n.years=length(Measure))
+```
+
+

@@ -1,3 +1,14 @@
+# Copyright 2017 Province of British Columbia
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and limitations under the License.
 
 # Compare the computed longterm statistics with those from the Excel spreadsheet
 # Change Log
@@ -39,8 +50,8 @@ compare.longterm.stat <- function(Station.Code,
    if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exits")}
    if( !is.logical(write.comparison.csv)) {stop('write.comparison.csv must be logical')}
    if( !is.logical(write.plots.pdf))      {stop("write.plots.pdf must be logial")}
-     
-   #  Load the packages used 
+
+   #  Load the packages used
    library(ggplot2)
    library(openxlsx)
    library(plyr)
@@ -70,16 +81,16 @@ compare.longterm.stat <- function(Station.Code,
    stats.in.E.not.in.Q <- names(E.stat)[ !names(E.stat) %in% names(Q.stat)]
 
    # Now to compare the results from Q.stat to those in E.stat
-   diff.stat <- ldply( names(Q.stat)[ names(Q.stat) != "Month" & !(names(Q.stat) %in% stats.in.Q.not.in.E)], 
+   diff.stat <- ldply( names(Q.stat)[ names(Q.stat) != "Month" & !(names(Q.stat) %in% stats.in.Q.not.in.E)],
                                     function (stat, Q.stat, E.stat){
       # stat has the name of the column to compare
       Q.values <- Q.stat[, c("Month",stat)]
       E.values <- data.frame(Month=E.stat$Month, stat=as.numeric(as.vector(E.stat[, stat])),stringsAsFactors=FALSE)
       names(E.values)[2] <- stat
       both.values <- merge(Q.values, E.values, by="Month", suffixes=c(".Q",".E"))
-      both.values$diff <-  both.values[,paste(stat,".Q",sep="")] - both.values[,paste(stat,".E",sep="")]  
+      both.values$diff <-  both.values[,paste(stat,".Q",sep="")] - both.values[,paste(stat,".E",sep="")]
       both.values$mean <- (both.values[,paste(stat,".Q",sep="")] + both.values[,paste(stat,".E",sep="")])/2
-      both.values$pdiff  <- abs(both.values$diff)/ both.values$mean 
+      both.values$pdiff  <- abs(both.values$diff)/ both.values$mean
       both.values$stat <- stat
       names(both.values)[names(both.values) == paste(stat,".Q",sep="")] <- "Value.Q"
       names(both.values)[names(both.values) == paste(stat,".E",sep="")] <- "Value.E"
@@ -114,13 +125,13 @@ compare.longterm.stat <- function(Station.Code,
    stat.not.plotted <- NA
 
    plot.list <- list(plot.allstat=plot.allstat)
- 
+
    file.comparison <- NA
    if(write.comparison.csv){
       file.comparison.csv <- file.path(report.dir,paste(Station.Code, "-comparison-longterm-R-vs-Excel.csv",sep=""))
       write.csv(diff.stat, file.comparison.csv, row.names=FALSE)
    }
-   
+
    file.plots.pdf <- NA
    if(write.plots.pdf){
       file.plots.pdf <- file.path(report.dir,paste(Station.Code, "-comparison-longterm-R-vs-Excel.pdf",sep=""))
@@ -128,7 +139,7 @@ compare.longterm.stat <- function(Station.Code,
       l_ply(plot.list, function(x){plot(x)})
       dev.off()
    }
-    
+
    list(stats.in.Q.not.in.E=stats.in.Q.not.in.E,
         stats.in.E.not.in.Q=stats.in.E.not.in.Q,
         diff.stat=diff.stat,

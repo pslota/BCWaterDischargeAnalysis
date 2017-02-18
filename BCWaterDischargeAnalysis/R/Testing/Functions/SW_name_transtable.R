@@ -1,3 +1,15 @@
+# Copyright 2017 Province of British Columbia
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and limitations under the License.
+
 # translation table between variables names from program and Excel or HEC spreadsheet
 
 SW_translate.csv <- textConnection(
@@ -97,9 +109,9 @@ NOV_P10_DAILY_SW,       NOV_P90_SW
 DEC_P10_DAILY_SW,       DEC_P90_SW
 WY_TOTALQ_DAILY_SW,   SW_Oct_to_Sept_TOTALQ
 WY_YIELDMM_DAILY_SW,  SW_Oct_to_Sept_YIELDMM
-AMJJAS_TotalQ_DAILY_SW, SW_AMJJAS_TotalQ 
+AMJJAS_TotalQ_DAILY_SW, SW_AMJJAS_TotalQ
 ONDJFM_TotalQ_DAILY_SW, SW_ONDJFM_TotalQ
-AMJJAS_YIELDMM_DAILY_SW,SW_AMJJAS_YIELDMM 
+AMJJAS_YIELDMM_DAILY_SW,SW_AMJJAS_YIELDMM
 ONDJFM_YIELDMM_DAILY_SW,SW_ONDJFM_YIELDMM
 CY_CUMQ_DAILY_SW,       SW_TOTAL_Q_CMS
 CY_DATE_25P_CUMQ_DAILY_SW, DATE_25P_CUMMUL_Q

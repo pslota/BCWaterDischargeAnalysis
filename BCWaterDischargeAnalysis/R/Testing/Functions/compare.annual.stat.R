@@ -1,3 +1,14 @@
+# Copyright 2017 Province of British Columbia
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and limitations under the License.
 
 # Compare the computed summary statistics with those from the Excel spreadsheet
 # Change Log
@@ -33,7 +44,7 @@ compare.annual.stat <- function(Station.Code, Q.filename, E.filename, SW_transla
    if( !file.exists(E.filename))     {stop('E.filename does not exist')}
    if(length(Q.filename)>1)          {stop("Q.filename cannot have length > 1")}
    if(length(E.filename)>1)          {stop("E.filename cannot have length > 1")}
-   
+
    if( !is.data.frame(SW_translate)) {stop("SW_translate is not a data frame.")}
    if(! all(c("V.Program","V.Excel") %in% names(SW_translate))){
                                       stop("SW_translate dataframe doesn't contain the variables V.Program and V.Excel.")}
@@ -42,7 +53,7 @@ compare.annual.stat <- function(Station.Code, Q.filename, E.filename, SW_transla
    if(! is.logical(write.plots.pdf))      {stop("write.plots.pdf should be logical")}
    if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exits")}
 
-   #  Load the packages used 
+   #  Load the packages used
    library(ggplot2)
    library(openxlsx)
    library(plyr)
@@ -53,7 +64,7 @@ compare.annual.stat <- function(Station.Code, Q.filename, E.filename, SW_transla
 
    # Get the data from the Excel spreadsheet
    E.stat <- openxlsx::readWorkbook(E.filename, sheet='HydroTrends_Input')
-   
+
    # convert all variable names to lower case
    names(Q.stat) <- tolower(names(Q.stat))
    names(E.stat) <- tolower(names(E.stat))
@@ -64,7 +75,7 @@ compare.annual.stat <- function(Station.Code, Q.filename, E.filename, SW_transla
    # for names that don't exist
    SW_translate <- rbind(SW_translate, data.frame(V.Program=names(E.stat), V.Excel=names(E.stat), Comment="",stringsAsFactors=FALSE))
    names(E.stat) <- tolower(SW_translate$V.Program[match( names(E.stat), tolower(SW_translate$V.Excel)) ])
-   
+
    # check the names in the two data frames
    names(Q.stat)
    names(E.stat)
@@ -84,9 +95,9 @@ compare.annual.stat <- function(Station.Code, Q.filename, E.filename, SW_transla
      Q.values <- Q.stat[, c("year",stat)]
      E.values <- E.stat[, c("year",stat)]
      both.values <- merge(Q.values, E.values, by="year", suffixes=c(".Q",".E"))
-     both.values$diff <-  both.values[,paste(stat,".Q",sep="")] - both.values[,paste(stat,".E",sep="")]  
+     both.values$diff <-  both.values[,paste(stat,".Q",sep="")] - both.values[,paste(stat,".E",sep="")]
      both.values$mean <- (both.values[,paste(stat,".Q",sep="")] + both.values[,paste(stat,".E",sep="")])/2
-     both.values$pdiff  <- abs(both.values$diff)/ both.values$mean 
+     both.values$pdiff  <- abs(both.values$diff)/ both.values$mean
      both.values$stat <- stat
      names(both.values)[names(both.values) == paste(stat,".Q",sep="")] <- "Value.Q"
      names(both.values)[names(both.values) == paste(stat,".E",sep="")] <- "Value.E"
@@ -117,32 +128,32 @@ compare.annual.stat <- function(Station.Code, Q.filename, E.filename, SW_transla
 
   #plot.allstat <- makediffplot(plotdata)  # all variables
 
-  set.daily  <- grepl("day",    plotdata$stat,   ignore.case=TRUE) | 
+  set.daily  <- grepl("day",    plotdata$stat,   ignore.case=TRUE) |
                 grepl("ANNUAL", plotdata$stat,   ignore.case=TRUE)
   plot.daily <- makediffplot(plotdata[ set.daily,])   # only for daily  statistics
 
   set.totalq   <- grepl("TOTALQ", plotdata$stat,  ignore.case=TRUE)
   set.yieldmm  <- grepl("YIELDMM", plotdata$stat, ignore.case=TRUE)
-  plot.yieldmm <- makediffplot(plotdata[ set.totalq | set.yieldmm,]) 
+  plot.yieldmm <- makediffplot(plotdata[ set.totalq | set.yieldmm,])
 
   set.mean   <- grepl("MEAN", plotdata$stat, ignore.case=TRUE)
-  plot.mean  <- makediffplot(plotdata[ set.mean,]) 
+  plot.mean  <- makediffplot(plotdata[ set.mean,])
 
-  set.per    <- grepl("P50", plotdata$stat, ignore.case=TRUE) | 
-                grepl("P20", plotdata$stat, ignore.case=TRUE) | 
-                grepl("P10", plotdata$stat, ignore.case=TRUE) 
-  plot.per   <- makediffplot(plotdata[ set.per,]) 
+  set.per    <- grepl("P50", plotdata$stat, ignore.case=TRUE) |
+                grepl("P20", plotdata$stat, ignore.case=TRUE) |
+                grepl("P10", plotdata$stat, ignore.case=TRUE)
+  plot.per   <- makediffplot(plotdata[ set.per,])
 
-  set.wyear  <- grepl("Oct_to_Sept", plotdata$stat, ignore.case=TRUE) | 
-                grepl("ONDJFM",      plotdata$stat, ignore.case=TRUE) | 
+  set.wyear  <- grepl("Oct_to_Sept", plotdata$stat, ignore.case=TRUE) |
+                grepl("ONDJFM",      plotdata$stat, ignore.case=TRUE) |
                 grepl("AMJJAS",      plotdata$stat, ignore.case=TRUE)
-  plot.wyear <- makediffplot(plotdata[ set.wyear,] ) 
+  plot.wyear <- makediffplot(plotdata[ set.wyear,] )
 
-  set.cumq  <- grepl("CUMQ", plotdata$stat, ignore.case=TRUE) 
-  plot.cumq <- makediffplot(plotdata[ set.cumq,] ) 
+  set.cumq  <- grepl("CUMQ", plotdata$stat, ignore.case=TRUE)
+  plot.cumq <- makediffplot(plotdata[ set.cumq,] )
 
   # are there any variables not plotted?
-  stat.not.plotted <- unique( plotdata$stat[ !(set.daily | set.totalq | set.yieldmm | 
+  stat.not.plotted <- unique( plotdata$stat[ !(set.daily | set.totalq | set.yieldmm |
                                               set.mean   | set.per    | set.wyear   | set.cumq)])
 
   plot.list <- list(#plot.allstat=plot.allstat,
@@ -152,13 +163,13 @@ compare.annual.stat <- function(Station.Code, Q.filename, E.filename, SW_transla
                      plot.per    =plot.per,
                      plot.wyear  =plot.wyear,
                      plot_cumq   =plot.cumq)
-   
+
    file.comparison <- NA
    if(write.comparison.csv){
       file.comparison.csv <- file.path(report.dir, paste(Station.Code,"-comparison-annual-R-vs-Excel.csv",sep=""))
       write.csv(diff.stat, file.comparison.csv, row.names=FALSE)
    }
-   
+
    file.plots.pdf <- NA
    if(write.plots.pdf){
       file.plots.pdf <- file.path(report.dir, paste(Station.Code,"-comparison-annual-R-vs-Excel.pdf",sep=""))
@@ -166,7 +177,7 @@ compare.annual.stat <- function(Station.Code, Q.filename, E.filename, SW_transla
       l_ply(plot.list, function(x){plot(x)})
       dev.off()
    }
-  
+
 
    list(stats.in.Q.not.in.E=stats.in.Q.not.in.E,
         stats.in.E.not.in.Q=stats.in.E.not.in.Q,

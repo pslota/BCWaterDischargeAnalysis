@@ -1,3 +1,14 @@
+# Copyright 2017 Province of British Columbia
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and limitations under the License.
 
 # Compare the computed percentile longterm statistics with those from the Excel spreadsheet
 # Change Log
@@ -43,7 +54,7 @@ compare.percentile.longterm.stat <- function(Station.Code,
 
    if(!is.numeric(csv.nddigits)){ stop("csv.nddigits must be numeric")}
    csv.nddigits <- round(csv.nddigits)[1]
-   #  Load the packages used 
+   #  Load the packages used
    library(ggplot2)
    library(openxlsx)
    library(plyr)
@@ -56,13 +67,13 @@ compare.percentile.longterm.stat <- function(Station.Code,
    if(debug)browser()
    E.stat.in <- E.stat.in[, (ncol(E.stat.in)-12):ncol(E.stat.in)]  # CG1: CT5 but readWorkBook skips blank columns in the first 5 rows
 
-   # Transpose the Excel sheet 
+   # Transpose the Excel sheet
    E.stat.in[,1] <- paste("P",formatC(100-as.numeric(E.stat.in[,1]), width=2, format="d", flag="0"), sep="")
    E.stat <-as.data.frame(t(E.stat.in[,-1]), stringsAsFactors=FALSE)
    names(E.stat) <- E.stat.in[,1]
    E.stat$Month <- row.names(E.stat)
    E.stat$Month <- substr(E.stat$Month,1,3)
-   
+
    # check the names in the two data frames
    names(Q.stat)
    names(E.stat)
@@ -74,15 +85,15 @@ compare.percentile.longterm.stat <- function(Station.Code,
    stats.in.E.not.in.Q <- names(E.stat)[ !names(E.stat) %in% names(Q.stat)]
    #browser()
    # Now to compare the results from Q.stat to those in E.stat
-   diff.stat <- ldply( names(Q.stat)[ names(Q.stat) != "Month" & !(names(Q.stat) %in% stats.in.Q.not.in.E)], 
+   diff.stat <- ldply( names(Q.stat)[ names(Q.stat) != "Month" & !(names(Q.stat) %in% stats.in.Q.not.in.E)],
                       function (stat, Q.stat, E.stat){
       # stat has the name of the column to compare
       Q.values <- Q.stat[, c("Month",stat)]
       E.values <- E.stat[, c("Month",stat)]
       both.values <- merge(Q.values, E.values, by="Month", suffixes=c(".Q",".E"))
-      both.values$diff <-  both.values[,paste(stat,".Q",sep="")] - both.values[,paste(stat,".E",sep="")]  
+      both.values$diff <-  both.values[,paste(stat,".Q",sep="")] - both.values[,paste(stat,".E",sep="")]
       both.values$mean <- (both.values[,paste(stat,".Q",sep="")] + both.values[,paste(stat,".E",sep="")])/2
-      both.values$pdiff  <- abs(both.values$diff)/ both.values$mean 
+      both.values$pdiff  <- abs(both.values$diff)/ both.values$mean
       both.values$stat <- stat
       names(both.values)[names(both.values) == paste(stat,".Q",sep="")] <- "Value.Q"
       names(both.values)[names(both.values) == paste(stat,".E",sep="")] <- "Value.E"
@@ -94,7 +105,7 @@ compare.percentile.longterm.stat <- function(Station.Code,
    max(diff.stat$pdiff, na.rm=TRUE)
    min(diff.stat$pdiff, na.rm=TRUE)
 
-   
+
    makediffplot <- function (plotdata){
      myplot <- ggplot2::ggplot(data=plotdata, aes(x=Month, y=stat, size=pdiff))+
        ggtitle(paste(Station.Code, " - Standardized differences between Q.stat and E.Stat",sep=""))+
@@ -125,7 +136,7 @@ compare.percentile.longterm.stat <- function(Station.Code,
       file.comparison.csv <- file.path(report.dir, paste(Station.Code,"-comparison-percentile-longterm-R-vs-Excel.csv",sep=""))
       write.csv(diff.stat, file.comparison.csv, row.names=FALSE)
    }
-   
+
    file.plots.pdf <- NA
    if(write.plots.pdf){
       file.plots.pdf <- file.path(report.dir, paste(Station.Code,"-comparison-percentile-longterm-R-vs-Excel.pdf",sep=""))
@@ -133,7 +144,7 @@ compare.percentile.longterm.stat <- function(Station.Code,
       l_ply(plot.list, function(x){plot(x)})
       dev.off()
    }
-   
+
    list(stats.in.Q.not.in.E=stats.in.Q.not.in.E,
         stats.in.E.not.in.Q=stats.in.E.not.in.Q,
         diff.stat=diff.stat,
