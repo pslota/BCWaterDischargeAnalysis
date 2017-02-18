@@ -34,15 +34,16 @@ To install the latest version of BCWaterDischargeAnalysis:
 
 ```{r, eval = FALSE}
 library(devtools)   # has the install_github() function
-install_github("bcgov/water-discharge-analysis")
+install_github("bcgov/water-discharge-analysis", subdir="BCwater-discharge-analysis")
 library(BCwater-discharge-analysis)
 ```
 
 
 ### Data
 Create a data frame (e.g. __df__) with two varibles:
+
 Variable | Description
---------------------
+---------|-------------
 Date   | The data of the reading in standard R date class format. 
 For example to convert a 4-digit year, numeric month, and numeric day of the
 month use __as.Date{paste(df$Year,'-',df$Month,'-',df$Day,sep="")}__.
