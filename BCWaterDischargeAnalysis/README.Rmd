@@ -23,7 +23,7 @@ by Carl James Schwarz (cschwarz.stat.sfu.ca@gmail.com).
 
 ## Usage
 An example of the usage of this package is available
-in the [vignette](https://htmlpreview.github.com/?https://github.com/bcgov/wwater-discharge-analysis/master/inst/doc/example-analysis.html). In your R session, you can type `vignette("BCWaterDischargeAnalysis")` to see the vignette.
+in the [vignette](https://htmlpreview.github.com/?https://github.com/bcgov/water-discharge-analysis/master/inst/doc/example-analysis.html). In your R session, you can type `vignette("BCWaterDischargeAnalysis")` to see the vignette.
 
 
 
@@ -35,7 +35,7 @@ To install the latest version of BCWaterDischargeAnalysis:
 # install the devtools package if it's not already installed
 # install.packages("devtools")
 library(devtools)
-install_github("bcgov/water-discharge-analysis", build_vignettes = TRUE)
+install_github("bcgov/water-discharge-analysis/BCWaterDischargeAnalysis", build_vignettes = TRUE)
 # Using `build_vignettes = TRUE` will slow down the install, but is necessary if 
 # you want to read the vignette, which is recommended
 library(BCwater-discharge-analysis)
@@ -43,16 +43,17 @@ library(BCwater-discharge-analysis)
 
 
 ### Data
-Create a data frame (e.g. \code{df}) with two varibles:
-\describe{
-\item{Date}{The data of the reading in standard R date class format. 
+Create a data frame (e.g. __df__) with two varibles:
+Variable | Description
+--------------------
+Date   | The data of the reading in standard R date class format. 
 For example to convert a 4-digit year, numeric month, and numeric day of the
-month use \code{as.Date{paste(df$Year,'-',df$Month,'-',df$Day,sep="")}}.
-\item {Q}{The average daily flow as a numeric value.}
-}
+month use __as.Date{paste(df$Year,'-',df$Month,'-',df$Day,sep="")}__.
+Q  | The average daily flow as a numeric value.
+
 
 Missing values can be indicated by leaving out dates with missing
-discharge values, or by setting the value of \code{Q} to missing (\code{NA}).
+discharge values, or by setting the value of __Q__ to missing (NA).
 
 The treatment of missing values in the analysis is explained in more
 detail in the vignette.
@@ -65,7 +66,7 @@ This project is complete.
 
 ### Getting Help or Reporting an Issue
 
-To report bugs/issues/feature requests, please file an [issue](https://github.com/bcgov/<repo-name>/issues/).
+To report bugs/issues/feature requests, please file an [issue](https://github.com/bcgov/water-discharge-analysis/issues/).
 
 ### License
 
