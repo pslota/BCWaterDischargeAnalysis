@@ -1,0 +1,33 @@
+Package: BCWaterDischargeAnalysis
+Type: Package
+Title: Analysis of stream discharge data to mimic HEC
+Version: 2017-02-28
+Author: c(person("Schwarz","CarlJames",email="cchwarz@stat.sfu.ca", role=c("aut","ctr"),
+                  comment='Primary Author'))
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description: Computes annual (calendar and water year) statistics, long term summary statistics,
+    long term percentiles, and a volume frequency analysis for stream discharge data.
+License: Apache License (== 2.0) | file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
+Depends:
+    R (>= 3.0.2),
+    scales
+Imports:
+   car,
+   e1071,
+   fitdistrplus,
+   ggplot2,
+   graphics,
+   grDevices,
+   PearsonDS, 
+   plyr,  
+   reshape2,    
+   scales,
+   stats,
+   utils,
+   zoo
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr

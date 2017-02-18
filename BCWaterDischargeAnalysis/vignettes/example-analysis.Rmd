@@ -1,0 +1,234 @@
+---
+title: "Sample Analysis of Station S08HA011 - Upper Cowichan Valley"
+author: "Carl James Schwarz"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This will demonstrate a sample analysis of the stream discharge data from station
+08HA011 (Upper Cowichan Valley) which is provided as a sample dataset (S08HA011) with this package.
+The basin has an area of 826 km**2. While the data fram runs from 1900 onwards, data was only 
+reliably collected starting in 1965 onwards. 
+
+## Loading the data and some initial plots
+
+We first load the package, load the data and look at the first few rows starting in 1965.
+
+```{r}
+library(ggplot2)
+library(plyr)       # split-apply-combine paradigm
+library(reshape2)   # for melting and casting
+
+library(BCWaterDischargeAnalysis)
+
+
+data(S08HA011)
+head( S08HA011[ as.numeric(format(S08HA011$Date, "%Y"))==1965,])
+```
+
+**Notice that the flow dataframw MUST have two variables: Date, the day in standard R format, and
+Q - the daily discharge value.**
+
+Missing values can be entered in two ways. First, the date with the missing value
+of Q can be dropped from the data frame. Second, the value of Q can be set to missing (NA).
+Both methods can be used together.
+
+We now set the variables limiting the years for which the analysis should be done
+and setting up needed variables.
+
+```{r}
+Station.Code <- '08HA011'
+Station.Name <- 'Upper Cowichan River'
+Station.Area <- 826    # square km's
+
+start.year   <- 1965  # when do you want the analysis to start at.
+end.year     <- 2012  # what is last year with complete data
+```
+## Preliminary screening
+
+Before analyzing the discharge values, you should do some preliminary screening to check
+for unusual data values, count missing values etc.
+
+Here are some suggestions:
+```{r}
+cat("Number of illegal date values ", sum(is.na(S08HA011$Date)), "\n")
+S08HA011[ is.na(S08HA011$Date),]     # sorry Microsoft, but feb 29 1900 is NOT a leap year
+
+dim(S08HA011)  # size before removing illegal dates
+S08HA011 <- S08HA011[ !is.na(S08HA011$Date),]
+dim(S08HA011)  # size after removing illegal dates
+
+# get a simple summary of the data
+S08HA011$Year <- as.numeric(format(S08HA011$Date, "%Y")) # add the year to the data frame
+# Table of simple statistics by year to help check for outliers, etc
+S08HA011.sum <- plyr::ddply(S08HA011[ S08HA011$Year >= start.year & S08HA011$Year <=end.year,], "Year", plyr::summarize,
+         n.days   = length(Year),
+         n.Q      = sum (!is.na(Q)),
+         n.miss.Q = sum ( is.na(Q)),
+         min.Q    = min (Q, na.rm=TRUE),
+         max.Q    = max (Q, na.rm=TRUE),
+         mean.Q   = mean(Q,na.rm=TRUE),
+         sd.Q     = sd  (Q,na.rm=TRUE))
+S08HA011.sum
+```
+
+We see that there are no missing values in any of the year between the start and end year. This
+report is also generated later. 
+
+Let's visuallize some of the statistics overtime
+```{r}
+# visuallize the min, max, and mean
+plotdata <- reshape2::melt(S08HA011.sum,
+             id.var='Year',
+             measure.var=c("min.Q","max.Q","mean.Q","sd.Q"),
+             variable.name='Statistic',
+             value.name='Value')
+ggplot2::ggplot(data=plotdata, aes(x=Year, y=Value))+
+  ggtitle("Summary statistics about Q over time")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  geom_line()+
+  facet_wrap(~Statistic, ncol=2, scales="free_y")
+
+```
+
+
+## Computing the Annual Statistics (on calendar and water year)
+We compute the plethora of annual statistics
+```{r, warning=FALSE}
+stat.annual <- compute.Q.stat.annual(
+                          Station.Code  =Station.Code,
+                          Station.Area  =Station.Area,
+                          flow          =S08HA011,
+                          start.year    =start.year,
+                          end.year      =end.year)
+
+```
+
+This will create a list object with many elements:
+```{r}
+names(stat.annual)
+```
+This has many, many statistics some of which are shown below:
+```{r}
+head(stat.annual$Q.stat.annual[, 1:10])
+```
+
+These statistics can be then processed as you desire.
+
+As well, the default arguments will also create several *.csv file with the summary statistics and
+a *.pdf file with the trends plotted over time in the directory you run the code in. The
+file names are given in the list object:
+```{r}
+stat.annual$file.stat.csv
+stat.annual$file.stat.trans.csv
+stat.annual$file.stat.trend.pdf
+```
+
+
+
+## Computing the long term summary statistics
+We compute the long term summary statistics 
+```{r, warning=FALSE}
+stat.longterm <- compute.Q.stat.longterm(
+                          Station.Code =Station.Code,
+                          Station.Area =Station.Area,
+                          flow         =S08HA011,
+                          start.year   =start.year,
+                          end.year     =end.year)
+
+```
+
+This will create a list object with many elements:
+```{r}
+names(stat.longterm)
+```
+This has the long term summary statistics (mean, min, max, etc) by month some of which are shown below:
+```{r}
+head(stat.longterm$Q.stat.longterm)
+```
+
+These statistics can be then processed as you desire.
+
+As well, the default arguments will also create several *.csv file with the summary statistics and
+a *.pdf file with the trends plotted over time in the directory you run the code in. The
+file names are given in the list object:
+```{r}
+stat.longterm$file.stat.csv
+stat.longterm$file.stat.trans.csv
+```
+
+
+
+## Computing the long term percentile statistics
+We compute the long term percentile statistics 
+```{r, warning=FALSE}
+percentile.longterm <- compute.Q.percentile.longterm(
+                          Station.Code=Station.Code,
+                          Station.Area=Station.Area,
+                          flow        =S08HA011,
+                          start.year  =start.year,
+                          end.year    =end.year)
+
+```
+
+This will create a list object with many elements:
+```{r}
+names(percentile.longterm)
+```
+This has the long term summary statistics (mean, min, max, etc) by month some of which are shown below:
+```{r}
+head(percentile.longterm$Q.percentile.stat)
+```
+
+These statistics can be then processed as you desire.
+
+As well, the default arguments will also create several *.csv file with the summary statistics and
+a *.pdf file with the trends plotted over time in the directory you run the code in. The
+file names are given in the list object:
+```{r}
+percentile.longterm$file.stat.csv
+percentile.longterm$file.stat.trans.csv
+```
+
+
+## Computing a volume frequency analysis
+We compute the volume frequency analysis 
+```{r, warning=FALSE}
+vfa.analysis <- compute.volume.frequency.analysis( 
+                      Station.Code   =Station.Code, S08HA011,
+                      start.year     =start.year, 
+                      end.year       =end.year)
+
+```
+
+This will create a list object with many elements:
+```{r}
+names(vfa.analysis)
+```
+
+A frequencey plot is created as an object in the list, and also written to the directory
+```{r}
+vfa.analysis$freqplot
+```
+
+The quantiles from the fitted distribution (the default is a Pearson Log III distribution) are also 
+computed:
+```{r}
+vfa.analysis$fitted.quantiles.trans
+```
+
+These statistics can be then processed as you desire.
+
+As well, the default arguments will also create several *.csv file with the summary statistics and
+a *.pdf file with the trends plotted over time in the directory you run the code in. The
+file names are given in the list object:
+```{r}
+vfa.analysis$file.stat.csv 
+vfa.analysis$file.quantile.csv
+vfa.analysis$file.frequency.plot
+
+```
