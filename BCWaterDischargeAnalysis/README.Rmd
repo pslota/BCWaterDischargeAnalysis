@@ -46,6 +46,13 @@ vignette("example-analysis", package="BCWaterDischargeAnalysis")
 ```
 
 
+## Help on functions
+Use the help function of R in the usual way.
+```{r}
+help(package="BCWaterDischargeAnalysis")
+help(compute.Q.stat.annual)
+```
+
 ### Data
 Create a data frame (e.g. __df__) with two varibles:
 
