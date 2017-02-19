@@ -129,8 +129,10 @@ Performs a volume frequency analysis on annual statistics similar to HEC-SSP.
 }
 \examples{
 \dontrun{
-vfa.analysis <- compute.volume.frequency.analysis( Station.Code='XXX',
-                     flow=flow,
-                     start.year=1960, end.year=2014)
+vfa.analysis <- compute.volume.frequency.analysis(
+                     Station.Code ='XXX',
+                     flow         =flow,
+                     start.year   =1960,
+                     end.year     =2014)
 }
 }

@@ -49,8 +49,8 @@ vignette("example-analysis", package="BCWaterDischargeAnalysis")
 ## Help on functions
 Use the help function of R in the usual way.
 ```{r}
-help(package="BCWaterDischargeAnalysis")
-help(compute.Q.stat.annual)
+help(package="BCWaterDischargeAnalysis") # list of all functions in package
+help(compute.Q.stat.annual)  # help on individual function
 ```
 
 ### Data
@@ -58,9 +58,10 @@ Create a data frame (e.g. __df__) with two varibles:
 
 Variable | Description
 ---------|-------------
-Date   | The data of the reading in standard R date class format. For example to convert a 4-digit year, numeric month, and numeric day of the month use __as.Date{paste(df$Year,'-',df$Month,'-',df$Day,sep="")}__.
+Date   | The data of the reading in standard R date class format. For example to convert a 4-digit year, numeric month, and numeric day of the month use __df$Date  <- as.Date{paste(df$Year,'-',df$Month,'-',df$Day,sep="")}__.
 Q  | The average daily flow as a numeric value.
 
+Other variables in the data frame will be ignored.
 
 Missing values can be indicated by leaving out dates with missing
 discharge values, or by setting the value of __Q__ to missing (NA).

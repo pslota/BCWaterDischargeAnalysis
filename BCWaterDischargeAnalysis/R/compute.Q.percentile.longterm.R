@@ -30,11 +30,12 @@
 #'
 #' @examples
 #' \dontrun{
-#' percentile.longterm <- compute.Q.percentile.longterm(Station.Code='ABCDE',
-#'                          Station.Area=2458,
-#'                          flow=flow,
-#'                          start.year=1960,
-#'                          end.year=2015)
+#' percentile.longterm <- compute.Q.percentile.longterm(
+#'                          Station.Code  ='ABCDE',
+#'                          Station.Area  =2458,
+#'                          flow          =flow,
+#'                          start.year    =1960,
+#'                          end.year      =2015)
 #' }
 #'
 #' @export

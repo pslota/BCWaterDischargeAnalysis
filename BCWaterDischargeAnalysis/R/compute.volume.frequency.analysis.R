@@ -66,9 +66,11 @@
 
 #' @examples
 #' \dontrun{
-#' vfa.analysis <- compute.volume.frequency.analysis( Station.Code='XXX',
-#'                      flow=flow,
-#'                      start.year=1960, end.year=2014)
+#' vfa.analysis <- compute.volume.frequency.analysis(
+#'                      Station.Code ='XXX',
+#'                      flow         =flow,
+#'                      start.year   =1960,
+#'                      end.year     =2014)
 #' }
 #' @export
 #'

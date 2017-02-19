@@ -69,11 +69,12 @@ Computes long term summary statistics on \code{flow$Q} variable
 }
 \examples{
 \dontrun{
-stat.longterm <- compute.Q.stat.longterm(Station.Code='ABCDE',
-                         Station.Area=2458,
-                         flow=flow,
-                         start.year=1960,
-                         end.year=2015)
+stat.longterm <- compute.Q.stat.longterm(
+                         Station.Code  ='ABCDE',
+                         Station.Area  =2458,
+                         flow          =flow,
+                         start.year    =1960,
+                         end.year      =2015)
 }
 
 }

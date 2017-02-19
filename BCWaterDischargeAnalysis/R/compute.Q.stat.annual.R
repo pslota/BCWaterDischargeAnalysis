@@ -47,11 +47,12 @@
 #'
 #' @examples
 #' \dontrun{
-#' stat.annual <- compute.Q.stat.annual(Station.Code='ABCD',
-#'                          Station.Area=12345,
-#'                          flow=flow,
-#'                          start.year=1960,
-#'                          end.year=2014)
+#' stat.annual <- compute.Q.stat.annual(
+#'                          Station.Code  ='ABCD',
+#'                          Station.Area  =12345,
+#'                          flow          =flow,
+#'                          start.year    =1960,
+#'                          end.year      =2014)
 #' }
 #' @export
 #'
