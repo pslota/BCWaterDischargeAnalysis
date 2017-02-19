@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Water Discharge Analysis
+# Water Discharge Analysis R Package.
 
 This package was developed to help analyze stream discharge data. 
 It is an alternative to using the HEC package.
