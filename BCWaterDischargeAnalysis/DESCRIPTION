@@ -24,7 +24,6 @@ Imports:
    PearsonDS, 
    plyr,  
    reshape2,    
-   scales,
    stats,
    utils,
    zoo
