@@ -39,6 +39,8 @@
 #' }
 #'
 #' @export
+#' @import ggplot2
+#' @import scales
 
 # Copyright 2017 Province of British Columbia
 #
@@ -110,7 +112,7 @@ compute.Q.percentile.longterm <- function(
    flow$Month <- as.numeric(format(flow$Date, '%m'))
    if(debug)browser()
    Q.per.month <- plyr::ddply(flow[flow$Year >= start.year & flow$Year <=end.year,], "Month", function(fy, na.rm){
-         per <- try(quantile(fy$Q, prob=per.list/100,na.rm=na.rm$na.rm.global), silent=TRUE)
+         per <- try(stats::quantile(fy$Q, prob=per.list/100,na.rm=na.rm$na.rm.global), silent=TRUE)
          if(class(per) == "try-error") per <- rep(NA, length(per.list))
          per <- matrix(per, nrow=1)
          colnames(per) <- paste("P", formatC(per.list, width=2, format="d", flag="0"), sep="")
@@ -121,7 +123,7 @@ compute.Q.percentile.longterm <- function(
    # compute the percentiles for the entire period of record
    flow$Month <- 99
    Q.per.all   <-plyr::ddply(flow[flow$Year >= start.year & flow$Year <=end.year,], "Month",  function(fy, na.rm){
-        per <- try(quantile(fy$Q, prob=per.list/100,na.rm=na.rm$na.rm.global), silent=TRUE)
+        per <- try(stats::quantile(fy$Q, prob=per.list/100,na.rm=na.rm$na.rm.global), silent=TRUE)
         if(class(per) == "try-error") per <- rep(NA, length(per.list))
         per <- matrix(per, nrow=1)
         colnames(per) <- paste("P", formatC(per.list, width=2, format="d", flag="0"), sep="")
@@ -138,7 +140,7 @@ compute.Q.percentile.longterm <- function(
       file.stat.csv <- file.path(report.dir,paste(Station.Code,"-longterm-percentile-stat.csv", sep=""))
       temp <- Q.per.longterm
       temp[, 2:ncol(Q.per.longterm)] <- round(temp[,2:ncol(Q.per.longterm)], csv.nddigits)
-      write.csv(temp, file=file.stat.csv, row.names=FALSE)
+      utils::write.csv(temp, file=file.stat.csv, row.names=FALSE)
    }
 
 #  Write out thesummary table in transposed format
@@ -150,7 +152,7 @@ compute.Q.percentile.longterm <- function(
      file.stat.trans.csv <-file.path(report.dir, paste(Station.Code,"-longterm-percentile-stat-trans.csv", sep=""))
      temp<- Q.per.longterm.trans
      temp <- round(temp, csv.nddigits)
-     write.csv(temp, file=file.stat.trans.csv, row.names=TRUE)
+     utils::write.csv(temp, file=file.stat.trans.csv, row.names=TRUE)
    }
 
    return(list(Q.percentile.stat=Q.per.longterm,

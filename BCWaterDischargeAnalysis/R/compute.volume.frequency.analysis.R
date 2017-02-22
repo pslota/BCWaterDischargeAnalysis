@@ -73,6 +73,8 @@
 #'                      end.year     =2014)
 #' }
 #' @export
+#' @import ggplot2
+#' @import scales
 #'
 
 # Copyright 2017 Province of British Columbia
@@ -233,7 +235,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
        x <- x[ order(x$value),]
        x$prob <- ((1:length(x$value))-a)/((length(x$value)+1-a-b))
        if(use.max)x$prob <- 1- x$prob   # they like to use p(exceedance) if using a minimum
-       x$dist.prob <- qnorm(1-x$prob)
+       x$dist.prob <- stats::qnorm(1-x$prob)
        x
    }, a=a, b=b, use.max=use.max)
    if(debug)browser()
@@ -267,7 +269,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    ePIII <- function(x,order){
       # compute (centered) empirical centered moments of the data
       if(order==1) return(mean(x))
-      if(order==2) return(var(x))
+      if(order==2) return(stats::var(x))
       if(order==3) return(e1071::skewness(x, type=2))
    }
 
@@ -280,8 +282,8 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
          # Note that the above forgot to mulitply the scale by the sign of skewness .
          # Refer to Page 24 of the Bulletin 17c
          m <- mean(x$value)
-         v <- var (x$value)
-         s <- sd  (x$value)
+         v <- stats::var (x$value)
+         s <- stats::sd  (x$value)
          g <- e1071::skewness(x$value, type=2)
 
          # This can be corrected, but HEC Bulletin 17b does not do these corrections
@@ -311,7 +313,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
       x <- fit[[measure]]
       # if fitting minimums then you want EXCEEDANCE probabilities
       if( use.max) prob <- 1-prob
-      quant <- quantile(x, prob=prob)
+      quant <- stats::quantile(x, prob=prob)
       quant <- unlist(quant$quantiles)
       if(x$distname=='PIII' & !use.log)quant <- 10^quant # PIII was fit to the log-values
       if(  use.max) prob <- 1-prob  # reset for adding to data frame
@@ -331,7 +333,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
      file.stat.csv <- file.path(report.dir,paste(Station.Code,"-annual-vfa-stat.csv", sep=""))
      temp <- Q.stat
      temp$value <- round(temp$value, csv.nddigits)
-     write.csv(temp,file=file.stat.csv, row.names=FALSE)
+     utils::write.csv(temp,file=file.stat.csv, row.names=FALSE)
    }
 
    file.stat.trans.csv <- NA
@@ -340,14 +342,14 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
      file.stat.trans.csv <- file.path(report.dir, paste(Station.Code,"-annual-vfa-stat-trans.csv", sep=""))
      temp <- Q.stat.trans
      temp <- round(temp, csv.nddigits)
-     write.csv(temp,file=file.stat.trans.csv, row.names=FALSE)
+     utils::write.csv(temp,file=file.stat.trans.csv, row.names=FALSE)
    }
 
    file.plotdata.csv <- NA
    if(write.plotdata.csv){
      # Write out the plotdata for comparison with HEC output
      file.plotdata.csv <- file.path(report.dir, paste(Station.Code,"-annual-vfa-plotdata.csv", sep=""))
-     write.csv(plotdata,file=file.plotdata.csv, row.names=FALSE)
+     utils::write.csv(plotdata,file=file.plotdata.csv, row.names=FALSE)
    }
 
    file.quantile.csv <- NA
@@ -356,7 +358,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
      file.quantile.csv<- file.path(report.dir, paste(Station.Code,"-annual-vfa-quantiles.csv", sep=""))
      temp <- fitted.quantiles
      temp$quantile <- round(temp$quantile, csv.nddigits)
-     write.csv(temp,file=file.quantile.csv, row.names=FALSE)
+     utils::write.csv(temp,file=file.quantile.csv, row.names=FALSE)
    }
 
    file.quantile.trans.csv <- NA
@@ -365,13 +367,13 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
      file.quantile.trans.csv <- file.path(report.dir, paste(Station.Code,"-annual-vfa-quantiles-trans.csv", sep=""))
      temp <- fitted.quantiles.trans
      temp[,3:ncol(temp)]<- round(temp[,3:ncol(temp)], csv.nddigits)
-     write.csv(temp,file=file.quantile.trans.csv, row.names=FALSE)
+     utils::write.csv(temp,file=file.quantile.trans.csv, row.names=FALSE)
    }
 
    file.frequency.plot <- NA
    if(write.frequency.plot){
       file.frequency.plot <- file.path(report.dir, paste(Station.Code,"-annual-vfa-frequency-plot.",write.frequency.plot.suffix[1],sep=""))
-      ggsave(plot=freqplot, file=file.frequency.plot, h=4, w=6, units="in", dpi=300)
+      ggplot2::ggsave(plot=freqplot, file=file.frequency.plot, h=4, w=6, units="in", dpi=300)
    }
 
    list(start.year=start.year,

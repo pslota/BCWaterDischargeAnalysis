@@ -55,6 +55,8 @@
 #'                          end.year      =2014)
 #' }
 #' @export
+#' @import ggplot2
+#' @import scales
 #'
 #--------------------------------------------------------------
 # Compute the statistics on an (calendar and water) year basis
@@ -174,8 +176,8 @@ compute.Q.stat.annual <- function(Station.Code='XXXXX',
        min.Q    = min (Q, na.rm=TRUE),
        max.Q    = max (Q, na.rm=TRUE),
        mean.Q   = mean(Q,na.rm=TRUE),
-       median.Q = median(Q,na.rm=TRUE),
-       sd.Q     = sd  (Q,na.rm=TRUE))
+       median.Q = stats::median(Q,na.rm=TRUE),
+       sd.Q     = stats::sd  (Q,na.rm=TRUE))
  flow.sum
 
  if(debug)browser()
@@ -265,10 +267,10 @@ compute.Q.stat.annual <- function(Station.Code='XXXXX',
                       month.min = min   (fy$Q, na.rm=na.rm$na.rm.global)
                       month.max = max   (fy$Q, na.rm=na.rm$na.rm.global)
                       month.mean= mean  (fy$Q, na.rm=na.rm$na.rm.global)
-                      month.p50 = median(fy$Q, na.rm=na.rm$na.rm.global)
-                      month.p10 = try(quantile(fy$Q, prob=.10, na.rm=na.rm$na.rm.global), TRUE)  # quantile bombs is na present and na.rm=FALSE !
+                      month.p50 = stats::median(fy$Q, na.rm=na.rm$na.rm.global)
+                      month.p10 = try(stats::quantile(fy$Q, prob=.10, na.rm=na.rm$na.rm.global), TRUE)  # quantile bombs is na present and na.rm=FALSE !
                       if (class(month.p10) == "try-error") month.p10 <- NA
-                      month.p20 = try(quantile(fy$Q, prob=.20, na.rm=na.rm$na.rm.global), TRUE)
+                      month.p20 = try(stats::quantile(fy$Q, prob=.20, na.rm=na.rm$na.rm.global), TRUE)
                       if (class(month.p20) == "try-error") month.p20 <- NA
                       data.frame(month.min, month.max, month.mean,
                                  month.p50, month.p20, month.p10, stringsAsFactors=FALSE)
@@ -429,8 +431,8 @@ Q.stat.wy <- plyr::ddply(flow[ flow$WYear >= start.year,], "WYear", function(fy,
 # compute the number of days in a year outside of the 25th or 75th percentile for each day.
 flow$jdate <- as.numeric(format(flow$Date, "%j")) # the julian date
 daily.quant <- plyr::ddply(flow, "jdate", plyr::summarize,
-                           p25=quantile(Q, prob=0.25, na.rm=TRUE),
-                           p75=quantile(Q, prob=0.75, na.rm=TRUE))
+                           p25=stats::quantile(Q, prob=0.25, na.rm=TRUE),
+                           p75=stats::quantile(Q, prob=0.75, na.rm=TRUE))
 flow <- merge(flow, daily.quant, by='jdate') # merge back with the original data
 outside.quant <- plyr::ddply(flow, "Year", plyr::summarize,
                              CY_N_BELOW_25=sum(Q < p25, na.rm=TRUE),
@@ -447,7 +449,7 @@ if(write.flow.summary.csv){
    file.summary.csv <- file.path(report.dir, paste(Station.Code,"-period-record-summary.csv", sep=""))
    temp <- flow.sum
    temp[,5:ncol(flow.sum)] <- round(temp[,5:ncol(flow.sum)], csv.nddigits)
-   write.csv(temp,file=file.summary.csv, row.names=FALSE)
+   utils::write.csv(temp,file=file.summary.csv, row.names=FALSE)
 }
 
 # See if you want to write out the summary tables?
@@ -458,7 +460,7 @@ if(write.stat.csv){
    file.stat.csv <- file.path(report.dir, paste(Station.Code,"-annual-summary-stat.csv", sep=""))
    temp <- Q.stat
    temp <- round(temp, csv.nddigits)
-   write.csv(temp,file=file.stat.csv, row.names=FALSE)
+   utils::write.csv(temp,file=file.stat.csv, row.names=FALSE)
 }
 
 # Write out the annual summary table in transposed format?
@@ -470,7 +472,7 @@ if(write.stat.trans.csv){
   file.stat.trans.csv <-file.path(report.dir,paste(Station.Code,"-annual-summary-stat-trans.csv",sep=""))
   temp <- Q.stat.trans
   temp <- round(temp, csv.nddigits)
-  write.csv(temp, file=file.stat.trans.csv, row.names=TRUE)
+  utils::write.csv(temp, file=file.stat.trans.csv, row.names=TRUE)
 }
 
 # Write out the low flow summary
@@ -492,7 +494,7 @@ if(write.lowflow.csv){
        temp[,i] <- as.Date(paste(temp$Year-1,'-10-01',sep=""))+temp[,i]-1
      }
    }
-   write.csv(temp, file=file.lowflow.csv, row.names=FALSE)
+   utils::write.csv(temp, file=file.lowflow.csv, row.names=FALSE)
 }
 
 # make a plot of the cumulative departures
@@ -500,7 +502,7 @@ if(write.lowflow.csv){
       # find the grand mean over all of the years ignoring all missing values
       grand.mean <- mean( Q.stat[, variable], na.rm=TRUE)
       plotdata <- Q.stat[,c("Year",variable)]
-      plotdata <- plotdata[complete.cases(plotdata),]   # remove all missing values
+      plotdata <- plotdata[stats::complete.cases(plotdata),]   # remove all missing values
       plotdata$diff.from.mean <- plotdata[, variable] - grand.mean
       plotdata$cum.diff.from.mean <- cumsum(plotdata$diff.from.mean)
       plot1 <- ggplot2::ggplot(data=plotdata, aes(x=Year, y=cum.diff.from.mean))+
@@ -518,30 +520,30 @@ if(plot.cumdepart){
    file.cumdepart.pdf <- file.path(report.dir, paste(Station.Code,"-cumulative departure.pdf",sep=""))
    var.list <- c("CY_MEAN_DAILY_SW","WY_MEAN_DAILY_SW", "CY_YIELDMM_DAILY_SW", "WY_YIELDMM_DAILY_SW",
                   "ONDJFM_YIELDMM_DAILY_SW","AMJJAS_YIELDMM_DAILY_SW"   )
-   pdf(file=file.cumdepart.pdf, h=8, w=11)
+   grDevices::pdf(file=file.cumdepart.pdf, h=8, w=11)
    plyr::l_ply(var.list, function(x, Q.stat){
       plot1 <- plot_cumdepart(Q.stat, x)
-      plot(plot1)
+      graphics::plot(plot1)
    },Q.stat=Q.stat)
-   dev.off()
+   grDevices::dev.off()
 }
 
 # Make a plot of all of the statistics over time and save to a pdf file
 file.stat.trend.pdf <- NA
 if(plot.stat.trend){
    file.stat.trend.pdf <- file.path(report.dir, paste(Station.Code,"-annual-trend.pdf",sep=""))
-   pdf(file.stat.trend.pdf, h=8, w=11)
+   grDevices::pdf(file.stat.trend.pdf, h=8, w=11)
 
    plot_trend <- function(plotdata, select){
      x <- plotdata[select,]
-     myplot <- ggplot(data=x, aes(x=Year, y=Value, group=Statistic, color=Statistic, linetype=Statistic))+
+     myplot <- ggplot2::ggplot(data=x, aes(x=Year, y=Value, group=Statistic, color=Statistic, linetype=Statistic))+
        ggtitle(paste(Station.Code, " - Trend for ", x$statgroup[1]))+
        geom_point()+
        geom_line()+xlab("Year")+ylab(x$Ylabel[1])
      if(x$transform[1] == 'log'){
        myplot <- myplot + ylab(paste("log(",x$Ylabel[1],")",sep=""))+scale_y_continuous(trans='log10')
      }
-     plot(myplot)
+     graphics::plot(myplot)
    }
 
    plotdata <- reshape2::melt(Q.stat, id.var="Year", variable.name="Statistic", value.name="Value")
@@ -832,7 +834,7 @@ if(plot.stat.trend){
    plotdata$Ylabel   [ set.misc] <- 'Cumulative Flow (cms)'
    plot_trend(plotdata, set.misc)
 
-   dev.off()
+   grDevices::dev.off()
 }
 return(list( Q.flow.summary=flow.sum,
              Q.stat.annual=Q.stat,

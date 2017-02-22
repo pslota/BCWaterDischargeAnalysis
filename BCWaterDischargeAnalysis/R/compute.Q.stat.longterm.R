@@ -36,6 +36,8 @@
 #' }
 #'
 #'@export
+#'@import ggplot2
+#'@import scales
 #'
 
 
@@ -105,14 +107,14 @@ compute.Q.stat.longterm <- function(
 
    Q.month.longterm <- plyr::ddply(flow[flow$Year >= start.year & flow$Year<=end.year,], "Month", function(x,na.rm){    # all missing values always excluded
       mean  = mean  (x$Q, na.rm=na.rm$na.rm.global)
-      median= median(x$Q, na.rm=na.rm$na.rm.global)
+      median= stats::median(x$Q, na.rm=na.rm$na.rm.global)
       max   = max   (x$Q, na.rm=na.rm$na.rm.global)
       min   = min   (x$Q, na.rm=na.rm$na.rm.global)
       data.frame(mean=mean, median=median, max=max, min=min)
    }, na.rm=na.rm)
    Q.all.longterm <- plyr::summarize( flow[flow$Year >= start.year & flow$Year<=end.year,],
                           mean  = mean  (Q, na.rm=na.rm$na.rm.global),
-                          median= median(Q, na.rm=na.rm$na.rm.global),
+                          median= stats::median(Q, na.rm=na.rm$na.rm.global),
                           max   = max   (Q, na.rm=na.rm$na.rm.global),
                           min   = min   (Q, na.rm=na.rm$na.rm.global))
    Q.all.longterm$Month <- 13
@@ -126,7 +128,7 @@ compute.Q.stat.longterm <- function(
       file.stat.csv <-file.path(report.dir, paste(Station.Code,"-longterm-summary-stat.csv", sep=""))
       temp <- Q.longterm
       temp <- round(temp, csv.nddigits)  # round the output
-      write.csv(temp, file=file.stat.csv, row.names=FALSE)
+      utils::write.csv(temp, file=file.stat.csv, row.names=FALSE)
    }
 
 #  Write out thesummary table in transposed format
@@ -138,7 +140,7 @@ compute.Q.stat.longterm <- function(
      file.stat.trans.csv <-file.path(report.dir,paste(Station.Code,"-longterm-summary-stat-trans.csv", sep=""))
      temp <- Q.longterm.trans
      temp <- round(temp, csv.nddigits) # round the output
-     write.csv(temp, file=file.stat.trans.csv, row.names=TRUE)
+     utils::write.csv(temp, file=file.stat.trans.csv, row.names=TRUE)
    }
    return(list(Q.stat.longterm=Q.longterm,
                Q.stat.longterm.trans=Q.longterm.trans,
