@@ -1,7 +1,0 @@
-30Jan2017:13:16:52-INFO-rgpike-Added Manager Base Map type hec2.ssp.model.DataStore
-30Jan2017:13:16:52-INFO-rgpike-Added Manager Base Map type hec2.ssp.model.Map
-30Jan2017:13:16:52-INFO-rgpike-Created by rgpike
-30Jan2017:13:16:53-INFO-rgpike-Coordinate System now X-Y
-30Jan2017:13:17:44-INFO-rgpike-Added Manager CARNATION-FLOW-DAY type hec2.ssp.model.Data
-30Jan2017:13:20:52-INFO-rgpike-Added Manager CARNATION_FREQ type hec2.ssp.model.VolumeFrequencyAnalysis
-30Jan2017:13:20:53-INFO-rgpike-Added Manager PlotProbLines type hec2.ssp.model.PlotProbLinesMgr

@@ -1,7 +1,0 @@
-30Jan2017:12:47:07-INFO-rgpike-Added Manager Base Map type hec2.ssp.model.DataStore
-30Jan2017:12:47:07-INFO-rgpike-Added Manager Base Map type hec2.ssp.model.Map
-30Jan2017:12:47:07-INFO-rgpike-Created by rgpike
-30Jan2017:12:47:07-INFO-rgpike-Coordinate System now X-Y
-30Jan2017:12:48:14-INFO-rgpike-Added Manager Liard-FLOW-DAY type hec2.ssp.model.Data
-30Jan2017:12:49:54-INFO-rgpike-Added Manager Liard_Freq type hec2.ssp.model.VolumeFrequencyAnalysis
-30Jan2017:12:49:56-INFO-rgpike-Added Manager PlotProbLines type hec2.ssp.model.PlotProbLinesMgr

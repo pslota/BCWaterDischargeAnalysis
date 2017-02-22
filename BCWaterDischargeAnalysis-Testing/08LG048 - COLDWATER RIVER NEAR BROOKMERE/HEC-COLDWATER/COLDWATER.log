@@ -1,8 +1,0 @@
-30Jan2017:13:11:34-INFO-rgpike-Added Manager Base Map type hec2.ssp.model.DataStore
-30Jan2017:13:11:34-INFO-rgpike-Added Manager Base Map type hec2.ssp.model.Map
-30Jan2017:13:11:34-INFO-rgpike-Created by rgpike
-30Jan2017:13:11:35-INFO-rgpike-Coordinate System now X-Y
-30Jan2017:13:12:21-INFO-rgpike-Added Manager COLDWATER-FLOW-DAY type hec2.ssp.model.Data
-30Jan2017:13:13:00-INFO-rgpike-Added Manager COLDWATER_FREQ type hec2.ssp.model.VolumeFrequencyAnalysis
-30Jan2017:13:13:08-INFO-rgpike-Added Manager PlotProbLines type hec2.ssp.model.PlotProbLinesMgr
-30Jan2017:13:13:56-INFO-rgpike-Project Closed
