@@ -247,9 +247,12 @@ vfa.analysis$file.frequency.plot
 
 # Missing Values
 
-Accoding to the WSC, 
-> monthly or annual values are not calculated unless there is complete daily record. 
-> If the gauge went down and the daily record cannot be reasonable estimated,
+Accoding to the WSC,
+
+> Monthly or annual values are not calculated unless 
+> there is complete daily record. 
+> If the gauge went down and the daily record cannot be 
+> reasonable estimated,
 > then summaries at longer time scales (monthly, annual) are not computed.
 
 

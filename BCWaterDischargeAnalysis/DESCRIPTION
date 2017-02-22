@@ -1,6 +1,6 @@
 Package: BCWaterDischargeAnalysis
 Type: Package
-Title: Analysis of stream discharge data to mimic HEC
+Title: Analysis of stream discharge data
 Version: 2017-02-28
 Author: c(person("Schwarz","CarlJames",email="cchwarz@stat.sfu.ca", role=c("aut","ctr"),
                   comment='Primary Author'))

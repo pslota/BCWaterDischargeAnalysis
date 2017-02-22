@@ -15,11 +15,11 @@ knitr::opts_chunk$set(
 # Water Discharge Analysis R Package.
 
 This package was developed to help analyze stream discharge data. 
-It is an alternative to using the HEC package.
 
 This package was written for the B.C. Ministry of Environment
 by Carl James Schwarz (cschwarz.stat.sfu.ca@gmail.com).
 
+<a rel="Delivery" href="https://github.com/BCDevExchange/docs/blob/master/discussion/projectstates.md"><img alt="In production, but maybe in Alpha or Beta. Intended to persist and be supported." style="border-width:0" src="http://bcdevexchange.org/badge/3.svg" title="In production, but maybe in Alpha or Beta. Intended to persist and be supported." /></a>
 
 ### Installing the package.
 
