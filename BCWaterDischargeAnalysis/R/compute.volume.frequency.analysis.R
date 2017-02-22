@@ -193,7 +193,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
 
    # Compute the rolling averagw of interest
    flow <- flow[ order(flow$Date),]
-   flow <- ldply(roll.avg.days, function (x, flow){
+   flow <- plyr::ldply(roll.avg.days, function (x, flow){
         # compute the rolling average of x days
         # create a variable to be attached to the statistic
         flow$Measure <- paste("Q", formatC(x, width=3, format="d", flag="0"),"-avg",sep="")
@@ -205,7 +205,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    flow <- flow[ flow$Year >=start.year & flow$Year <= end.year,]
 
    # Compute the yearly min (unless max flag is set)
-   Q.stat <- ddply(flow, c("Year","Measure"), function(x,use.max=FALSE, na.rm){
+   Q.stat <- plyr::ddply(flow, c("Year","Measure"), function(x,use.max=FALSE, na.rm){
        # compute min or max of Q for the year-measure combination
        value <- ifelse(use.max, max(x$Q,na.rm=na.rm$na.rm.global), min(x$Q,na.rm=na.rm$na.rm.global) )
        data.frame(value=value)
@@ -271,7 +271,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
       if(order==3) return(e1071::skewness(x, type=2))
    }
 
-   fit <- dlply(Q.stat, "Measure", function(x, distr, fit.method){
+   fit <- plyr::dlply(Q.stat, "Measure", function(x, distr, fit.method){
       start=NULL
       # PIII is fit to log-of values unless use.log has been set, in which case data has previous been logged
       if(distr=='PIII' & !use.log){x$value <- log10(x$value)}
@@ -306,7 +306,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    }, distr=fit.distr[1], fit.method=fit.distr.method[1])
 
    # extracted the fitted quantiles from the fitted distribution
-   fitted.quantiles <- ldply(names(fit), function (measure, prob,fit, use.max, use.log){
+   fitted.quantiles <- plyr::ldply(names(fit), function (measure, prob,fit, use.max, use.log){
       # get the quantiles for each model
       x <- fit[[measure]]
       # if fitting minimums then you want EXCEEDANCE probabilities
