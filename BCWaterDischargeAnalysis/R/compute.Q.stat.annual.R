@@ -519,7 +519,7 @@ if(plot.cumdepart){
    var.list <- c("CY_MEAN_DAILY_SW","WY_MEAN_DAILY_SW", "CY_YIELDMM_DAILY_SW", "WY_YIELDMM_DAILY_SW",
                   "ONDJFM_YIELDMM_DAILY_SW","AMJJAS_YIELDMM_DAILY_SW"   )
    pdf(file=file.cumdepart.pdf, h=8, w=11)
-   l_ply(var.list, function(x, Q.stat){
+   plyr::l_ply(var.list, function(x, Q.stat){
       plot1 <- plot_cumdepart(Q.stat, x)
       plot(plot1)
    },Q.stat=Q.stat)
