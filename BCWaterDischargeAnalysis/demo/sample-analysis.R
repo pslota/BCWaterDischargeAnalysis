@@ -42,7 +42,7 @@ end.year     <- 2012  # what is last year with complete data
 # See http://r-pkgs.had.co.nz/data.html for details.
 # Normally, you would just give the actual file name in the read.csv() function below.
 
-input.csv <- system.file("extdata","08HA011_STREAMFLOW_SUMMARY.csv", pacakge="BCWaterDischargeAnalysis")
+input.csv <- system.file("extdata","08HA011_STREAMFLOW_SUMMARY.csv", package="BCWaterDischargeAnalysis")
 
 flow <- read.csv(input.csv, header=TRUE, as.is=TRUE, strip.white=TRUE)
 
