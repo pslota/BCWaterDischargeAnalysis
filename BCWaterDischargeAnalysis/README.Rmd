@@ -20,7 +20,7 @@ This package was written for the B.C. Ministry of Environment
 by Carl James Schwarz (cschwarz.stat.sfu.ca@gmail.com).
 
 
-### Installing the package.
+## Installing the package.
 
 To install the latest version of BCWaterDischargeAnalysis:
 
@@ -34,6 +34,9 @@ install_github("bcgov/water-discharge-analysis/BCWaterDischargeAnalysis", build_
 library(BCWaterDischargeAnalysis)
 ```
 
+
+## Vignettes
+
 You can see the vignette names using
 ```{r, eval=FALSE}
 vignette(package="BCWaterDischargeAnalysis")
@@ -44,6 +47,17 @@ You can read the vignette using:
 vignette("example-analysis", package="BCWaterDischargeAnalysis")
 ```
 
+## Demo files
+You can see a list of all the demonstration files using:
+```{r, eval=FALSE}
+demo(package="BCWaterDischargeAnalysis")
+```
+
+You can run a specific demo using:
+```{r, eval=FALSE}
+demo("sample-analysis", package="BCWaterDischargeAnalysis")
+```
+
 
 ## Help on functions
 Use the help function of R in the usual way.
@@ -52,7 +66,7 @@ help(package="BCWaterDischargeAnalysis") # list of all functions in package
 help(compute.Q.stat.annual)  # help on individual function
 ```
 
-### Data
+## Data
 Create a data frame (e.g. __df__) with two varibles:
 
 Variable | Description
@@ -71,14 +85,14 @@ detail in the vignette.
 
 
 
-### Project Status
+## Project Status
 This project is complete.
 
-### Getting Help or Reporting an Issue
+## Getting Help or Reporting an Issue
 
 To report bugs/issues/feature requests, please file an [issue](https://github.com/bcgov/water-discharge-analysis/issues/).
 
-### License
+## License
 
     Copyright 2017 Province of British Columbia
 
