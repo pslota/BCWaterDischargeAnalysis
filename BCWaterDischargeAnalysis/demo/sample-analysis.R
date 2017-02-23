@@ -16,7 +16,9 @@
 devAskNewPage(ask = FALSE)
 
 
-library(ggplot2)
+library(ggplot2)   # for plotting
+library(plyr)      # for summarizing
+library(reshape2)  # for melting
 
 
 options(width=200)  # how wide to print output
@@ -247,8 +249,14 @@ vfa.analysis$file.stat.csv
 head(vfa.analysis$Q.stat)
 head(vfa.analysis$Q.stat.trans)
 
+# you can access the frequence plot directly
 vfa.analysis$freqplot
-ggsave(plot=vfa.analysis$freqplot,
+
+# you can change features of the plot
+new.plot <- vfa.analysis$freqplot + ggtitle("A new title")
+
+# you can save this revised plot in the usual way.
+ggsave(plot=new.plot,
        file=file.path(report.dir, paste(Station.Code,"-annual-vfa-frequency-plot.png",sep="")), h=6, w=6, units="in", dpi=300)
 
 vfa.analysis$fitted.quantiles.trans
