@@ -15,7 +15,7 @@ a sample analysis of the stream discharge data from station
 the period of record.
 
 The base data is provided as a sample dataset (S08HA011) with this package.
-The basin has an area of 826 km**2. While the data fram runs from 1900 onwards, data was only 
+The basin has an area of 826 km**2. While the data frame runs from 1900 onwards, data was only 
 populated in this example starting in 1965 onwards. 
 
 ## Loading the data 
@@ -126,7 +126,7 @@ We see that there are now missing values in a few years (e.g. 1967).
 
 
 ## Computing the Annual Statistics (on calendar- and water-year)
-We compute the plethora of annual statistics with the default action to propogate missing values.
+We compute the plethora of annual statistics with the default action to propagate missing values.
 ```{r, warning=FALSE}
 stat.annual <- compute.Q.stat.annual(
                           Station.Code  =Station.Code,
@@ -174,7 +174,7 @@ stat.longterm <- compute.Q.stat.longterm(
 head(stat.longterm$Q.stat.longterm)
 ```
 
-If you wish missing values to propogate, use:
+If you wish missing values to propagate, use:
 ```{r, warning=FALSE}
 stat.longterm.missing <- compute.Q.stat.longterm(
                           Station.Code =Station.Code,
@@ -199,7 +199,7 @@ percentile.longterm <- compute.Q.percentile.longterm(
 head(percentile.longterm$Q.percentile.stat)
 ```
 
-If you want to propogate missing values, again set the **na.rm** argument:
+If you want to propagate missing values, again set the **na.rm** argument:
 ```{r, warning=FALSE}
 percentile.longterm.missing <- compute.Q.percentile.longterm(
                           Station.Code=Station.Code,

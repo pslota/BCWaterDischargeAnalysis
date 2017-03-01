@@ -207,10 +207,10 @@ ggplot2::<span class="kw">ggplot</span>(<span class="dt">data=</span>plotdata, <
 <p>This will create a list object with many elements:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">names</span>(stat.annual)</code></pre></div>
 <pre><code>##  [1] &quot;Q.flow.summary&quot;      &quot;Q.stat.annual&quot;       &quot;Q.stat.annual.trans&quot;
-##  [4] &quot;dates.missing.flows&quot; &quot;file.stat.csv&quot;       &quot;file.stat.trans.csv&quot;
-##  [7] &quot;file.stat.trend.pdf&quot; &quot;file.cumdepart.pdf&quot;  &quot;file.summary.csv&quot;   
-## [10] &quot;file.lowflow.csv&quot;    &quot;na.rm&quot;               &quot;Version&quot;            
-## [13] &quot;Date&quot;</code></pre>
+##  [4] &quot;dates.missing.flows&quot; &quot;file.cy.stat.csv&quot;    &quot;file.wy.stat.csv&quot;   
+##  [7] &quot;file.stat.trans.csv&quot; &quot;file.stat.trend.pdf&quot; &quot;file.cumdepart.pdf&quot; 
+## [10] &quot;file.summary.csv&quot;    &quot;file.lowflow.csv&quot;    &quot;na.rm&quot;              
+## [13] &quot;Version&quot;             &quot;Date&quot;</code></pre>
 <p>This has many, many statistics some of which are shown below:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(stat.annual$Q.stat.annual[, <span class="dv">1</span>:<span class="dv">10</span>])</code></pre></div>
 <pre><code>##   Year CY_MIN_01Day_SW CY_MINDOY_01Day_SW CY_MIN_03Day_SW
@@ -234,11 +234,11 @@ ggplot2::<span class="kw">ggplot</span>(<span class="dt">data=</span>plotdata, <
 ## 4                237            5.10
 ## 5                256            4.98
 ## 6                230            4.25</code></pre>
-<p>Notice the default acton (refer to the <code>missing-data</code> vignette) is to propogate missing values. Despite a complete data record starting in 1965, we made this example have no data prior to (and including) 1964-12-31. This implies that a three-day rolling average that includes 1964-12-31 cannot be computed which gives rise to missing values for the 3-day rolling average minimum flow for the first few days in 1965. This also occurs for other rolling averages that include any 1964 data such as the water year computation for the 1965 water year which started on 1964-10-01.</p>
+<p>Notice the default acton (refer to the <code>missing-data</code> vignette) is to propagate missing values. Despite a complete data record starting in 1965, we made this example have no data prior to (and including) 1964-12-31. This implies that a three-day rolling average that includes 1964-12-31 cannot be computed which gives rise to missing values for the 3-day rolling average minimum flow for the first few days in 1965. This also occurs for other rolling averages that include any 1964 data such as the water year computation for the 1965 water year which started on 1964-10-01.</p>
 <p>These statistics can be then processed as you desire.</p>
 <p>As well, the default arguments will also create several <code>.csv</code> files with the summary statistics and a <code>.pdf</code> file with the trends plotted over time in the directory you run the code in. The file names are given in the list object:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stat.annual$file.stat.csv</code></pre></div>
-<pre><code>## [1] &quot;./08HA011-annual-summary-stat.csv&quot;</code></pre>
+<pre><code>## NULL</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stat.annual$file.stat.trans.csv</code></pre></div>
 <pre><code>## [1] &quot;./08HA011-annual-summary-stat-trans.csv&quot;</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stat.annual$file.stat.trend.pdf</code></pre></div>

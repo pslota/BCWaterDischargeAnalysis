@@ -75,7 +75,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 <p>This will demonstrate the impact of missing values on the computations using a sample analysis of the stream discharge data from station 08HA011 (Cowichen River near Duncan) after creating some missing values (at random) during the period of record.</p>
-<p>The base data is provided as a sample dataset (S08HA011) with this package. The basin has an area of 826 km**2. While the data fram runs from 1900 onwards, data was only populated in this example starting in 1965 onwards.</p>
+<p>The base data is provided as a sample dataset (S08HA011) with this package. The basin has an area of 826 km**2. While the data frame runs from 1900 onwards, data was only populated in this example starting in 1965 onwards.</p>
 <div id="loading-the-data" class="section level2">
 <h2>Loading the data</h2>
 <p>We first load the package, load the data, add a <strong>Year</strong> column, and look at the first few rows starting in 1965.</p>
@@ -223,7 +223,7 @@ S08HA011.sum</code></pre></div>
 </div>
 <div id="computing-the-annual-statistics-on-calendar--and-water-year" class="section level2">
 <h2>Computing the Annual Statistics (on calendar- and water-year)</h2>
-<p>We compute the plethora of annual statistics with the default action to propogate missing values.</p>
+<p>We compute the plethora of annual statistics with the default action to propagate missing values.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stat.annual &lt;-<span class="st"> </span><span class="kw">compute.Q.stat.annual</span>(
                           <span class="dt">Station.Code  =</span>Station.Code,
                           <span class="dt">Station.Area  =</span>Station.Area,
@@ -305,7 +305,7 @@ S08HA011.sum</code></pre></div>
 ## 4     4  57.23731  52.40 154.0  8.67
 ## 5     5  35.27636  31.00 121.0  6.47
 ## 6     6  18.18267  13.60  73.4  2.99</code></pre>
-<p>If you wish missing values to propogate, use:</p>
+<p>If you wish missing values to propagate, use:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stat.longterm.missing &lt;-<span class="st"> </span><span class="kw">compute.Q.stat.longterm</span>(
                           <span class="dt">Station.Code =</span>Station.Code,
                           <span class="dt">Station.Area =</span>Station.Area,
@@ -353,7 +353,7 @@ S08HA011.sum</code></pre></div>
 ## 4  93.91 107.00 120.00 131.610
 ## 5  65.84  72.80  79.14  84.096
 ## 6  40.40  49.01  57.20  63.968</code></pre>
-<p>If you want to propogate missing values, again set the <strong>na.rm</strong> argument:</p>
+<p>If you want to propagate missing values, again set the <strong>na.rm</strong> argument:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">percentile.longterm.missing &lt;-<span class="st"> </span><span class="kw">compute.Q.percentile.longterm</span>(
                           <span class="dt">Station.Code=</span>Station.Code,
                           <span class="dt">Station.Area=</span>Station.Area,

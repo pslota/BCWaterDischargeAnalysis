@@ -83,7 +83,8 @@ A list with the following elements:
   \item{Q.stat.annual.trans}{Data frame with transposed summary statistics.}
   \item{dates.missing.flow}{Data framw with dates of missing \code{flow$Q} between
          \code{start.year} and \code{end.year}}
-  \item{file.stat.csv}{File name of *.csv file with summary statistics.}
+  \item{file.cy.stat.csv}{File name of *.csv file with calendary year summary statistics.}
+  \item{file.wy.stat.csv}{File name of *.csv file with water year summary statistics.}
   \item{file.stat.trans.csv}{File name of *.csv file with transposed summary statistics.}
   \item{file.stat.trend.pdf}{File name of *.pdf file with plot of statistics over time.}
   \item{file.cumdepart.pdf}{File name of *.pdf file with plot of yearly and cumulative departures.}

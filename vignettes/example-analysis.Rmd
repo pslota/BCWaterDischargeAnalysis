@@ -117,7 +117,7 @@ This has many, many statistics some of which are shown below:
 ```{r}
 head(stat.annual$Q.stat.annual[, 1:10])
 ```
-Notice the default acton (refer to the `missing-data` vignette) is to propogate missing values. Despite a complete data record starting
+Notice the default acton (refer to the `missing-data` vignette) is to propagate missing values. Despite a complete data record starting
 in 1965, we made this example have no data prior to (and including) 1964-12-31. 
 This implies that a three-day rolling average that
 includes 1964-12-31 cannot be computed which gives rise to missing values for the 3-day rolling average minimum
