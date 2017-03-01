@@ -64,6 +64,8 @@ Create a data frame (e.g. __df__) with two varibles:
 Variable | Description
 ---------|-------------
 Date   | The data of the reading in standard R date class format. For example to convert a 4-digit year, numeric month, and numeric day of the month use __df$Date  <- as.Date{paste(df$Year,'-',df$Month,'-',df$Day,sep="")}__.
+To convert a character string (e.g. '1/15/2001') use the `as.Date(flow$chardate, "%d/%m/%Y")` function. 
+The formatting codes (%Y etc) are explained in the help for the `strptime()` function.
 Q  | The average daily flow as a numeric value.
 
 Other variables in the data frame will be ignored.
