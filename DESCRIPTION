@@ -1,10 +1,10 @@
 Package: BCWaterDischargeAnalysis
 Type: Package
 Title: Analysis of stream discharge data
-Version: 2017-02-28
+Version: 2017-03-01
 Author: c(person("Schwarz","CarlJames",email="cchwarz@stat.sfu.ca", role=c("aut","ctr"),
                   comment='Primary Author'))
-Maintainer: The package maintainer <yourself@somewhere.net>
+Maintainer: Robin G. Pike <Robin.G.Pike@gov.bc.ca>
 Description: Computes annual (calendar and water year) statistics, long term summary statistics,
     long term percentiles, and a volume frequency analysis for stream discharge data.
 License: Apache License (== 2.0) | file LICENSE

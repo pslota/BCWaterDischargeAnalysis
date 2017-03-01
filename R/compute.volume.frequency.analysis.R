@@ -5,9 +5,10 @@
 #' @template Station.Code
 #' @template flow
 #' @template start.year
-#' @param use.water.year Should results be computed on the water year (starting 1 October)? The 2014 water year
+#' @param use.water.year Should results be computed on the water year (starting 1 October)?
+#'        The 2013/2014 water year
 #'        runs from 2013-10-01 to 2014-09-30.
-#' @param roll.avg.days Volume frequncy analysis conducted on these rolling averages.
+#' @param roll.avg.days Volume frequency analysis conducted on these rolling averages.
 #' @param use.log  Transfrom to log-scale before analysis?
 #' @param use.max  Analyze the maximums rather than the minimums.
 #' @param prob.plot.position Which plotting positions should be used in the frequency plots. Points are plotted
@@ -117,7 +118,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
 # Output list - see above.
 
   {
-   Version <- '2017-02-01'
+   Version <- packageVersion("BCWaterDischargeAnalysis")
    # replicate the frequency analysis of the HEC-SSP program
    # refer to Chapter 7 of the user manual
 

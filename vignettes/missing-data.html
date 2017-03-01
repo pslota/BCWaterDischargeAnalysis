@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Carl James Schwarz" />
+
+<meta name="date" content="2017-03-01" />
+
+<title>Impact of missing values</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Impact of missing values</h1>
+<h4 class="author"><em>Carl James Schwarz</em></h4>
+<h4 class="date"><em>2017-03-01</em></h4>
+
+
+
+<p>This will demonstrate the impact of missing values on the computations using a sample analysis of the stream discharge data from station 08HA011 (Cowichen River near Duncan) after creating some missing values (at random) during the period of record.</p>
+<p>The base data is provided as a sample dataset (S08HA011) with this package. The basin has an area of 826 km**2. While the data fram runs from 1900 onwards, data was only populated in this example starting in 1965 onwards.</p>
+<div id="loading-the-data" class="section level2">
+<h2>Loading the data</h2>
+<p>We first load the package, load the data, add a <strong>Year</strong> column, and look at the first few rows starting in 1965.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(plyr)       <span class="co"># split-apply-combine paradigm</span>
+
+<span class="kw">library</span>(BCWaterDischargeAnalysis)
+
+
+<span class="kw">data</span>(S08HA011)
+S08HA011$Year &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(<span class="kw">format</span>(S08HA011$Date, <span class="st">&quot;%Y&quot;</span>))
+<span class="kw">head</span>( S08HA011[ S08HA011$Year ==<span class="dv">1965</span>,])</code></pre></div>
+<pre><code>##             Date    Q Year
+## 23742 1965-01-01 46.4 1965
+## 23743 1965-01-02 45.0 1965
+## 23744 1965-01-03 44.5 1965
+## 23745 1965-01-04 39.6 1965
+## 23746 1965-01-05 38.2 1965
+## 23747 1965-01-06 36.5 1965</code></pre>
+<p><strong>Notice that the flow dataframe MUST have two variables: Date, the day in standard R format, and Q - the daily discharge value.</strong></p>
+<p>We now set the variables limiting the years for which the analysis should be done and setting up other needed variables for the analysis.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Station.Code &lt;-<span class="st"> '08HA011'</span>
+Station.Name &lt;-<span class="st"> 'Cowichen River near Duncan'</span>
+Station.Area &lt;-<span class="st"> </span><span class="dv">826</span>    <span class="co"># square km's</span>
+
+start.year   &lt;-<span class="st"> </span><span class="dv">1965</span>  <span class="co"># when do you want the analysis to start at.</span>
+end.year     &lt;-<span class="st"> </span><span class="dv">2012</span>  <span class="co"># what is last year with complete data</span></code></pre></div>
+<p>We now create some missing values at random in the dataset.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Create 1% missing values (approximately)</span>
+<span class="kw">set.seed</span>(<span class="dv">3423432</span>)
+<span class="kw">sum</span>(<span class="kw">is.na</span>(S08HA011[ start.year &lt;=<span class="st"> </span>S08HA011$Year &amp;<span class="st"> </span>S08HA011$Year &lt;=<span class="st"> </span>end.year, <span class="st">&quot;Q&quot;</span>]))</code></pre></div>
+<pre><code>## [1] 0</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">missing &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span>:<span class="kw">nrow</span>(S08HA011), .<span class="dv">0003</span>*<span class="kw">nrow</span>(S08HA011))
+S08HA011$Q[ missing ] &lt;-<span class="st"> </span><span class="ot">NA</span>
+<span class="kw">sum</span>(<span class="kw">is.na</span>(S08HA011[ start.year &lt;=<span class="st"> </span>S08HA011$Year &amp;<span class="st"> </span>S08HA011$Year &lt;=<span class="st"> </span>end.year, <span class="st">&quot;Q&quot;</span>]))</code></pre></div>
+<pre><code>## [1] 4</code></pre>
+</div>
+<div id="impact-of-missing-values" class="section level2">
+<h2>Impact of missing values</h2>
+<p>Accoding to the WSC,</p>
+<blockquote>
+<p>Monthly or annual values are not calculated unless there is complete daily record. If the gauge went down and the daily record cannot be reasonable estimated, then summaries at longer time scales (monthly, annual) are not computed.</p>
+</blockquote>
+<p>This is controlled in all of the functions in this package using the <strong>na.rm</strong> argument (similar to many R functions such as <code>mean()</code> etc), but usage is slightly different from the standard R usage to allow future versions of the software to have finer control on dealing with missing values.</p>
+<p>The treatment of missing values for all functions is controlled through the <strong>na.rm=list(na.rm.global=XXXXX)</strong> argument. The current default actions are:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Default Action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>compute.Q.stat.annual</td>
+<td>na.rm=list(na.rm.global=FALSE)</td>
+</tr>
+<tr class="even">
+<td>compute.Q.stat.longterm</td>
+<td>na.rm=list(na.rm.global=TRUE)</td>
+</tr>
+<tr class="odd">
+<td>compute.Q.percentile.longterm</td>
+<td>na.rm=list(na.rm.global=TRUE)</td>
+</tr>
+<tr class="even">
+<td>compute.volume.frequency.analysis</td>
+<td>na.rm=list(na.rm.global=TRUE)</td>
+</tr>
+</tbody>
+</table>
+<p>If <strong>na.rm=list(na.rm.global=FALSE)</strong>, i.e. do NOT remove missing values before computing statistics, then if there is a missing value present in a series, the missingness is propagated forward. For example, if a month is missing a value, then the minimum flow for that month in that year is not computed, but the minimum flows in the other months are computed. The minimum flow for that year that has the missing value is also not computed. If the missing value was in January, then the JFM season missing is also not computed, but the minimum for AMJ etc are computed. Similarly 6 month averages are computed only if they have a complete record.<br />
+The rule is the same for both the CY (calendar-year) and WY (water-year) statistics.</p>
+<p>The missing value also affects a rolling average that includes the missing value. This may cross month boundaries, e.g. if the missing value occurred on 31 January, then the 3 day rolling average for the 1 Feb is also missing so the statistics for February on the 3 day rolling average are also not computed. If the missing value occurred at the end of a year, the rolling average in January of the next year may be affected, and so on.</p>
+<p>There is also an unintended consequence with the rolling averages. In the first year of the series, the 3, 7, and 30 day rolling averages for the 1st January will be missing and so any monthly/ season/ yearly statistic on the rolling averages will also be missing. The way around this is to INCLUDE data prior to 1 January, e.g. the actual data record runs from 1940 onwards, but you set the <code>start.year=1941</code>. Then the rolling average for 1941-01-01 can be computed.</p>
+<p>Because the first year water-year starts in the previous October, many off the water-year statistics will be missing for the first year, unless you again include more data before the 1 January in the <code>start.year</code> (as above).</p>
+<p>If <strong>na.rm=list(na.rm.glob=TRUE)</strong>, then ALL statistics are computed with the missing value excluded, i.e. in a month with a missing value, the statistics are computed on the remaining values.</p>
+<p>The default action to deal missing values for the long-term statistics is to EXCLUDE all missing values, and so statistics are still computed. For example, if 1942-05-12 has a missing value, any statistics about May will ignore this missing value and at the long-term averages will still be computed.</p>
+<p>The default rule of the volume frequency analysis is to exclude all missing values so so you will get statistics for years without a complete record. If the <strong>na.rm</strong> argument is set to TRUE, then if a year has a missing values in finding the min etc, that year has a NA for the statistic and that year is then EXCLUDED from fitting the distribution. So if you had 40 years on the record, and 1 year had a missing value, then 39 years would be used in the analysis. Because the rolling average is always missing in the first year, any analysis involving a rolling average will miss the first year.</p>
+<p>There is a bit of weirdness if you choose to analyze on the water-year and set the <strong>na.rm.global=TRUE</strong>, because it will compute statistics for the first water-year even though you may be missing data from the previous October prior to 1 January of <code>start.year</code>. Be careful.</p>
+</div>
+<div id="counting-the-number-of-missing-values." class="section level2">
+<h2>Counting the number of missing values.</h2>
+<p>The simple summary statistics are computed as before.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># get a simple summary of the data</span>
+<span class="co"># Table of simple statistics by year to help check for outliers, etc</span>
+S08HA011.sum &lt;-<span class="st"> </span>plyr::<span class="kw">ddply</span>(S08HA011[ S08HA011$Year &gt;=<span class="st"> </span>start.year &amp;<span class="st"> </span>S08HA011$Year &lt;=end.year,], <span class="st">&quot;Year&quot;</span>, plyr::summarize,
+         <span class="dt">n.days   =</span> <span class="kw">length</span>(Year),
+         <span class="dt">n.Q      =</span> <span class="kw">sum</span> (!<span class="kw">is.na</span>(Q)),
+         <span class="dt">n.miss.Q =</span> <span class="kw">sum</span> ( <span class="kw">is.na</span>(Q)),
+         <span class="dt">min.Q    =</span> <span class="kw">min</span> (Q, <span class="dt">na.rm=</span><span class="ot">TRUE</span>),
+         <span class="dt">max.Q    =</span> <span class="kw">max</span> (Q, <span class="dt">na.rm=</span><span class="ot">TRUE</span>),
+         <span class="dt">mean.Q   =</span> <span class="kw">mean</span>(Q,<span class="dt">na.rm=</span><span class="ot">TRUE</span>),
+         <span class="dt">sd.Q     =</span> <span class="kw">sd</span>  (Q,<span class="dt">na.rm=</span><span class="ot">TRUE</span>))
+S08HA011.sum</code></pre></div>
+<pre><code>##    Year n.days n.Q n.miss.Q min.Q max.Q   mean.Q     sd.Q
+## 1  1965    365 365        0  3.54 196.0 47.72625 44.55059
+## 2  1966    365 365        0  5.80 362.0 60.32545 65.58664
+## 3  1967    365 364        1  4.11 213.0 61.78137 53.71085
+## 4  1968    366 366        0  5.10 450.0 69.52503 71.15098
+## 5  1969    365 365        0  4.98 150.0 47.50655 35.52722
+## 6  1970    365 365        0  4.25 153.0 36.84767 34.33385
+## 7  1971    365 365        0  6.00 187.0 55.62266 39.62329
+## 8  1972    366 366        0  5.83 425.0 53.93230 59.41003
+## 9  1973    365 365        0  3.11 337.0 53.33545 64.81365
+## 10 1974    365 365        0  3.28 343.0 69.46066 64.42318
+## 11 1975    365 365        0  6.43 345.0 66.59186 65.38940
+## 12 1976    366 366        0  4.62 165.0 47.77153 37.67202
+## 13 1977    365 365        0  4.16 233.0 47.69573 47.43126
+## 14 1978    365 365        0  4.64 101.0 30.25252 21.66569
+## 15 1979    365 364        1  3.84 336.0 43.57135 56.20453
+## 16 1980    366 366        0  4.42 385.0 58.65967 62.00653
+## 17 1981    365 365        0  4.66 244.0 60.31227 54.73371
+## 18 1982    365 365        0  5.32 217.0 49.76348 46.18497
+## 19 1983    365 365        0  5.71 303.0 61.29674 69.73937
+## 20 1984    366 366        0  4.12 197.0 58.12112 41.60186
+## 21 1985    365 365        0  3.36  86.4 27.75455 20.36948
+## 22 1986    365 365        0  3.45 400.0 52.85359 63.78841
+## 23 1987    365 365        0  3.60 198.0 47.36142 50.49256
+## 24 1988    366 366        0  4.14 139.0 46.11101 37.02558
+## 25 1989    365 365        0  4.08 176.0 40.17173 35.15942
+## 26 1990    365 365        0  4.89 326.0 59.71548 63.55819
+## 27 1991    365 365        0  4.61 248.0 45.93523 47.93800
+## 28 1992    366 366        0  3.74 324.0 42.74970 56.93322
+## 29 1993    365 365        0  4.89 191.0 33.46789 33.87104
+## 30 1994    365 365        0  4.80 257.0 47.67293 52.08854
+## 31 1995    365 365        0  4.67 286.0 71.34422 77.38259
+## 32 1996    366 366        0  4.63 254.0 50.60377 45.75725
+## 33 1997    365 365        0  7.45 359.0 79.12233 55.64481
+## 34 1998    365 365        0  3.96 325.0 57.35233 71.50327
+## 35 1999    365 365        0  6.01 282.0 71.80063 57.92698
+## 36 2000    366 366        0  5.23  88.7 36.60932 22.77473
+## 37 2001    365 365        0  4.21 255.0 41.97326 42.51711
+## 38 2002    365 365        0  4.98 289.0 49.30463 50.89087
+## 39 2003    365 365        0  2.68 312.0 66.03233 67.18302
+## 40 2004    366 366        0  2.77 213.0 43.52918 43.62734
+## 41 2005    365 365        0  4.96 321.0 48.51677 53.08182
+## 42 2006    365 365        0  2.58 333.0 70.73003 85.25151
+## 43 2007    365 365        0  5.64 381.0 71.45077 67.47710
+## 44 2008    366 366        0  5.30 166.0 40.58847 30.46670
+## 45 2009    365 365        0  5.48 407.0 53.16282 68.14245
+## 46 2010    365 365        0  4.39 365.0 64.36416 61.11077
+## 47 2011    365 365        0  5.68 222.0 57.97247 47.16704
+## 48 2012    366 364        2  3.55 229.0 58.52063 48.22929</code></pre>
+<p>We see that there are now missing values in a few years (e.g. 1967).</p>
+</div>
+<div id="computing-the-annual-statistics-on-calendar--and-water-year" class="section level2">
+<h2>Computing the Annual Statistics (on calendar- and water-year)</h2>
+<p>We compute the plethora of annual statistics with the default action to propogate missing values.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stat.annual &lt;-<span class="st"> </span><span class="kw">compute.Q.stat.annual</span>(
+                          <span class="dt">Station.Code  =</span>Station.Code,
+                          <span class="dt">Station.Area  =</span>Station.Area,
+                          <span class="dt">flow          =</span>S08HA011,
+                          <span class="dt">start.year    =</span>start.year,
+                          <span class="dt">end.year      =</span>end.year)</code></pre></div>
+<p>The returned list includes a dataframe of the missing days</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stat.annual$dates.missing.flow</code></pre></div>
+<pre><code>## [1] &quot;1967-05-20&quot; &quot;1979-07-24&quot; &quot;2012-03-30&quot; &quot;2012-06-16&quot;</code></pre>
+<p>The returned dataframe of statistics has many, many statistics some of which are shown below. Notice that some are now missing (e.g. in 1967) over and above the missing in the rolling averages for the first year.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(stat.annual$Q.stat.annual[, <span class="dv">1</span>:<span class="dv">10</span>])</code></pre></div>
+<pre><code>##   Year CY_MIN_01Day_SW CY_MINDOY_01Day_SW CY_MIN_03Day_SW
+## 1 1965            3.54                276              NA
+## 2 1966            5.80                215        5.936667
+## 3 1967              NA                 NA              NA
+## 4 1968            5.10                219        5.223333
+## 5 1969            4.98                228        4.980000
+## 6 1970            4.25                203        4.343333
+##   CY_MINDOY_03Day_SW CY_MIN_07Day_SW CY_MINDOY_07Day_SW CY_MIN_30Day_SW
+## 1                 NA              NA                 NA              NA
+## 2                224        6.305714                225        6.445667
+## 3                 NA              NA                 NA              NA
+## 4                220        5.258571                223        6.569000
+## 5                238        5.071429                240        5.357667
+## 6                204        4.642857                206        5.035667
+##   CY_MINDOY_30Day_SW CY_MIN_DAILY_SW
+## 1                 NA            3.54
+## 2                244            5.80
+## 3                 NA              NA
+## 4                237            5.10
+## 5                256            4.98
+## 6                230            4.25</code></pre>
+<p>To ignore the missing values, we set the <code>na.rm</code> parameter:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stat.annual.ignore.missing &lt;-<span class="st"> </span><span class="kw">compute.Q.stat.annual</span>(
+                          <span class="dt">Station.Code  =</span>Station.Code,
+                          <span class="dt">Station.Area  =</span>Station.Area,
+                          <span class="dt">flow          =</span>S08HA011,
+                          <span class="dt">start.year    =</span>start.year,
+                          <span class="dt">end.year      =</span>end.year,
+                          <span class="dt">na.rm=</span><span class="kw">list</span>(<span class="dt">na.rm.global=</span><span class="ot">TRUE</span>))
+<span class="kw">head</span>(stat.annual.ignore.missing$Q.stat.annual[, <span class="dv">1</span>:<span class="dv">10</span>])</code></pre></div>
+<pre><code>##   Year CY_MIN_01Day_SW CY_MINDOY_01Day_SW CY_MIN_03Day_SW
+## 1 1965            3.54                276        3.746667
+## 2 1966            5.80                215        5.936667
+## 3 1967            4.11                243        4.110000
+## 4 1968            5.10                219        5.223333
+## 5 1969            4.98                228        4.980000
+## 6 1970            4.25                203        4.343333
+##   CY_MINDOY_03Day_SW CY_MIN_07Day_SW CY_MINDOY_07Day_SW CY_MIN_30Day_SW
+## 1                276        4.224286                276        5.070000
+## 2                224        6.305714                225        6.445667
+## 3                256        4.320000                269        4.652333
+## 4                220        5.258571                223        6.569000
+## 5                238        5.071429                240        5.357667
+## 6                204        4.642857                206        5.035667
+##   CY_MINDOY_30Day_SW CY_MIN_DAILY_SW
+## 1                223            3.54
+## 2                244            5.80
+## 3                270            4.11
+## 4                237            5.10
+## 5                256            4.98
+## 6                230            4.25</code></pre>
+<p>Notice that all statistics are computed even if there were missing values.</p>
+</div>
+<div id="computing-the-long-term-summary-statistics" class="section level2">
+<h2>Computing the long term summary statistics</h2>
+<p>The long-term summary statistics default action is to IGNORE the missing values.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stat.longterm &lt;-<span class="st"> </span><span class="kw">compute.Q.stat.longterm</span>(
+                          <span class="dt">Station.Code =</span>Station.Code,
+                          <span class="dt">Station.Area =</span>Station.Area,
+                          <span class="dt">flow         =</span>S08HA011,
+                          <span class="dt">start.year   =</span>start.year,
+                          <span class="dt">end.year     =</span>end.year)
+<span class="kw">head</span>(stat.longterm$Q.stat.longterm)</code></pre></div>
+<pre><code>##   Month      mean median   max   min
+## 1     1 110.46828  98.65 450.0 15.60
+## 2     2  92.69174  82.90 303.0 14.70
+## 3     3  77.37176  68.80 359.0 15.80
+## 4     4  57.23731  52.40 154.0  8.67
+## 5     5  35.27636  31.00 121.0  6.47
+## 6     6  18.18267  13.60  73.4  2.99</code></pre>
+<p>If you wish missing values to propogate, use:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stat.longterm.missing &lt;-<span class="st"> </span><span class="kw">compute.Q.stat.longterm</span>(
+                          <span class="dt">Station.Code =</span>Station.Code,
+                          <span class="dt">Station.Area =</span>Station.Area,
+                          <span class="dt">flow         =</span>S08HA011,
+                          <span class="dt">start.year   =</span>start.year,
+                          <span class="dt">end.year     =</span>end.year,
+                          <span class="dt">na.rm=</span><span class="kw">list</span>(<span class="dt">na.rm.global=</span><span class="ot">FALSE</span>))
+<span class="kw">head</span>(stat.longterm.missing$Q.stat.longterm)</code></pre></div>
+<pre><code>##   Month      mean median max   min
+## 1     1 110.46828  98.65 450 15.60
+## 2     2  92.69174  82.90 303 14.70
+## 3     3        NA     NA  NA    NA
+## 4     4  57.23731  52.40 154  8.67
+## 5     5        NA     NA  NA    NA
+## 6     6        NA     NA  NA    NA</code></pre>
+</div>
+<div id="computing-the-long-term-percentile-statistics" class="section level2">
+<h2>Computing the long term percentile statistics</h2>
+<p>The long-term percentile statistics default action is to IGNORE the missing values.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">percentile.longterm &lt;-<span class="st"> </span><span class="kw">compute.Q.percentile.longterm</span>(
+                          <span class="dt">Station.Code=</span>Station.Code,
+                          <span class="dt">Station.Area=</span>Station.Area,
+                          <span class="dt">flow        =</span>S08HA011,
+                          <span class="dt">start.year  =</span>start.year,
+                          <span class="dt">end.year    =</span>end.year)
+<span class="kw">head</span>(percentile.longterm$Q.percentile.stat)</code></pre></div>
+<pre><code>##   Month     P01     P02    P05   P10   P15    P20    P25   P30    P35
+## 1   Jan 21.8740 25.2000 31.480 40.41 49.60 58.600 65.800 70.81 78.200
+## 2   Feb 23.2550 29.7200 36.950 43.90 49.60 54.900 60.000 64.10 68.525
+## 3   Mar 20.3880 24.5720 29.230 36.06 41.89 47.200 51.300 55.38 58.910
+## 4   Apr 13.4000 16.0120 23.490 28.48 32.30 35.800 38.575 41.30 43.600
+## 5   May  7.4116  8.7744  9.866 12.20 14.20 16.100 18.300 21.30 23.700
+## 6   Jun  3.9500  4.6200  5.580  6.28  6.55  6.946  7.580  8.16  9.093
+##     P40    P45   P50    P55    P60    P65    P70     P75    P80    P85
+## 1 84.94 92.215 98.65 106.00 112.00 120.55 129.00 141.000 152.60 169.90
+## 2 73.10 77.275 82.90  89.15  95.40 101.00 107.00 114.000 122.00 133.00
+## 3 62.60 65.100 68.80  71.33  74.80  79.00  85.40  92.850 101.00 113.10
+## 4 45.66 48.655 52.40  56.00  59.70  63.70  68.00  72.425  77.34  85.00
+## 5 26.40 28.940 31.00  33.40  36.66  40.09  43.70  49.000  54.30  60.30
+## 6 10.70 12.000 13.60  15.19  16.80  18.80  20.66  23.050  26.84  32.23
+##      P90    P95    P98     P99
+## 1 194.00 239.65 282.26 321.000
+## 2 154.00 186.00 229.80 245.450
+## 3 132.40 161.70 188.28 209.560
+## 4  93.91 107.00 120.00 131.610
+## 5  65.84  72.80  79.14  84.096
+## 6  40.40  49.01  57.20  63.968</code></pre>
+<p>If you want to propogate missing values, again set the <strong>na.rm</strong> argument:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">percentile.longterm.missing &lt;-<span class="st"> </span><span class="kw">compute.Q.percentile.longterm</span>(
+                          <span class="dt">Station.Code=</span>Station.Code,
+                          <span class="dt">Station.Area=</span>Station.Area,
+                          <span class="dt">flow        =</span>S08HA011,
+                          <span class="dt">start.year  =</span>start.year,
+                          <span class="dt">end.year    =</span>end.year,
+                          <span class="dt">na.rm=</span><span class="kw">list</span>(<span class="dt">na.rm.global=</span><span class="ot">FALSE</span>))
+<span class="kw">head</span>(percentile.longterm.missing$Q.percentile.stat)</code></pre></div>
+<pre><code>##   Month    P01    P02   P05   P10  P15  P20    P25   P30    P35   P40
+## 1   Jan 21.874 25.200 31.48 40.41 49.6 58.6 65.800 70.81 78.200 84.94
+## 2   Feb 23.255 29.720 36.95 43.90 49.6 54.9 60.000 64.10 68.525 73.10
+## 3   Mar     NA     NA    NA    NA   NA   NA     NA    NA     NA    NA
+## 4   Apr 13.400 16.012 23.49 28.48 32.3 35.8 38.575 41.30 43.600 45.66
+## 5   May     NA     NA    NA    NA   NA   NA     NA    NA     NA    NA
+## 6   Jun     NA     NA    NA    NA   NA   NA     NA    NA     NA    NA
+##      P45   P50    P55   P60    P65 P70     P75    P80   P85    P90    P95
+## 1 92.215 98.65 106.00 112.0 120.55 129 141.000 152.60 169.9 194.00 239.65
+## 2 77.275 82.90  89.15  95.4 101.00 107 114.000 122.00 133.0 154.00 186.00
+## 3     NA    NA     NA    NA     NA  NA      NA     NA    NA     NA     NA
+## 4 48.655 52.40  56.00  59.7  63.70  68  72.425  77.34  85.0  93.91 107.00
+## 5     NA    NA     NA    NA     NA  NA      NA     NA    NA     NA     NA
+## 6     NA    NA     NA    NA     NA  NA      NA     NA    NA     NA     NA
+##      P98    P99
+## 1 282.26 321.00
+## 2 229.80 245.45
+## 3     NA     NA
+## 4 120.00 131.61
+## 5     NA     NA
+## 6     NA     NA</code></pre>
+</div>
+<div id="computing-a-volume-frequency-analysis" class="section level2">
+<h2>Computing a volume frequency analysis</h2>
+<p>The volume frequency analysis automatically drops missing values:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vfa.analysis &lt;-<span class="st"> </span><span class="kw">compute.volume.frequency.analysis</span>( 
+                      <span class="dt">Station.Code   =</span>Station.Code, S08HA011,
+                      <span class="dt">start.year     =</span>start.year, 
+                      <span class="dt">end.year       =</span>end.year)
+vfa.analysis$fitted.quantiles.trans</code></pre></div>
+<pre><code>##    distr  prob     Return Q001-avg Q003-avg Q007-avg Q015-avg Q030-avg
+## 1   PIII 0.010 100.000000 2.437537 2.544397 2.611767 2.738193 2.880917
+## 2   PIII 0.050  20.000000 2.976171 3.108230 3.228087 3.378068 3.513155
+## 3   PIII 0.100  10.000000 3.289789 3.433166 3.579166 3.739922 3.878317
+## 4   PIII 0.200   5.000000 3.692997 3.846881 4.020310 4.191558 4.344346
+## 5   PIII 0.500   2.000000 4.529539 4.689240 4.893066 5.073719 5.297933
+## 6   PIII 0.800   1.250000 5.436928 5.575970 5.766214 5.938405 6.310295
+## 7   PIII 0.900   1.111111 5.932125 6.046993 6.207631 6.367395 6.852380
+## 8   PIII 0.950   1.052632 6.348495 6.435532 6.558702 6.704024 7.302151
+## 9   PIII 0.975   1.025641 6.713263 6.770038 6.850824 6.980675 7.691466
+## 10  PIII 0.980   1.020408 6.822247 6.868883 6.935265 7.060010 7.806904
+## 11  PIII 0.990   1.010101 7.139578 7.153741 7.173624 7.282293 8.140661
+##     Q060-avg  Q090-avg
+## 1   3.257945  3.820377
+## 2   3.803850  4.244597
+## 3   4.149801  4.552287
+## 4   4.630680  5.025881
+## 5   5.787290  6.368893
+## 6   7.362566  8.642141
+## 7   8.410619 10.438321
+## 8   9.423576 12.394999
+## 9  10.429875 14.559549
+## 10 10.755119 15.307267
+## 11 11.774964 17.807848</code></pre>
+<p>If you set the <strong>na.rm</strong> parameter the output appears to be unaffected:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vfa.analysis.missing &lt;-<span class="st"> </span><span class="kw">compute.volume.frequency.analysis</span>( 
+                      <span class="dt">Station.Code   =</span>Station.Code, S08HA011,
+                      <span class="dt">start.year     =</span>start.year, 
+                      <span class="dt">end.year       =</span>end.year,
+                      <span class="dt">na.rm=</span><span class="kw">list</span>(<span class="dt">na.rm.global=</span><span class="ot">FALSE</span>))
+vfa.analysis.missing$fitted.quantiles.trans</code></pre></div>
+<pre><code>##    distr  prob     Return Q001-avg Q003-avg Q007-avg Q015-avg Q030-avg
+## 1   PIII 0.010 100.000000 2.392825 2.493076 2.542913 2.672973 2.805126
+## 2   PIII 0.050  20.000000 2.968353 3.116283 3.214208 3.368355 3.485497
+## 3   PIII 0.100  10.000000 3.302028 3.472312 3.595274 3.760092 3.877631
+## 4   PIII 0.200   5.000000 3.728208 3.919953 4.070265 4.244979 4.375493
+## 5   PIII 0.500   2.000000 4.597956 4.803839 4.988868 5.170371 5.379300
+## 6   PIII 0.800   1.250000 5.512047 5.681369 5.865335 6.034586 6.413169
+## 7   PIII 0.900   1.111111 5.995297 6.120604 6.286412 6.441483 6.949490
+## 8   PIII 0.950   1.052632 6.392037 6.467046 6.608333 6.748043 7.383814
+## 9   PIII 0.975   1.025641 6.731892 6.752941 6.866200 6.990266 7.751191
+## 10  PIII 0.980   1.020408 6.831972 6.835125 6.938889 7.057939 7.858502
+## 11  PIII 0.990   1.010101 7.119398 7.065875 7.139237 7.242910 8.164366
+##     Q060-avg  Q090-avg
+## 1   3.168508  3.784448
+## 2   3.742962  4.212080
+## 3   4.106501  4.521116
+## 4   4.611158  4.995637
+## 5   5.821678  6.336734
+## 6   7.462880  8.598115
+## 7   8.550120 10.380025
+## 8   9.597543 12.317516
+## 9  10.634900 14.457222
+## 10 10.969525 15.195585
+## 11 12.016773 17.662334</code></pre>
+<p>The years with the missing values will be DROPPED from the analysis, and the analysis will continue with the remaining years of data, i.e. the sample size for fitting the distributions will be reduced. It is difficult to see this in action other than by actually looking at the plotting data for the frequency plot and comparing to the same summary with no missing data.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">plyr::<span class="kw">ddply</span>(vfa.analysis.missing$plotdata, <span class="st">&quot;Measure&quot;</span>, plyr::summarize, <span class="dt">n.years=</span><span class="kw">length</span>(Measure))</code></pre></div>
+<pre><code>##    Measure n.years
+## 1 Q001-avg      45
+## 2 Q003-avg      44
+## 3 Q007-avg      44
+## 4 Q015-avg      44
+## 5 Q030-avg      44
+## 6 Q060-avg      44
+## 7 Q090-avg      44</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">plyr::<span class="kw">ddply</span>(vfa.analysis$plotdata        , <span class="st">&quot;Measure&quot;</span>, plyr::summarize, <span class="dt">n.years=</span><span class="kw">length</span>(Measure))</code></pre></div>
+<pre><code>##    Measure n.years
+## 1 Q001-avg      48
+## 2 Q003-avg      48
+## 3 Q007-avg      48
+## 4 Q015-avg      48
+## 5 Q030-avg      48
+## 6 Q060-avg      48
+## 7 Q090-avg      48</code></pre>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

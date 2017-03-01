@@ -13,7 +13,7 @@ compute.Q.stat.longterm(Station.Code = "XXXXX", Station.Area = NA, flow,
 \item{Station.Code}{A character string. Used to names any *.csv or *.pdf files created so be careful
 that the Station.Code will be acceptable in a file name.}
 
-\item{Station.Area}{Area of the water basin, used in computing some statistics}
+\item{Station.Area}{Area of the water basin (square km), used in computing some statistics}
 
 \item{flow}{Dataframe with two variables (1) \code{Date} with the date as a R date class variable and
          (2) \code{Q} a numeric variable with the flow for that day.
@@ -24,7 +24,7 @@ that the Station.Code will be acceptable in a file name.}
 
          The date range of \code{flow} can be wider than
          the \code{start.year} and \code{end.year}. This is useful for statistics on the water year
-         (starting 1 October of the previous year) when you may wish to include flow data for the latteer
+         (starting 1 October of the previous year) when you may wish to include flow data for the latter
          part of the year. Similarly, it may be useful for statistics that use a 3, 7, or 30 day
          rolling average as this will be missing for the first few days of each year.
 

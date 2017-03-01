@@ -28,7 +28,7 @@ To install the latest version of BCWaterDischargeAnalysis:
 ```{r, eval = FALSE}
 library(devtools)   # has the install_github() function
 # This will take about 5 minutes to install
-install_github("bcgov/water-discharge-analysis/BCWaterDischargeAnalysis", build_vignettes = TRUE) 
+install_github("bcgov/BCWaterDischargeAnalysis", build_vignettes = TRUE) 
 # Using `build_vignettes = TRUE` will slow down the install, but is necessary if 
 # you want to read the vignette, which is recommended
 library(BCWaterDischargeAnalysis)
@@ -47,16 +47,8 @@ You can read the vignette using:
 vignette("example-analysis", package="BCWaterDischargeAnalysis")
 ```
 
-## Demo files
-You can see a list of all the demonstration files using:
-```{r, eval=FALSE}
-demo(package="BCWaterDischargeAnalysis")
-```
-
-You can run a specific demo using:
-```{r, eval=FALSE}
-demo("sample-analysis", package="BCWaterDischargeAnalysis")
-```
+## Sample Scripts
+Sample scripts are available in the GitHub repository bcgov/BCWaterDischargeAnalysis-SampleScripts
 
 
 ## Help on functions

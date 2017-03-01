@@ -71,7 +71,7 @@ compute.Q.stat.longterm <- function(
 #############################################################
 #  Some basic error checking on the input parameters
 #
-   Version <- '2017-01-01'
+   Version <- packageVersion("BCWaterDischargeAnalysis")
 
    if( !is.character(Station.Code))  {stop("Station Code must be a character string.")}
    if(length(Station.Code)>1)        {stop("Station.Code cannot have length > 1")}
@@ -112,22 +112,23 @@ compute.Q.stat.longterm <- function(
       min   = min   (x$Q, na.rm=na.rm$na.rm.global)
       data.frame(mean=mean, median=median, max=max, min=min)
    }, na.rm=na.rm)
+   Q.month.longterm$Month <- as.character(Q.month.longterm$Month)
+
    Q.all.longterm <- plyr::summarize( flow[flow$Year >= start.year & flow$Year<=end.year,],
                           mean  = mean  (Q, na.rm=na.rm$na.rm.global),
                           median= stats::median(Q, na.rm=na.rm$na.rm.global),
                           max   = max   (Q, na.rm=na.rm$na.rm.global),
                           min   = min   (Q, na.rm=na.rm$na.rm.global))
-   Q.all.longterm$Month <- 13
+   Q.all.longterm$Month <- "Longterm"
 
    Q.longterm <- rbind(Q.month.longterm, Q.all.longterm)
-
 
 #  Write out the summary table for comparison to excel spreadsheet
    file.stat.csv <- NA
    if(write.stat.csv){
       file.stat.csv <-file.path(report.dir, paste(Station.Code,"-longterm-summary-stat.csv", sep=""))
       temp <- Q.longterm
-      temp <- round(temp, csv.nddigits)  # round the output
+      temp[,2:ncol(temp)] <- round(temp[,2:ncol(temp)], csv.nddigits)  # round the output
       utils::write.csv(temp, file=file.stat.csv, row.names=FALSE)
    }
 

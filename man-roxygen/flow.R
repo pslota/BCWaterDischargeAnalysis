@@ -7,7 +7,7 @@
 #'
 #'          The date range of \code{flow} can be wider than
 #'          the \code{start.year} and \code{end.year}. This is useful for statistics on the water year
-#'          (starting 1 October of the previous year) when you may wish to include flow data for the latteer
+#'          (starting 1 October of the previous year) when you may wish to include flow data for the latter
 #'          part of the year. Similarly, it may be useful for statistics that use a 3, 7, or 30 day
 #'          rolling average as this will be missing for the first few days of each year.
 #'

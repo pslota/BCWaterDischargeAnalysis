@@ -5,17 +5,17 @@
 \title{Compute annual (calendar and water year) statistics.}
 \usage{
 compute.Q.stat.annual(Station.Code = "XXXXX", Station.Area = NA, flow,
-  start.year = 9999, end.year = 0, write.stat.csv = TRUE,
-  write.stat.trans.csv = TRUE, write.flow.summary.csv = TRUE,
-  write.lowflow.csv = TRUE, plot.stat.trend = TRUE, plot.cumdepart = TRUE,
-  report.dir = ".", na.rm = list(na.rm.global = FALSE), csv.nddigits = 3,
-  debug = FALSE)
+  start.year = 9999, end.year = 0, write.cy.stat.csv = TRUE,
+  write.wy.stat.csv = TRUE, write.stat.trans.csv = TRUE,
+  write.flow.summary.csv = TRUE, write.lowflow.csv = TRUE,
+  plot.stat.trend = TRUE, plot.cumdepart = TRUE, report.dir = ".",
+  na.rm = list(na.rm.global = FALSE), csv.nddigits = 3, debug = FALSE)
 }
 \arguments{
 \item{Station.Code}{A character string. Used to names any *.csv or *.pdf files created so be careful
 that the Station.Code will be acceptable in a file name.}
 
-\item{Station.Area}{Area of the water basin, used in computing some statistics}
+\item{Station.Area}{Area of the water basin (square km), used in computing some statistics}
 
 \item{flow}{Dataframe with two variables (1) \code{Date} with the date as a R date class variable and
          (2) \code{Q} a numeric variable with the flow for that day.
@@ -26,7 +26,7 @@ that the Station.Code will be acceptable in a file name.}
 
          The date range of \code{flow} can be wider than
          the \code{start.year} and \code{end.year}. This is useful for statistics on the water year
-         (starting 1 October of the previous year) when you may wish to include flow data for the latteer
+         (starting 1 October of the previous year) when you may wish to include flow data for the latter
          part of the year. Similarly, it may be useful for statistics that use a 3, 7, or 30 day
          rolling average as this will be missing for the first few days of each year.
 
@@ -36,11 +36,15 @@ that the Station.Code will be acceptable in a file name.}
 
 \item{start.year, end.year}{Starting and ending year for statistics in YYYY format, e.g. start.year=2013.}
 
-\item{write.stat.csv}{Should a file be created with the computed percentiles?
-The file name will be  \code{file.path(report.dir,paste(Station.Code,'-longterm-percentile-stat.csv'))}.}
+\item{write.cy.stat.csv}{Should a file be created with the calendar year computed percentiles?
+The file name will be  \code{file.path(report.dir,paste(Station.Code,'-annual-cy-summary-stat.csv'))}.}
 
-\item{write.stat.trans.csv}{Should a file be created with the transposed of the percentile report?
-The file name will be  \code{file.path(report.dir,paste(Station.Code,'-longterm-percentile-stat-trabs.csv'))}.}
+\item{write.wy.stat.csv}{Should a file be created with the water year computed percentiles?
+The file name will be  \code{file.path(report.dir,paste(Station.Code,'-annual-wy-summary-stat.csv'))}.}
+
+\item{write.stat.trans.csv}{Should a file be created with the transposed of the annual statistics
+(both calendar and water year)?
+The file name will be  \code{file.path(report.dir,paste(Station.Code,'-annual-summary-stat-trans.csv'))}.}
 
 \item{write.flow.summary.csv}{Should a file be created with a flow summary over the years between the
 start.year and end.year (inclusive). This summary includes number of days, number of missing values,

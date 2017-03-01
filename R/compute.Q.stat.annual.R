@@ -7,10 +7,13 @@
 #' @template Station.Area
 #' @template flow
 #' @template start.year
-#' @param write.stat.csv Should a file be created with the computed percentiles?
-#'    The file name will be  \code{file.path(report.dir,paste(Station.Code,'-longterm-percentile-stat.csv'))}.
-#' @param write.stat.trans.csv Should a file be created with the transposed of the percentile report?
-#'    The file name will be  \code{file.path(report.dir,paste(Station.Code,'-longterm-percentile-stat-trabs.csv'))}.
+#' @param write.cy.stat.csv Should a file be created with the calendar year computed percentiles?
+#'    The file name will be  \code{file.path(report.dir,paste(Station.Code,'-annual-cy-summary-stat.csv'))}.
+#' @param write.wy.stat.csv Should a file be created with the water year computed percentiles?
+#'    The file name will be  \code{file.path(report.dir,paste(Station.Code,'-annual-wy-summary-stat.csv'))}.
+#' @param write.stat.trans.csv Should a file be created with the transposed of the annual statistics
+#'    (both calendar and water year)?
+#'    The file name will be  \code{file.path(report.dir,paste(Station.Code,'-annual-summary-stat-trans.csv'))}.
 #' @param write.flow.summary.csv Should a file be created with a flow summary over the years between the
 #'    start.year and end.year (inclusive). This summary includes number of days, number of missing values,
 #'    mean, median, minimum, maximum, and standard deviation of \code{flow$Q}.
@@ -80,8 +83,9 @@ compute.Q.stat.annual <- function(Station.Code='XXXXX',
                         flow,
                         start.year=9999,
                         end.year=0,
-                        write.stat.csv=TRUE,        # write out statistics
-                        write.stat.trans.csv=TRUE,  # write out statistics in transposed format
+                        write.cy.stat.csv=TRUE,        # write out statistics on calendar year
+                        write.wy.stat.csv=TRUE,        # write out statistics on water year
+                        write.stat.trans.csv=TRUE,  # write out statistics in transposed format (cy & wy)
                         write.flow.summary.csv=TRUE, # write out a summary of period of record
                         write.lowflow.csv=TRUE,      # write out a summary of low flows
                         plot.stat.trend=TRUE,        # should you plot all of stat trends?
@@ -99,7 +103,7 @@ compute.Q.stat.annual <- function(Station.Code='XXXXX',
 #############################################################
 #  Some basic error checking on the input parameters
 #
- Version <- '2017-02-15'
+  Version <- packageVersion("BCWaterDischargeAnalysis")
 
  if( !is.character(Station.Code))  {stop("Station Code must be a character string.")}
  if(length(Station.Code)>1)        {stop("Station.Code cannot have length > 1")}
@@ -115,7 +119,8 @@ compute.Q.stat.annual <- function(Station.Code='XXXXX',
  if(! (is.numeric(start.year) & is.numeric(end.year))){
                                     stop("start.year and end.year not numberic.")}
  if(! (start.year <= end.year))    {stop("start.year > end.year")}
- if( !is.logical(write.stat.csv))  {stop("write.stat.csv must be logical (TRUE/FALSE")}
+ if( !is.logical(write.cy.stat.csv))  {stop("write.cy.stat.csv must be logical (TRUE/FALSE")}
+ if( !is.logical(write.wy.stat.csv))  {stop("write.wy.stat.csv must be logical (TRUE/FALSE")}
  if( !is.logical(write.stat.trans.csv)){stop("write.stat.trans.csv must be logical (TRUE/FALSE")}
  if( !is.logical(write.flow.summary.csv)){stop("write.flow.summary.csv must be logical (TRUE/FALSE")}
  if( !is.logical(write.lowflow.csv)){ stop("write.lowflow.csv must be logical (TRUE/FALSE)")}
@@ -453,21 +458,33 @@ if(write.flow.summary.csv){
 }
 
 # See if you want to write out the summary tables?
-file.stat.csv <- NA
-if(write.stat.csv){
+file.cy.stat.csv <- NA
+if(write.cy.stat.csv){
    if(debug)browser()
-   # Write out the summary table for comparison to excel spreadsheet
-   file.stat.csv <- file.path(report.dir, paste(Station.Code,"-annual-summary-stat.csv", sep=""))
-   temp <- Q.stat
+   # Write out the summary table for comparison to excel spreadsheet for calendar year
+   file.cy.stat.csv <- file.path(report.dir, paste(Station.Code,"-annual-cy-summary-stat.csv", sep=""))
+   select <- !grepl("^WY", colnames(Q.stat)) # exclude water year information
+   temp <- Q.stat[, select]
    temp <- round(temp, csv.nddigits)
-   utils::write.csv(temp,file=file.stat.csv, row.names=FALSE)
+   utils::write.csv(temp,file=file.cy.stat.csv, row.names=FALSE)
+}
+
+file.wy.stat.csv <- NA
+if(write.wy.stat.csv){
+  if(debug)browser()
+  # Write out the summary table for comparison to excel spreadsheet for water year
+  file.wy.stat.csv <- file.path(report.dir, paste(Station.Code,"-annual-wy-summary-stat.csv", sep=""))
+  select <-grepl("^WY", colnames(Q.stat))  | (colnames(Q.stat) %in% c("Year"))
+  temp <- Q.stat[,select]
+  temp <- round(temp, csv.nddigits)
+  utils::write.csv(temp,file=file.wy.stat.csv, row.names=FALSE)
 }
 
 # Write out the annual summary table in transposed format?
 file.stat.trans.csv<- NA
 Year <- Q.stat[,"Year"]
 Q.stat.trans <- t(Q.stat[, !grepl('^Year', names(Q.stat))])
-colnames(Q.stat.trans) <- paste("Y",Year,sep="")
+colnames(Q.stat.trans) <- paste("",Year,sep="")
 if(write.stat.trans.csv){
   file.stat.trans.csv <-file.path(report.dir,paste(Station.Code,"-annual-summary-stat-trans.csv",sep=""))
   temp <- Q.stat.trans
@@ -551,8 +568,16 @@ if(plot.stat.trend){
    plotdata$transform <- ""
    plotdata$Ylabel    <- 'Value'
 
-   set.annual.min  <- grepl("^CY_MIN_", plotdata$Statistic)
+   # yearly minimums. Remove redundancy between CY_MIN_01DAY_SW and CY_MIN+DAILY_SW if a 01 rolling average
+   # has been requested.
+   set.annual.min  <- grepl("^CY_MIN_", plotdata$Statistic) & !grepl("DAILY", plotdata$Statistic)
    plotdata$statgroup [set.annual.min] <- 'CY Annual Minimums'
+   plotdata$Ylabel    [set.annual.min] <- 'Flow (cms)'
+   plot_trend(plotdata, set.annual.min)
+
+   # more plots on the water year basis
+   set.annual.min  <- grepl("^WY_MIN_", plotdata$Statistic) & !grepl("DAILY", plotdata$Statistic)
+   plotdata$statgroup [set.annual.min] <- 'WY Annual Minimums'
    plotdata$Ylabel    [set.annual.min] <- 'Flow (cms)'
    plot_trend(plotdata, set.annual.min)
 
@@ -756,21 +781,21 @@ if(plot.stat.trend){
 
    set.yieldmm     <- grepl("YIELDMM", plotdata$Statistic) &
                       (substr(plotdata$Statistic,1,3) %in% c("AMJ","JAS"))
-   plotdata$statgroup [set.yieldmm] <- 'CY Yield (MM)   -  Spring/Summer'
+   plotdata$statgroup [set.yieldmm] <- 'Water Yield (Spring/Summer)'
    plotdata$transform [set.yieldmm] <- "log"
    plotdata$Ylabel    [set.yieldmm] <- 'Yield (MM)'
    plot_trend(plotdata, set.yieldmm)
 
    set.yieldmm     <- grepl("YIELDMM", plotdata$Statistic) &
                       (substr(plotdata$Statistic,1,3) %in% c("JFM","OND"))
-   plotdata$statgroup [set.yieldmm] <- 'CY Yield (MM)   -  Fall/Winter'
+   plotdata$statgroup [set.yieldmm] <- 'Water Yield (Fall/Winter)'
    plotdata$transform [set.yieldmm] <- "log"
    plotdata$Ylabel    [set.yieldmm] <- 'Yield (MM)'
    plot_trend(plotdata, set.yieldmm)
 
    set.yieldmm     <- grepl("YIELDMM", plotdata$Statistic) &
                      (substr(plotdata$Statistic,1,2) %in% c("CY","WY"))
-   plotdata$statgroup [set.yieldmm] <- 'CY Yield (MM)   -  Calendar or Water Year'
+   plotdata$statgroup [set.yieldmm] <- 'Water Yield (Calendar and Water Year)'
    plotdata$transform [set.yieldmm] <- "log"
    plotdata$Ylabel    [set.yieldmm] <- 'Yield (MM)'
    plot_trend(plotdata, set.yieldmm)
@@ -799,12 +824,6 @@ if(plot.stat.trend){
    plotdata$statgroup [set.annual.date] <- 'Annual Day of CY for Total Discharge Milestones'
    plotdata$Ylabel    [set.annual.date] <- "Day into the year"
    plot_trend(plotdata, set.annual.date)
-
-   # more plots on the water year basis
-   set.annual.min  <- grepl("^WY_MIN_", plotdata$Statistic)
-   plotdata$statgroup [set.annual.min] <- 'WY Annual Minimums'
-   plotdata$Ylabel    [set.annual.min] <- 'Flow (cms)'
-   plot_trend(plotdata, set.annual.min)
 
    set.annual.mindoy  <- grepl("^WY_MINDOY", plotdata$Statistic)
    plotdata$statgroup [set.annual.mindoy] <- 'Annual Day of WY for Minimums'
@@ -840,7 +859,8 @@ return(list( Q.flow.summary=flow.sum,
              Q.stat.annual=Q.stat,
              Q.stat.annual.trans=Q.stat.trans,
              dates.missing.flows=dates.missing.flows,
-             file.stat.csv=file.stat.csv,
+             file.cy.stat.csv=file.cy.stat.csv,
+             file.wy.stat.csv=file.wy.stat.csv,
              file.stat.trans.csv=file.stat.trans.csv,
              file.stat.trend.pdf=file.stat.trend.pdf,
              file.cumdepart.pdf=file.cumdepart.pdf,

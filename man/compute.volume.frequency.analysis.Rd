@@ -31,7 +31,7 @@ that the Station.Code will be acceptable in a file name.}
 
          The date range of \code{flow} can be wider than
          the \code{start.year} and \code{end.year}. This is useful for statistics on the water year
-         (starting 1 October of the previous year) when you may wish to include flow data for the latteer
+         (starting 1 October of the previous year) when you may wish to include flow data for the latter
          part of the year. Similarly, it may be useful for statistics that use a 3, 7, or 30 day
          rolling average as this will be missing for the first few days of each year.
 
@@ -41,10 +41,11 @@ that the Station.Code will be acceptable in a file name.}
 
 \item{start.year, end.year}{Starting and ending year for statistics in YYYY format, e.g. start.year=2013.}
 
-\item{use.water.year}{Should results be computed on the water year (starting 1 October)? The 2014 water year
+\item{use.water.year}{Should results be computed on the water year (starting 1 October)?
+The 2013/2014 water year
 runs from 2013-10-01 to 2014-09-30.}
 
-\item{roll.avg.days}{Volume frequncy analysis conducted on these rolling averages.}
+\item{roll.avg.days}{Volume frequency analysis conducted on these rolling averages.}
 
 \item{use.log}{Transfrom to log-scale before analysis?}
 

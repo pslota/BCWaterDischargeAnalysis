@@ -6,5 +6,5 @@
 \alias{BCWaterDischargeAnalysis-package}
 \title{Performs analysis on water discharge from streams}
 \description{
-This is a suite of functions to mimic the HEC package analysis of stream discharge data..
+This is a suite of functions for the analysis of stream discharge data..
 }

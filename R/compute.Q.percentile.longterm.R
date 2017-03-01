@@ -73,7 +73,7 @@ compute.Q.percentile.longterm <- function(
 #############################################################
 #  Some basic error checking on the input parameters
 #
-   Version <- '2017-02-15'
+   Version <- packageVersion("BCWaterDischargeAnalysis")
 
    if( !is.character(Station.Code))  {stop("Station Code must be a character string.")}
    if(length(Station.Code)>1)        {stop("Station.Code cannot have length > 1")}
