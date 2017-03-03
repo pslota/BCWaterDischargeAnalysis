@@ -19,7 +19,7 @@ compute.volume.frequency.analysis(Station.Code, flow, start.year = 9999,
   "png"), report.dir = ".", csv.nddigits = 3, debug = FALSE)
 }
 \arguments{
-\item{Station.Code}{A character string. Used to names any *.csv or *.pdf files created so be careful
+\item{Station.Code}{A character string. Used to name any *.csv or *.pdf files created so be careful
 that the Station.Code will be acceptable in a file name.}
 
 \item{flow}{Dataframe with two variables (1) \code{Date} with the date as a R date class variable and

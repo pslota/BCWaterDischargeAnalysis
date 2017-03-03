@@ -11,7 +11,7 @@ compute.Q.percentile.longterm(Station.Code = "XXXXX", Station.Area = NA,
   debug = FALSE)
 }
 \arguments{
-\item{Station.Code}{A character string. Used to names any *.csv or *.pdf files created so be careful
+\item{Station.Code}{A character string. Used to name any *.csv or *.pdf files created so be careful
 that the Station.Code will be acceptable in a file name.}
 
 \item{Station.Area}{Area of the water basin (square km), used in computing some statistics}

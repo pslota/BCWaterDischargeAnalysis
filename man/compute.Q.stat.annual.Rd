@@ -12,7 +12,7 @@ compute.Q.stat.annual(Station.Code = "XXXXX", Station.Area = NA, flow,
   na.rm = list(na.rm.global = FALSE), csv.nddigits = 3, debug = FALSE)
 }
 \arguments{
-\item{Station.Code}{A character string. Used to names any *.csv or *.pdf files created so be careful
+\item{Station.Code}{A character string. Used to name any *.csv or *.pdf files created so be careful
 that the Station.Code will be acceptable in a file name.}
 
 \item{Station.Area}{Area of the water basin (square km), used in computing some statistics}
@@ -79,11 +79,11 @@ and all statistics that depend on those rolling averages, will also be set to mi
 \value{
 A list with the following elements:
   \item{Q.flow.summary}{Data frame with flow summary.}
-  \item{Q.stat.annual}{Data frame with summary statistics.}
-  \item{Q.stat.annual.trans}{Data frame with transposed summary statistics.}
+  \item{Q.stat.annual}{Data frame with summary statistics as listed at \code{\link{SummaryStatistics}}.}
+  \item{Q.stat.annual.trans}{Data frame with transposed summary statistics as listed at \code{\link{SummaryStatistics}}.}
   \item{dates.missing.flow}{Data framw with dates of missing \code{flow$Q} between
          \code{start.year} and \code{end.year}}
-  \item{file.cy.stat.csv}{File name of *.csv file with calendary year summary statistics.}
+  \item{file.cy.stat.csv}{File name of *.csv file with calendar year summary statistics.}
   \item{file.wy.stat.csv}{File name of *.csv file with water year summary statistics.}
   \item{file.stat.trans.csv}{File name of *.csv file with transposed summary statistics.}
   \item{file.stat.trend.pdf}{File name of *.pdf file with plot of statistics over time.}

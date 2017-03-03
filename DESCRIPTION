@@ -1,7 +1,7 @@
 Package: BCWaterDischargeAnalysis
 Type: Package
 Title: Analysis of stream discharge data
-Version: 2017-03-01
+Version: 2017-03-03
 Author: c(person("Schwarz","CarlJames",email="cchwarz@stat.sfu.ca", role=c("aut","ctr"),
                   comment='Primary Author'))
 Maintainer: Robin G. Pike <Robin.G.Pike@gov.bc.ca>
