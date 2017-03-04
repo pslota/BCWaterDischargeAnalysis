@@ -61,6 +61,7 @@
 #' @export
 #' @import ggplot2
 #' @import scales
+#' @import utils
 #'
 #--------------------------------------------------------------
 # Compute the statistics on an (calendar and water) year basis
@@ -175,15 +176,18 @@ compute.Q.stat.annual <- function(Station.Code='XXXXX',
                              as.numeric(format(flow$Date,"%Y"))<=end.year  ]
 
 #  simple summary statistics
- flow.sum <- plyr::ddply(flow[ flow$Year >= start.year & flow$Year <=end.year,], "Year", plyr::summarize,
-       n.days   = length(Year),
-       n.Q      = sum (!is.na(Q)),
-       n.miss.Q = sum ( is.na(Q)),
-       min.Q    = min (Q, na.rm=TRUE),
-       max.Q    = max (Q, na.rm=TRUE),
-       mean.Q   = mean(Q,na.rm=TRUE),
-       median.Q = stats::median(Q,na.rm=TRUE),
-       sd.Q     = stats::sd  (Q,na.rm=TRUE))
+ flow.sum <- plyr::ddply(flow[ flow$Year >= start.year & flow$Year <=end.year,], "Year", function(x, na.rm=FALSE){
+       n.days   = length(x$Year)
+       n.Q      = sum (!is.na(x$Q))
+       n.miss.Q = sum ( is.na(x$Q))
+       min.Q    = min (x$Q,          na.rm=na.rm$na.rm.global)
+       max.Q    = max (x$Q,          na.rm=na.rm$na.rm.global)
+       mean.Q   = mean(x$Q,          na.rm=na.rm$na.rm.global)
+       median.Q = stats::median(x$Q, na.rm=na.rm$na.rm.global)
+       sd.Q     = stats::sd  (x$Q,   na.rm=na.rm$na.rm.global)
+       data.frame(n.day=n.days, n.Q=n.Q, n.miss.Q=n.miss.Q,
+                  min.Q=min.Q, max.Q=max.Q, mean.Q=mean.Q, median.Q=median.Q, sd.Q=sd.Q)
+       }, na.rm=na.rm)
  flow.sum
 
  if(debug)browser()

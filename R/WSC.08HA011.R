@@ -1,4 +1,4 @@
-#' Stream discharge data from the Upper Cowichan River (Station 08HA011).
+#' Stream discharge data from the Upper Cowichan River (Station WSC.08HA011).
 #'
 #' A dataset the date and daily average stream flow.
 #' The basin area is 826 km**2.
@@ -8,12 +8,13 @@
 #' want to set start.year=1965 and end.year=2015
 #'
 #' @docType data
-#'
+#' @name WSC.08HA011
 #' @format A data frame with many rows and 2 variables.:
 #' \describe{
-#'   \item{Date}{Date as R date class variable}
+#'   \item{Date}{Date as an R date class variable}
 #'   \item{Q}{Average daily stream flow}  ...
 #' }
-#' @example
-#' data(S08HA011)
-#' head(S08HA011)
+#' @examples
+#' data(WSC.08HA011)
+#' head(WSC.08HA011)
+NULL

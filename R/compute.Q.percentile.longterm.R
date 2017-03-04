@@ -41,6 +41,7 @@
 #' @export
 #' @import ggplot2
 #' @import scales
+#' @import utils
 
 # Copyright 2017 Province of British Columbia
 #

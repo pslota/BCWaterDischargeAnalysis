@@ -38,6 +38,7 @@
 #'@export
 #'@import ggplot2
 #'@import scales
+#'@import utils
 #'
 
 

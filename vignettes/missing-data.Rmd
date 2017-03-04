@@ -11,10 +11,10 @@ vignette: >
 
 This will demonstrate the impact of missing values on the computations using 
 a sample analysis of the stream discharge data from station
-08HA011 (Cowichen River near Duncan) after creating some missing values (at random) during
+08HA011 (Cowichan River near Duncan) after creating some missing values (at random) during
 the period of record.
 
-The base data is provided as a sample dataset (S08HA011) with this package.
+The base data is provided as a sample dataset (WSC.08HA011) with this package.
 The basin has an area of 826 km**2. While the data frame runs from 1900 onwards, data was only 
 populated in this example starting in 1965 onwards. 
 
@@ -28,20 +28,33 @@ library(plyr)       # split-apply-combine paradigm
 library(BCWaterDischargeAnalysis)
 
 
-data(S08HA011)
-S08HA011$Year <- as.numeric(format(S08HA011$Date, "%Y"))
-head( S08HA011[ S08HA011$Year ==1965,])
+data(WSC.08HA011)
+WSC.08HA011$Year <- as.numeric(format(WSC.08HA011$Date, "%Y"))
+head( WSC.08HA011[ WSC.08HA011$Year ==1965,])
 ```
 
-**Notice that the flow dataframe MUST have two variables: Date, the day in standard R format, and
-Q - the daily discharge value.**
+**Notice that the flow dataframe MUST have two variables: `Date`, the day in standard R format, and
+`Q` - the daily discharge value.**
+
+  Variable | Description
+  ---------|-------------
+  Date     | The data of the reading in standard R date class format.
+           | For example to convert a 4-digit year, numeric month, and numeric day 
+           | of the month use 
+           |    `flow$Date  <- as.Date{paste(flow$Year,'-',flow$Month,'-',flow$Day,sep="")`.
+           | To convert a character string (e.g. '1/15/2001') use the 
+           |    `flow$Date <- as.Date(flow$chardate, "%d/%m/%Y")` . 
+           | The formatting codes (%Y etc) are explained in the help for the `strptime()` function. 
+  Q        | The average daily flow as a numeric value.
+
+Other variables in the data frame will be ignored.
 
 We now set the variables limiting the years for which the analysis should be done
 and setting up other needed variables for the analysis.
 
 ```{r}
-Station.Code <- '08HA011'
-Station.Name <- 'Cowichen River near Duncan'
+Station.Code <- 'WSC-08HA011'
+Station.Name <- 'Cowichan River near Duncan'
 Station.Area <- 826    # square km's
 
 start.year   <- 1965  # when do you want the analysis to start at.
@@ -53,17 +66,17 @@ We now create some missing values at random in the dataset.
 ```{r}
 # Create 1% missing values (approximately)
 set.seed(3423432)
-sum(is.na(S08HA011[ start.year <= S08HA011$Year & S08HA011$Year <= end.year, "Q"]))
+sum(is.na(WSC.08HA011[ start.year <= WSC.08HA011$Year & WSC.08HA011$Year <= end.year, "Q"]))
 
-missing <- sample(1:nrow(S08HA011), .0003*nrow(S08HA011))
-S08HA011$Q[ missing ] <- NA
-sum(is.na(S08HA011[ start.year <= S08HA011$Year & S08HA011$Year <= end.year, "Q"]))
+missing <- sample(1:nrow(WSC.08HA011), .0003*nrow(WSC.08HA011))
+WSC.08HA011$Q[ missing ] <- NA
+sum(is.na(WSC.08HA011[ start.year <= WSC.08HA011$Year & WSC.08HA011$Year <= end.year, "Q"]))
 ```
 
 
 ## Impact of missing values
 
-Accoding to the WSC,
+According to the WSC,
 
 > Monthly or annual values are not calculated unless 
 > there is complete daily record. 
@@ -111,7 +124,7 @@ The simple summary statistics are computed as before.
 ```{r}
 # get a simple summary of the data
 # Table of simple statistics by year to help check for outliers, etc
-S08HA011.sum <- plyr::ddply(S08HA011[ S08HA011$Year >= start.year & S08HA011$Year <=end.year,], "Year", plyr::summarize,
+WSC.08HA011.sum <- plyr::ddply(WSC.08HA011[ WSC.08HA011$Year >= start.year & WSC.08HA011$Year <=end.year,], "Year", plyr::summarize,
          n.days   = length(Year),
          n.Q      = sum (!is.na(Q)),
          n.miss.Q = sum ( is.na(Q)),
@@ -119,7 +132,7 @@ S08HA011.sum <- plyr::ddply(S08HA011[ S08HA011$Year >= start.year & S08HA011$Yea
          max.Q    = max (Q, na.rm=TRUE),
          mean.Q   = mean(Q,na.rm=TRUE),
          sd.Q     = sd  (Q,na.rm=TRUE))
-S08HA011.sum
+WSC.08HA011.sum
 ```
 
 We see that there are now missing values in a few years (e.g. 1967).
@@ -131,7 +144,7 @@ We compute the plethora of annual statistics with the default action to propagat
 stat.annual <- compute.Q.stat.annual(
                           Station.Code  =Station.Code,
                           Station.Area  =Station.Area,
-                          flow          =S08HA011,
+                          flow          =WSC.08HA011,
                           start.year    =start.year,
                           end.year      =end.year)
 
@@ -154,7 +167,7 @@ To ignore the missing values, we set the `na.rm` parameter:
 stat.annual.ignore.missing <- compute.Q.stat.annual(
                           Station.Code  =Station.Code,
                           Station.Area  =Station.Area,
-                          flow          =S08HA011,
+                          flow          =WSC.08HA011,
                           start.year    =start.year,
                           end.year      =end.year,
                           na.rm=list(na.rm.global=TRUE))
@@ -168,7 +181,7 @@ The long-term summary statistics default action is to IGNORE the missing values.
 stat.longterm <- compute.Q.stat.longterm(
                           Station.Code =Station.Code,
                           Station.Area =Station.Area,
-                          flow         =S08HA011,
+                          flow         =WSC.08HA011,
                           start.year   =start.year,
                           end.year     =end.year)
 head(stat.longterm$Q.stat.longterm)
@@ -179,7 +192,7 @@ If you wish missing values to propagate, use:
 stat.longterm.missing <- compute.Q.stat.longterm(
                           Station.Code =Station.Code,
                           Station.Area =Station.Area,
-                          flow         =S08HA011,
+                          flow         =WSC.08HA011,
                           start.year   =start.year,
                           end.year     =end.year,
                           na.rm=list(na.rm.global=FALSE))
@@ -193,7 +206,7 @@ The long-term percentile statistics default action is to IGNORE the missing valu
 percentile.longterm <- compute.Q.percentile.longterm(
                           Station.Code=Station.Code,
                           Station.Area=Station.Area,
-                          flow        =S08HA011,
+                          flow        =WSC.08HA011,
                           start.year  =start.year,
                           end.year    =end.year)
 head(percentile.longterm$Q.percentile.stat)
@@ -204,7 +217,7 @@ If you want to propagate missing values, again set the **na.rm** argument:
 percentile.longterm.missing <- compute.Q.percentile.longterm(
                           Station.Code=Station.Code,
                           Station.Area=Station.Area,
-                          flow        =S08HA011,
+                          flow        =WSC.08HA011,
                           start.year  =start.year,
                           end.year    =end.year,
                           na.rm=list(na.rm.global=FALSE))
@@ -215,7 +228,8 @@ head(percentile.longterm.missing$Q.percentile.stat)
 The volume frequency analysis automatically drops missing values:
 ```{r, warning=FALSE}
 vfa.analysis <- compute.volume.frequency.analysis( 
-                      Station.Code   =Station.Code, S08HA011,
+                      Station.Code   =Station.Code, 
+                      flow           =WSC.08HA011,
                       start.year     =start.year, 
                       end.year       =end.year)
 vfa.analysis$fitted.quantiles.trans
@@ -224,7 +238,8 @@ vfa.analysis$fitted.quantiles.trans
 If you set the **na.rm** parameter the output appears to be unaffected:
 ```{r, warning=FALSE}
 vfa.analysis.missing <- compute.volume.frequency.analysis( 
-                      Station.Code   =Station.Code, S08HA011,
+                      Station.Code   =Station.Code, 
+                      flow           =WSC.08HA011,
                       start.year     =start.year, 
                       end.year       =end.year,
                       na.rm=list(na.rm.global=FALSE))

@@ -76,6 +76,7 @@
 #' @export
 #' @import ggplot2
 #' @import scales
+#' @import utils
 #'
 
 # Copyright 2017 Province of British Columbia
@@ -179,6 +180,18 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    if( !all(names(na.rm) %in% names(my.na.rm))){stop("Illegal element in na.rm")}
    my.na.rm[names(na.rm)]<- na.rm
    na.rm <- my.na.rm  # set the na.rm for the rest of the function.
+
+   # Define the log=Pearson III function needed for fitting at the GLOBAL environment level
+   dPIII <<-function(x, shape, location, scale) PearsonDS::dpearsonIII(x, shape, location, scale, log=FALSE)
+   pPIII <<-function(q, shape, location, scale) PearsonDS::ppearsonIII(q, shape, location, scale, lower.tail = TRUE, log.p = FALSE)
+   qPIII <<-function(p, shape, location, scale) PearsonDS::qpearsonIII(p, shape, location, scale, lower.tail = TRUE, log.p = FALSE)
+
+   mPIII <<-function(order, shape, location, scale){
+      # compute the empirical first 3 moments of the PIII distribution
+      if(order==1) return( location + shape*scale)
+      if(order==2) return(scale*scale*shape)
+      if(order==3) return(2/sqrt(shape)*sign(scale))
+   }
 
    # Expand the data from the min(date) to max(date) in the dataframe to
    # insert missing values if date was omitted

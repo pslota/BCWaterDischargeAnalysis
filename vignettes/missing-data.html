@@ -12,7 +12,7 @@
 
 <meta name="author" content="Carl James Schwarz" />
 
-<meta name="date" content="2017-03-01" />
+<meta name="date" content="2017-03-03" />
 
 <title>Impact of missing values</title>
 
@@ -70,12 +70,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Impact of missing values</h1>
 <h4 class="author"><em>Carl James Schwarz</em></h4>
-<h4 class="date"><em>2017-03-01</em></h4>
+<h4 class="date"><em>2017-03-03</em></h4>
 
 
 
-<p>This will demonstrate the impact of missing values on the computations using a sample analysis of the stream discharge data from station 08HA011 (Cowichen River near Duncan) after creating some missing values (at random) during the period of record.</p>
-<p>The base data is provided as a sample dataset (S08HA011) with this package. The basin has an area of 826 km**2. While the data frame runs from 1900 onwards, data was only populated in this example starting in 1965 onwards.</p>
+<p>This will demonstrate the impact of missing values on the computations using a sample analysis of the stream discharge data from station 08HA011 (Cowichan River near Duncan) after creating some missing values (at random) during the period of record.</p>
+<p>The base data is provided as a sample dataset (WSC.08HA011) with this package. The basin has an area of 826 km**2. While the data frame runs from 1900 onwards, data was only populated in this example starting in 1965 onwards.</p>
 <div id="loading-the-data" class="section level2">
 <h2>Loading the data</h2>
 <p>We first load the package, load the data, add a <strong>Year</strong> column, and look at the first few rows starting in 1965.</p>
@@ -84,9 +84,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">library</span>(BCWaterDischargeAnalysis)
 
 
-<span class="kw">data</span>(S08HA011)
-S08HA011$Year &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(<span class="kw">format</span>(S08HA011$Date, <span class="st">&quot;%Y&quot;</span>))
-<span class="kw">head</span>( S08HA011[ S08HA011$Year ==<span class="dv">1965</span>,])</code></pre></div>
+<span class="kw">data</span>(WSC.08HA011)
+WSC.08HA011$Year &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(<span class="kw">format</span>(WSC.08HA011$Date, <span class="st">&quot;%Y&quot;</span>))
+<span class="kw">head</span>( WSC.08HA011[ WSC.08HA011$Year ==<span class="dv">1965</span>,])</code></pre></div>
 <pre><code>##             Date    Q Year
 ## 23742 1965-01-01 46.4 1965
 ## 23743 1965-01-02 45.0 1965
@@ -94,10 +94,51 @@ S08HA011$Year &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(<
 ## 23745 1965-01-04 39.6 1965
 ## 23746 1965-01-05 38.2 1965
 ## 23747 1965-01-06 36.5 1965</code></pre>
-<p><strong>Notice that the flow dataframe MUST have two variables: Date, the day in standard R format, and Q - the daily discharge value.</strong></p>
+<p><strong>Notice that the flow dataframe MUST have two variables: <code>Date</code>, the day in standard R format, and <code>Q</code> - the daily discharge value.</strong></p>
+<table style="width:33%;">
+<colgroup>
+<col width="13%"></col>
+<col width="19%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Date</td>
+<td>The data of the reading in standard R date class format.</td>
+</tr>
+<tr class="even">
+<td>For example to convert a 4-digit year, numeric month, and numeric day</td>
+</tr>
+<tr class="odd">
+<td>of the month use</td>
+</tr>
+<tr class="even">
+<td><code>flow$Date  &lt;- as.Date{paste(flow$Year,'-',flow$Month,'-',flow$Day,sep=&quot;&quot;)</code>.</td>
+</tr>
+<tr class="odd">
+<td>To convert a character string (e.g. ‘1/15/2001’) use the</td>
+</tr>
+<tr class="even">
+<td><code>flow$Date &lt;- as.Date(flow$chardate, &quot;%d/%m/%Y&quot;)</code> .</td>
+</tr>
+<tr class="odd">
+<td>The formatting codes (%Y etc) are explained in the help for the <code>strptime()</code> function.</td>
+</tr>
+<tr class="even">
+<td>Q</td>
+<td>The average daily flow as a numeric value.</td>
+</tr>
+</tbody>
+</table>
+<p>Other variables in the data frame will be ignored.</p>
 <p>We now set the variables limiting the years for which the analysis should be done and setting up other needed variables for the analysis.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Station.Code &lt;-<span class="st"> '08HA011'</span>
-Station.Name &lt;-<span class="st"> 'Cowichen River near Duncan'</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">Station.Code &lt;-<span class="st"> 'WSC-08HA011'</span>
+Station.Name &lt;-<span class="st"> 'Cowichan River near Duncan'</span>
 Station.Area &lt;-<span class="st"> </span><span class="dv">826</span>    <span class="co"># square km's</span>
 
 start.year   &lt;-<span class="st"> </span><span class="dv">1965</span>  <span class="co"># when do you want the analysis to start at.</span>
@@ -105,16 +146,16 @@ end.year     &lt;-<span class="st"> </span><span class="dv">2012</span>  <span c
 <p>We now create some missing values at random in the dataset.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Create 1% missing values (approximately)</span>
 <span class="kw">set.seed</span>(<span class="dv">3423432</span>)
-<span class="kw">sum</span>(<span class="kw">is.na</span>(S08HA011[ start.year &lt;=<span class="st"> </span>S08HA011$Year &amp;<span class="st"> </span>S08HA011$Year &lt;=<span class="st"> </span>end.year, <span class="st">&quot;Q&quot;</span>]))</code></pre></div>
+<span class="kw">sum</span>(<span class="kw">is.na</span>(WSC.08HA011[ start.year &lt;=<span class="st"> </span>WSC.08HA011$Year &amp;<span class="st"> </span>WSC.08HA011$Year &lt;=<span class="st"> </span>end.year, <span class="st">&quot;Q&quot;</span>]))</code></pre></div>
 <pre><code>## [1] 0</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">missing &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span>:<span class="kw">nrow</span>(S08HA011), .<span class="dv">0003</span>*<span class="kw">nrow</span>(S08HA011))
-S08HA011$Q[ missing ] &lt;-<span class="st"> </span><span class="ot">NA</span>
-<span class="kw">sum</span>(<span class="kw">is.na</span>(S08HA011[ start.year &lt;=<span class="st"> </span>S08HA011$Year &amp;<span class="st"> </span>S08HA011$Year &lt;=<span class="st"> </span>end.year, <span class="st">&quot;Q&quot;</span>]))</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">missing &lt;-<span class="st"> </span><span class="kw">sample</span>(<span class="dv">1</span>:<span class="kw">nrow</span>(WSC.08HA011), .<span class="dv">0003</span>*<span class="kw">nrow</span>(WSC.08HA011))
+WSC.08HA011$Q[ missing ] &lt;-<span class="st"> </span><span class="ot">NA</span>
+<span class="kw">sum</span>(<span class="kw">is.na</span>(WSC.08HA011[ start.year &lt;=<span class="st"> </span>WSC.08HA011$Year &amp;<span class="st"> </span>WSC.08HA011$Year &lt;=<span class="st"> </span>end.year, <span class="st">&quot;Q&quot;</span>]))</code></pre></div>
 <pre><code>## [1] 4</code></pre>
 </div>
 <div id="impact-of-missing-values" class="section level2">
 <h2>Impact of missing values</h2>
-<p>Accoding to the WSC,</p>
+<p>According to the WSC,</p>
 <blockquote>
 <p>Monthly or annual values are not calculated unless there is complete daily record. If the gauge went down and the daily record cannot be reasonable estimated, then summaries at longer time scales (monthly, annual) are not computed.</p>
 </blockquote>
@@ -161,7 +202,7 @@ The rule is the same for both the CY (calendar-year) and WY (water-year) statist
 <p>The simple summary statistics are computed as before.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># get a simple summary of the data</span>
 <span class="co"># Table of simple statistics by year to help check for outliers, etc</span>
-S08HA011.sum &lt;-<span class="st"> </span>plyr::<span class="kw">ddply</span>(S08HA011[ S08HA011$Year &gt;=<span class="st"> </span>start.year &amp;<span class="st"> </span>S08HA011$Year &lt;=end.year,], <span class="st">&quot;Year&quot;</span>, plyr::summarize,
+WSC.08HA011.sum &lt;-<span class="st"> </span>plyr::<span class="kw">ddply</span>(WSC.08HA011[ WSC.08HA011$Year &gt;=<span class="st"> </span>start.year &amp;<span class="st"> </span>WSC.08HA011$Year &lt;=end.year,], <span class="st">&quot;Year&quot;</span>, plyr::summarize,
          <span class="dt">n.days   =</span> <span class="kw">length</span>(Year),
          <span class="dt">n.Q      =</span> <span class="kw">sum</span> (!<span class="kw">is.na</span>(Q)),
          <span class="dt">n.miss.Q =</span> <span class="kw">sum</span> ( <span class="kw">is.na</span>(Q)),
@@ -169,7 +210,7 @@ S08HA011.sum &lt;-<span class="st"> </span>plyr::<span class="kw">ddply</span>(S
          <span class="dt">max.Q    =</span> <span class="kw">max</span> (Q, <span class="dt">na.rm=</span><span class="ot">TRUE</span>),
          <span class="dt">mean.Q   =</span> <span class="kw">mean</span>(Q,<span class="dt">na.rm=</span><span class="ot">TRUE</span>),
          <span class="dt">sd.Q     =</span> <span class="kw">sd</span>  (Q,<span class="dt">na.rm=</span><span class="ot">TRUE</span>))
-S08HA011.sum</code></pre></div>
+WSC.08HA011.sum</code></pre></div>
 <pre><code>##    Year n.days n.Q n.miss.Q min.Q max.Q   mean.Q     sd.Q
 ## 1  1965    365 365        0  3.54 196.0 47.72625 44.55059
 ## 2  1966    365 365        0  5.80 362.0 60.32545 65.58664
@@ -227,7 +268,7 @@ S08HA011.sum</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stat.annual &lt;-<span class="st"> </span><span class="kw">compute.Q.stat.annual</span>(
                           <span class="dt">Station.Code  =</span>Station.Code,
                           <span class="dt">Station.Area  =</span>Station.Area,
-                          <span class="dt">flow          =</span>S08HA011,
+                          <span class="dt">flow          =</span>WSC.08HA011,
                           <span class="dt">start.year    =</span>start.year,
                           <span class="dt">end.year      =</span>end.year)</code></pre></div>
 <p>The returned list includes a dataframe of the missing days</p>
@@ -260,7 +301,7 @@ S08HA011.sum</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stat.annual.ignore.missing &lt;-<span class="st"> </span><span class="kw">compute.Q.stat.annual</span>(
                           <span class="dt">Station.Code  =</span>Station.Code,
                           <span class="dt">Station.Area  =</span>Station.Area,
-                          <span class="dt">flow          =</span>S08HA011,
+                          <span class="dt">flow          =</span>WSC.08HA011,
                           <span class="dt">start.year    =</span>start.year,
                           <span class="dt">end.year      =</span>end.year,
                           <span class="dt">na.rm=</span><span class="kw">list</span>(<span class="dt">na.rm.global=</span><span class="ot">TRUE</span>))
@@ -294,7 +335,7 @@ S08HA011.sum</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stat.longterm &lt;-<span class="st"> </span><span class="kw">compute.Q.stat.longterm</span>(
                           <span class="dt">Station.Code =</span>Station.Code,
                           <span class="dt">Station.Area =</span>Station.Area,
-                          <span class="dt">flow         =</span>S08HA011,
+                          <span class="dt">flow         =</span>WSC.08HA011,
                           <span class="dt">start.year   =</span>start.year,
                           <span class="dt">end.year     =</span>end.year)
 <span class="kw">head</span>(stat.longterm$Q.stat.longterm)</code></pre></div>
@@ -309,7 +350,7 @@ S08HA011.sum</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stat.longterm.missing &lt;-<span class="st"> </span><span class="kw">compute.Q.stat.longterm</span>(
                           <span class="dt">Station.Code =</span>Station.Code,
                           <span class="dt">Station.Area =</span>Station.Area,
-                          <span class="dt">flow         =</span>S08HA011,
+                          <span class="dt">flow         =</span>WSC.08HA011,
                           <span class="dt">start.year   =</span>start.year,
                           <span class="dt">end.year     =</span>end.year,
                           <span class="dt">na.rm=</span><span class="kw">list</span>(<span class="dt">na.rm.global=</span><span class="ot">FALSE</span>))
@@ -328,7 +369,7 @@ S08HA011.sum</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">percentile.longterm &lt;-<span class="st"> </span><span class="kw">compute.Q.percentile.longterm</span>(
                           <span class="dt">Station.Code=</span>Station.Code,
                           <span class="dt">Station.Area=</span>Station.Area,
-                          <span class="dt">flow        =</span>S08HA011,
+                          <span class="dt">flow        =</span>WSC.08HA011,
                           <span class="dt">start.year  =</span>start.year,
                           <span class="dt">end.year    =</span>end.year)
 <span class="kw">head</span>(percentile.longterm$Q.percentile.stat)</code></pre></div>
@@ -357,7 +398,7 @@ S08HA011.sum</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">percentile.longterm.missing &lt;-<span class="st"> </span><span class="kw">compute.Q.percentile.longterm</span>(
                           <span class="dt">Station.Code=</span>Station.Code,
                           <span class="dt">Station.Area=</span>Station.Area,
-                          <span class="dt">flow        =</span>S08HA011,
+                          <span class="dt">flow        =</span>WSC.08HA011,
                           <span class="dt">start.year  =</span>start.year,
                           <span class="dt">end.year    =</span>end.year,
                           <span class="dt">na.rm=</span><span class="kw">list</span>(<span class="dt">na.rm.global=</span><span class="ot">FALSE</span>))
@@ -388,7 +429,8 @@ S08HA011.sum</code></pre></div>
 <h2>Computing a volume frequency analysis</h2>
 <p>The volume frequency analysis automatically drops missing values:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vfa.analysis &lt;-<span class="st"> </span><span class="kw">compute.volume.frequency.analysis</span>( 
-                      <span class="dt">Station.Code   =</span>Station.Code, S08HA011,
+                      <span class="dt">Station.Code   =</span>Station.Code, 
+                      <span class="dt">flow           =</span>WSC.08HA011,
                       <span class="dt">start.year     =</span>start.year, 
                       <span class="dt">end.year       =</span>end.year)
 vfa.analysis$fitted.quantiles.trans</code></pre></div>
@@ -418,7 +460,8 @@ vfa.analysis$fitted.quantiles.trans</code></pre></div>
 ## 11 11.774964 17.807848</code></pre>
 <p>If you set the <strong>na.rm</strong> parameter the output appears to be unaffected:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">vfa.analysis.missing &lt;-<span class="st"> </span><span class="kw">compute.volume.frequency.analysis</span>( 
-                      <span class="dt">Station.Code   =</span>Station.Code, S08HA011,
+                      <span class="dt">Station.Code   =</span>Station.Code, 
+                      <span class="dt">flow           =</span>WSC.08HA011,
                       <span class="dt">start.year     =</span>start.year, 
                       <span class="dt">end.year       =</span>end.year,
                       <span class="dt">na.rm=</span><span class="kw">list</span>(<span class="dt">na.rm.global=</span><span class="ot">FALSE</span>))
