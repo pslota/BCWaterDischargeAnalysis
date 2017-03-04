@@ -83,13 +83,13 @@ A list with the following elements:
   \item{Q.stat.annual.trans}{Data frame with transposed summary statistics as listed at \code{\link{SummaryStatistics}}.}
   \item{dates.missing.flow}{Data framw with dates of missing \code{flow$Q} between
          \code{start.year} and \code{end.year}}
-  \item{file.cy.stat.csv}{File name of *.csv file with calendar year summary statistics.}
-  \item{file.wy.stat.csv}{File name of *.csv file with water year summary statistics.}
-  \item{file.stat.trans.csv}{File name of *.csv file with transposed summary statistics.}
-  \item{file.stat.trend.pdf}{File name of *.pdf file with plot of statistics over time.}
-  \item{file.cumdepart.pdf}{File name of *.pdf file with plot of yearly and cumulative departures.}
-  \item{file.summary.csv}{File name of *.csv file with summary statistics.}
-  \item{file.lowflow.csv}{File name of *.csv file with low flow summary statistics.}
+  \item{file.cy.stat.csv}{Object with file name of *.csv file with calendar year summary statistics.}
+  \item{file.wy.stat.csv}{Object with file name of *.csv file with water year summary statistics.}
+  \item{file.stat.trans.csv}{Object with file name of *.csv file with transposed summary statistics.}
+  \item{file.stat.trend.pdf}{Object with file name of *.pdf file with plot of statistics over time.}
+  \item{file.cumdepart.pdf}{Object with file name of *.pdf file with plot of yearly and cumulative departures.}
+  \item{file.summary.csv}{Object with file name of *.csv file with summary statistics.}
+  \item{file.lowflow.csv}{Object with file name of *.csv file with low flow summary statistics.}
   \item{na.rm}{Missing value flags.}
   \item{Version}{Version of this function.}
   \item{Date}{Date function was run.}

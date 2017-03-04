@@ -116,12 +116,12 @@ A list with the following elements:
   \item{fit}{List of fitted objects from fitdistrplus.}
   \item{fitted.quantiles}{Data frame with fitted quantiles.}
   \item{fitted.quantiles.trans}{Data frane with fitted quantiles (transposed)}
-  \item{file.stat.csv}{File name of *.csv file with flow summary}
-  \item{ file.stat.trans.csv}{File name of *.csv file with flow summary (transposed)}
-  \item{file.plotdata.csv}{File name of *.csv file with plotting information for frequency plot.}
-  \item{file.quantile.csv}{File name of fitted quantiles.}
-  \item{file.quantile.trans.csv}{File name of fitted quantiles (transposed)}
-  \item{file.frequency.plot}{File name of *.pdf or *.png file with frequency plot}
+  \item{file.stat.csv}{Object with file name of *.csv file with flow summary}
+  \item{ file.stat.trans.csv}{Object with file name of *.csv file with flow summary (transposed)}
+  \item{file.plotdata.csv}{Object with file name of *.csv file with plotting information for frequency plot.}
+  \item{file.quantile.csv}{Object with file name of fitted quantiles.}
+  \item{file.quantile.trans.csv}{Object with file name of fitted quantiles (transposed)}
+  \item{file.frequency.plot}{Object with file name of *.pdf or *.png file with frequency plot}
   \item{Version}{Version of this function.}
   \item{Date}{Date function was run.}
 }

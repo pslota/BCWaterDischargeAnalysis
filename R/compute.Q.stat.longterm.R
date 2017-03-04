@@ -20,8 +20,8 @@
 #'   \item{Q.stat.longterm}{Data frame with the long term statistics of \code{flow$Q} by month
 #'         and overall between \code{start.year} and \code{end.year}}
 #'   \item{Q.stat.longterm.trans}{Data frame with the long term statistics of \code{flow$Q} transposed.}
-#'   \item{file.stat.csv}{File name of *.csv file with long term summary statistics.}
-#'    \item{file.stat.trans.csv}{File name of *.csv file with transposed long term summary statistics.}
+#'   \item{file.stat.csv}{Object with file name of *.csv file with long term summary statistics.}
+#'    \item{file.stat.trans.csv}{Object with file name of *.csv file with transposed long term summary statistics.}
 #'    \item{na.rm}{Missing value flags.}
 #'    \item{Version}{Version of this function.}
 #'    \item{Date}{Date function was run.}

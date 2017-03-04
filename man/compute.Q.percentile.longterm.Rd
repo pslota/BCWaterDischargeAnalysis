@@ -61,8 +61,8 @@ A list with the following elements:
   \item{Q.percentile.stat}{Data frame with the percentiles of \code{flow$Q} by month
         and overall between \code{start.year} and \code{end.year}}
   \item{Q.percentile.stat.trans}{Data frame with the percentiles of \code{flow$Q} transposed.}
-  \item{file.stat.csv}{File name of *.csv file with percentile statistics.}
-   \item{file.stat.trans.csv}{File name of *.csv file with transposed percentile statistics.}
+  \item{file.stat.csv}{Object with file name of *.csv file with percentile statistics.}
+   \item{file.stat.trans.csv}{Object with file name of *.csv file with transposed percentile statistics.}
    \item{na.rm}{Missing value flags.}
    \item{Version}{Version of this function.}
    \item{Date}{Date function was run.}
