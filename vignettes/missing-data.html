@@ -94,44 +94,26 @@ WSC.08HA011$Year &lt;-<span class="st"> </span><span class="kw">as.numeric</span
 ## 23745 1965-01-04 39.6 1965
 ## 23746 1965-01-05 38.2 1965
 ## 23747 1965-01-06 36.5 1965</code></pre>
-<p><strong>Notice that the flow dataframe MUST have two variables: <code>Date</code>, the day in standard R format, and <code>Q</code> - the daily discharge value.</strong></p>
-<table style="width:33%;">
+<p><strong>Notice that the flow dataframe MUST have two variables: <code>Date</code> and <code>Q</code> - the daily discharge value.</strong></p>
+<table>
 <colgroup>
-<col width="13%"></col>
-<col width="19%"></col>
+<col width="12%"></col>
+<col width="87%"></col>
 </colgroup>
 <thead>
 <tr class="header">
-<th>Variable</th>
-<th>Description</th>
+<th align="right">Variable</th>
+<th align="left">Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Date</td>
-<td>The data of the reading in standard R date class format.</td>
+<td align="right">Date</td>
+<td align="left">The date of the reading in standard R date class format.<br> For example to convert a 4-digit year, numeric month, and numeric day of the month use <br>     <code>flow$Date  &lt;- as.Date{paste(flow$Year,'-',flow$Month,'-',flow$Day,sep=&quot;&quot;)</code><br> To convert a character string (e.g. ‘1/15/2001’) use the <br>     <code>flow$Date &lt;- as.Date(flow$chardate, &quot;%d/%m/%Y&quot;)</code><br> The formatting codes (%Y etc) are explained in the help for the strptime() function.</td>
 </tr>
 <tr class="even">
-<td>For example to convert a 4-digit year, numeric month, and numeric day</td>
-</tr>
-<tr class="odd">
-<td>of the month use</td>
-</tr>
-<tr class="even">
-<td><code>flow$Date  &lt;- as.Date{paste(flow$Year,'-',flow$Month,'-',flow$Day,sep=&quot;&quot;)</code>.</td>
-</tr>
-<tr class="odd">
-<td>To convert a character string (e.g. ‘1/15/2001’) use the</td>
-</tr>
-<tr class="even">
-<td><code>flow$Date &lt;- as.Date(flow$chardate, &quot;%d/%m/%Y&quot;)</code> .</td>
-</tr>
-<tr class="odd">
-<td>The formatting codes (%Y etc) are explained in the help for the <code>strptime()</code> function.</td>
-</tr>
-<tr class="even">
-<td>Q</td>
-<td>The average daily flow as a numeric value.</td>
+<td align="right">Q</td>
+<td align="left">The average daily flow as a numeric value.</td>
 </tr>
 </tbody>
 </table>

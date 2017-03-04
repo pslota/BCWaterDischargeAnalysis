@@ -115,7 +115,7 @@ A list with the following elements:
   \item{fit.distr}{Which distribution was fit to the data}
   \item{fit}{List of fitted objects from fitdistrplus.}
   \item{fitted.quantiles}{Data frame with fitted quantiles.}
-  \item{fitted.quantiles.trans}{Data frane with fitted quantiles (transposed)}
+  \item{fitted.quantiles.trans}{Data frame with fitted quantiles (transposed)}
   \item{file.stat.csv}{Object with file name of *.csv file with flow summary}
   \item{ file.stat.trans.csv}{Object with file name of *.csv file with flow summary (transposed)}
   \item{file.plotdata.csv}{Object with file name of *.csv file with plotting information for frequency plot.}

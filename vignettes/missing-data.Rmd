@@ -33,19 +33,21 @@ WSC.08HA011$Year <- as.numeric(format(WSC.08HA011$Date, "%Y"))
 head( WSC.08HA011[ WSC.08HA011$Year ==1965,])
 ```
 
-**Notice that the flow dataframe MUST have two variables: `Date`, the day in standard R format, and
-`Q` - the daily discharge value.**
+**Notice that the flow dataframe MUST have two variables: `Date` and `Q` - the daily discharge value.**
 
-  Variable | Description
-  ---------|-------------
-  Date     | The data of the reading in standard R date class format.
-           | For example to convert a 4-digit year, numeric month, and numeric day 
-           | of the month use 
-           |    `flow$Date  <- as.Date{paste(flow$Year,'-',flow$Month,'-',flow$Day,sep="")`.
-           | To convert a character string (e.g. '1/15/2001') use the 
-           |    `flow$Date <- as.Date(flow$chardate, "%d/%m/%Y")` . 
-           | The formatting codes (%Y etc) are explained in the help for the `strptime()` function. 
-  Q        | The average daily flow as a numeric value.
+---------------------------------------------------------------------------------------------------- 
+   Variable  Description                                                                            
+-----------  ---------------------------------------------------------------------------------------- 
+Date         The date of the reading in standard R date class format.<br>                              
+             For example to convert a 4-digit year, numeric month, and numeric day                  
+             of the month use <br>                                                                     
+             &nbsp;&nbsp;&nbsp;&nbsp;`flow$Date  <- as.Date{paste(flow$Year,'-',flow$Month,'-',flow$Day,sep="")`<br>
+             To convert a character string (e.g. '1/15/2001') use the <br>                             
+             &nbsp;&nbsp;&nbsp;&nbsp;`flow$Date <- as.Date(flow$chardate, "%d/%m/%Y")`<br>
+             The formatting codes (%Y etc) are explained in the help for the strptime() function.    
+
+Q            The average daily flow as a numeric value.                                             
+---------------------------------------------------------------------------------------------------- 
 
 Other variables in the data frame will be ignored.
 
