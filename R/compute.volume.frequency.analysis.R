@@ -161,7 +161,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    if(! all(fit.quantiles >0 & fit.quantiles < 1)){
        stop("fit.quantiles must be numeric and between 0 and 1 (not inclusive)")}
    if(  fit.distr[1]=='weibull' & use.log){stop("Cannot fit Weibull distribution on log-scale")}
-   if(  fit.distr[1]=='weibull' & any(flow$Q<0)){stop("cannot fit weibull distribution with negative flow values")}
+   if(  fit.distr[1]=='weibull' & any(flow$Q<0, na.rm=TRUE)){stop("cannot fit weibull distribution with negative flow values")}
    if(  fit.distr[1]!="PIII" & fit.distr.method[1]=="MOM"){stop('MOM only can be used with PIII distribution')}
 
    if( !is.logical(write.stat.csv))      {stop("write.stat.csv must be logical (TRUE/FALSE")}
@@ -271,7 +271,8 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
 
    if(!use.max){ freqplot <- freqplot+theme(legend.justification=c(1,1), legend.position=c(1,1))}
    if( use.max){ freqplot <- freqplot+theme(legend.justification=c(1,0), legend.position=c(1,0))}
-   if(!use.log){ freqplot <- freqplot + scale_y_log10(breaks=function(x){pretty(x)})}
+   if(!use.log){ freqplot <- freqplot + scale_y_log10(breaks=pretty_breaks(n=20))}
+   if( use.log){ freqplot <- freqplot + scale_y_continuous(breaks=pretty_breaks(n=20))}
    if( use.log &  use.max ){freqplot <- freqplot + ylab("ln(Max Flow (cms))")}  # adjust the Y axis label
    if( use.log & !use.max){freqplot <- freqplot + ylab("ln(Min Flow (cms))")}
    if(!use.log &  use.max ){freqplot <- freqplot + ylab("Max Flow (cms)")}
@@ -319,8 +320,10 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
       if(fit.method=="MOM") {fit <- fitdistrplus::fitdist(x$value, distr, start=start,
                                     method="mme", order=1:3, memp=ePIII, control=list(maxit=1000))
       } # fixed at MOM estimates
+      fit
    }, distr=fit.distr[1], fit.method=fit.distr.method[1])
 
+   if(debug)browser()
    # extracted the fitted quantiles from the fitted distribution
    fitted.quantiles <- plyr::ldply(names(fit), function (measure, prob,fit, use.max, use.log){
       # get the quantiles for each model
