@@ -1,35 +1,35 @@
-#' @title Compute long term annual (calendar year) summary statistics.
+#' @title Compute long-term annual (calendar and water year) summary statistics.
 #'
-#' @description Computes long term summary statistics on \code{flow$Q} variable
+#' @description Computes long-term summary statistics on \code{flow$Q} variable
 #'    between \code{start.year} and \code{end.year} inclusive.
 #'    It (optionally) saves the resutls in *.csv and *.pdf files.
 #'
 #' @template Station.Code
 #' @template flow
 #' @template start.year
-#' @param write.CY.stat.csv Should a file be created with the computed percentiles?
-#'    The file name will be  \code{file.path(report.dir,paste(Station.Code,'-longterm-summary-stat.csv'))}.
-#' @param write.CY.stat.trans.csv Should a file be created with the transposed of the percentile report?
-#'    The file name will be  \code{file.path(report.dir,paste(Station.Code,'-longterm-summary-stat-trans.csv'))}.
-#' @param write.WY.stat.csv Should a file be created with the computed percentiles?
-#'    The file name will be  \code{file.path(report.dir,paste(Station.Code,'-longterm-WY-summary-stat.csv'))}.
-#' @param write.WY.stat.trans.csv Should a file be created with the transposed of the percentile report?
-#'    The file name will be  \code{file.path(report.dir,paste(Station.Code,'-longterm-summary-stat-trabs.csv'))}.
+#' @param write.cy.stat.csv Should a file be created with the computed statistics?
+#'    The file name will be  \code{file.path(report.dir,paste(Station.Code,'-longterm-cy-summary-stat.csv'))}.
+#' @param write.cy.stat.trans.csv Should a file be created with the transposed of the statistics report?
+#'    The file name will be  \code{file.path(report.dir,paste(Station.Code,'-longterm-cy-summary-stat-trans.csv'))}.
+#' @param write.wy.stat.csv Should a file be created with the computed statistics?
+#'    The file name will be  \code{file.path(report.dir,paste(Station.Code,'-longterm-wy-summary-stat.csv'))}.
+#' @param write.wy.stat.trans.csv Should a file be created with the transposed of the statistics report?
+#'    The file name will be  \code{file.path(report.dir,paste(Station.Code,'-longterm-wy-summary-stat-trans.csv'))}.
 #' @template report.dir
 #' @template csv.nddigits
 #' @template na.rm
 #'
 #' @return A list with the following elements:
-#'   \item{Q.CY.stat.longterm}{Data frame with the long term statistics of \code{flow$Q} by month
+#'   \item{Q.cy.stat.longterm}{Data frame with the long-term statistics of \code{flow$Q} by month
 #'         and overall between \code{start.year} and \code{end.year}}
-#'   \item{Q.CY.stat.longterm.trans}{Data frame with the long term statistics of \code{flow$Q} transposed.}
-#'   \item{file.CY.stat.csv}{Object with file name of *.csv file with long term summary statistics.}
-#'    \item{file.CY.stat.trans.csv}{Object with file name of *.csv file with transposed long term summary statistics.}
-#'    \item{Q.WY.stat.longterm}{Data frame with the long term statistics of \code{flow$Q} by month
+#'   \item{Q.cy.stat.longterm.trans}{Data frame with the long-term statistics of \code{flow$Q} transposed.}
+#'   \item{file.cy.stat.csv}{Object with file name of *.csv file with long term summary statistics.}
+#'    \item{file.cy.stat.trans.csv}{Object with file name of *.csv file with transposed long-term summary statistics.}
+#'    \item{Q.wy.stat.longterm}{Data frame with the long-term statistics of \code{flow$Q} by month
 #'         and overall between \code{start.year} and \code{end.year}}
-#'   \item{Q.WY.stat.longterm.trans}{Data frame with the long term statistics of \code{flow$Q} transposed.}
-#'   \item{file.WY.stat.csv}{Object with file name of *.csv file with long term summary statistics.}
-#'    \item{file.WY.stat.trans.csv}{Object with file name of *.csv file with transposed long term summary statistics.}
+#'   \item{Q.wy.stat.longterm.trans}{Data frame with the long-term statistics of \code{flow$Q} transposed.}
+#'   \item{file.wy.stat.csv}{Object with file name of *.csv file with long-term summary statistics.}
+#'    \item{file.wy.stat.trans.csv}{Object with file name of *.csv file with transposed long-term summary statistics.}
 #'    \item{na.rm}{Missing value flags.}
 #'    \item{Version}{Version of this function.}
 #'    \item{Date}{Date function was run.}
@@ -66,10 +66,10 @@ compute.Q.stat.longterm <- function(
                           flow,
                           start.year=9999,
                           end.year=0,
-                          write.CY.stat.csv=TRUE,         # write out statistics
-                          write.CY.stat.trans.csv=TRUE,   # write out statistics in transposed format
-                          write.WY.stat.csv=TRUE,
-                          write.WY.stat.trans.csv=TRUE,
+                          write.cy.stat.csv=TRUE,         # write out calendar year statistics
+                          write.cy.stat.trans.csv=TRUE,   # write out statistics in transposed format
+                          write.wy.stat.csv=TRUE,         # write out water year statistics
+                          write.wy.stat.trans.csv=TRUE,   # write out water year statistics in transposed format
                           report.dir='.',
                           csv.nddigits=3,               # decimal digit for csv files.
                           na.rm=list(na.rm.global=TRUE)){
@@ -94,10 +94,10 @@ compute.Q.stat.longterm <- function(
    if(! (is.numeric(start.year) & is.numeric(end.year))){
                                       stop("start.year and end.year not numberic.")}
    if(! (start.year <= end.year))    {stop("start.year > end.year")}
-   if( !is.logical(write.CY.stat.csv))  {stop("write.stat.csv must be logical (TRUE/FALSE")}
-   if( !is.logical(write.CY.stat.trans.csv)){stop("write.stat.trans.csv must be logical (TRUE/FALSE")}
-   if( !is.logical(write.WY.stat.csv))  {stop("write.WY.stat.csv must be logical (TRUE/FALSE")}
-   if( !is.logical(write.WY.stat.trans.csv)){stop("write.WY.stat.trans.csv must be logical (TRUE/FALSE")}
+   if( !is.logical(write.cy.stat.csv))  {stop("write.stat.csv must be logical (TRUE/FALSE")}
+   if( !is.logical(write.cy.stat.trans.csv)){stop("write.stat.trans.csv must be logical (TRUE/FALSE")}
+   if( !is.logical(write.wy.stat.csv))  {stop("write.wy.stat.csv must be logical (TRUE/FALSE")}
+   if( !is.logical(write.wy.stat.trans.csv)){stop("write.wy.stat.trans.csv must be logical (TRUE/FALSE")}
    if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exist")}
 
    if(!is.numeric(csv.nddigits)){ stop("csv.nddigits must be numeric")}
@@ -116,99 +116,104 @@ compute.Q.stat.longterm <- function(
    flow$MonthNum <- as.numeric(format(flow$Date, '%m'))
    flow$WaterYear <- as.numeric(ifelse(flow$MonthNum>=10,flow$Year+1,flow$Year))
 
-   #Calendar YEAR
+#  Compute calendar year long-term stats
 
-   Q.month.longterm.CY <- plyr::ddply(flow[flow$Year >= start.year & flow$Year<=end.year,], "Month", function(x,na.rm){    # all missing values always excluded
+   Q.month.longterm.cy <- plyr::ddply(flow[flow$Year >= start.year & flow$Year<=end.year,], "Month", function(x,na.rm){    # all missing values always excluded
       Mean  = mean  (x$Q, na.rm=na.rm$na.rm.global)
       Median= stats::median(x$Q, na.rm=na.rm$na.rm.global)
       Maximum   = max   (x$Q, na.rm=na.rm$na.rm.global)
       Minimum   = min   (x$Q, na.rm=na.rm$na.rm.global)
       data.frame(Mean=Mean, Median=Median, Maximum=Maximum, Minimum=Minimum)
    }, na.rm=na.rm)
-   Q.month.longterm.CY$Month <- as.factor(Q.month.longterm.CY$Month)
+   Q.month.longterm.cy$Month <- as.factor(Q.month.longterm.cy$Month)
 
-   Q.all.longterm.CY <- plyr::summarize( flow[flow$Year >= start.year & flow$Year<=end.year,],
+   Q.all.longterm.cy <- plyr::summarize( flow[flow$Year >= start.year & flow$Year<=end.year,],
                           Mean  = mean  (Q, na.rm=na.rm$na.rm.global),
                           Median= stats::median(Q, na.rm=na.rm$na.rm.global),
                           Maximum   = max   (Q, na.rm=na.rm$na.rm.global),
                           Minimum   = min   (Q, na.rm=na.rm$na.rm.global))
-   Q.all.longterm.CY$Month <- "Long-term"
+   Q.all.longterm.cy$Month <- "Long-term"
 
-   Q.longterm.CY <- rbind(Q.month.longterm.CY, Q.all.longterm.CY)
-   Q.longterm.CY$Month <- factor(Q.longterm.CY$Month, levels=c("Jan", "Feb", "Mar", "Apr", "May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","Long-term"))
-   Q.longterm.CY <- with(Q.longterm.CY, Q.longterm.CY[order(Month),])
+   Q.longterm.cy <- rbind(Q.month.longterm.cy, Q.all.longterm.cy)
+   Q.longterm.cy$Month <- factor(Q.longterm.cy$Month, levels=c("Jan", "Feb", "Mar", "Apr", "May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","Long-term"))
+   Q.longterm.cy <- with(Q.longterm.cy, Q.longterm.cy[order(Month),])
 
-   #WATER YEAR
+#  Compute water year long-term stats
 
-   Q.month.longterm.WY <- plyr::ddply(flow[flow$WaterYear >= start.year & flow$WaterYear<=end.year,], "Month", function(x,na.rm){    # all missing values always excluded
+   Q.month.longterm.wy <- plyr::ddply(flow[flow$WaterYear >= start.year & flow$WaterYear<=end.year,], "Month", function(x,na.rm){    # all missing values always excluded
      Mean  = mean  (x$Q, na.rm=na.rm$na.rm.global)
      Median= stats::median(x$Q, na.rm=na.rm$na.rm.global)
      Maximum   = max   (x$Q, na.rm=na.rm$na.rm.global)
      Minimum   = min   (x$Q, na.rm=na.rm$na.rm.global)
      data.frame(Mean=Mean, Median=Median, Maximum=Maximum, Minimum=Minimum)
    }, na.rm=na.rm)
-   Q.month.longterm.WY$Month <- as.factor(Q.month.longterm.WY$Month)
+   Q.month.longterm.wy$Month <- as.factor(Q.month.longterm.wy$Month)
 
 
-   Q.all.longterm.WY <- plyr::summarize( flow[flow$WaterYear >= start.year & flow$WaterYear<=end.year,],
+   Q.all.longterm.wy <- plyr::summarize( flow[flow$WaterYear >= start.year & flow$WaterYear<=end.year,],
                                          Mean  = mean  (Q, na.rm=na.rm$na.rm.global),
                                          Median= stats::median(Q, na.rm=na.rm$na.rm.global),
                                          Maximum   = max   (Q, na.rm=na.rm$na.rm.global),
                                          Minimum   = min   (Q, na.rm=na.rm$na.rm.global))
-   Q.all.longterm.WY$Month <- "Long-term"
+   Q.all.longterm.wy$Month <- "Long-term"
 
-   Q.longterm.WY <- rbind(Q.month.longterm.WY, Q.all.longterm.WY)
-   Q.longterm.WY$Month <- factor(Q.longterm.WY$Month, levels=c("Oct","Nov","Dec","Jan", "Feb", "Mar", "Apr", "May","Jun","Jul","Aug","Sep","Long-term"))
-   Q.longterm.WY <- with(Q.longterm.WY, Q.longterm.WY[order(Month),])
+   Q.longterm.wy <- rbind(Q.month.longterm.wy, Q.all.longterm.wy)
+   Q.longterm.wy$Month <- factor(Q.longterm.wy$Month, levels=c("Oct","Nov","Dec","Jan", "Feb", "Mar", "Apr", "May","Jun","Jul","Aug","Sep","Long-term"))
+   Q.longterm.wy <- with(Q.longterm.wy, Q.longterm.wy[order(Month),])
 
-#  Write out the summary table for comparison to excel spreadsheet
-   file.CY.stat.csv <- NA
-   if(write.CY.stat.csv){
-      file.CY.stat.csv <-file.path(report.dir, paste(Station.Code,"-longterm-CY-summary-stat.csv", sep=""))
-      temp <- Q.longterm.CY
+#  Write out summary tables for calendar years
+   #  Write out the summary table for comparison to excel spreadsheet
+   file.cy.stat.csv <- NA
+   if(write.cy.stat.csv){
+      file.cy.stat.csv <-file.path(report.dir, paste(Station.Code,"-longterm-cy-summary-stat.csv", sep=""))
+      temp <- Q.longterm.cy
       temp[,2:ncol(temp)] <- round(temp[,2:ncol(temp)], csv.nddigits)  # round the output
-      utils::write.csv(temp, file=file.CY.stat.csv, row.names=FALSE)
+      utils::write.csv(temp, file=file.cy.stat.csv, row.names=FALSE)
    }
-#  Write out the summary table for comparison to excel spreadsheet WATER YEAR
-   file.WY.stat.csv <- NA
-   if(write.WY.stat.csv){
-     file.WY.stat.csv <-file.path(report.dir, paste(Station.Code,"-longterm-WY-summary-stat.csv", sep=""))
-     temp <- Q.longterm.WY
+
+   #  Write out thesummary table in transposed format
+   Month.cy <- Q.longterm.cy[,"Month"]
+   Q.longterm.trans.cy <- t(Q.longterm.cy[, !grepl('^Month', names(Q.longterm.cy))])
+   colnames(Q.longterm.trans.cy) <- c("Jan", "Feb", "Mar", "Apr", "May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","Long-term")
+   file.cy.stat.trans.csv <- NA
+   if(write.cy.stat.trans.csv){
+     file.cy.stat.trans.csv <-file.path(report.dir,paste(Station.Code,"-longterm-cy-summary-stat-trans.csv", sep=""))
+     temp <- Q.longterm.trans.cy
+     temp <- round(temp, csv.nddigits) # round the output
+     utils::write.csv(temp, file=file.cy.stat.trans.csv, row.names=TRUE)
+   }
+
+#  Write out summary tables for water  years
+   #  Write out the summary table for comparison to excel spreadsheet WATER YEAR
+   file.wy.stat.csv <- NA
+   if(write.wy.stat.csv){
+     file.wy.stat.csv <-file.path(report.dir, paste(Station.Code,"-longterm-wy-summary-stat.csv", sep=""))
+     temp <- Q.longterm.wy
      temp[,2:ncol(temp)] <- round(temp[,2:ncol(temp)], csv.nddigits)  # round the output
-     utils::write.csv(temp, file=file.WY.stat.csv, row.names=FALSE)
+     utils::write.csv(temp, file=file.wy.stat.csv, row.names=FALSE)
    }
 
-#  Write out thesummary table in transposed format
-   Month.CY <- Q.longterm.CY[,"Month"]
-   Q.longterm.trans.CY <- t(Q.longterm.CY[, !grepl('^Month', names(Q.longterm.CY))])
-   colnames(Q.longterm.trans.CY) <- c("Jan", "Feb", "Mar", "Apr", "May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","Long-term")
-   file.CY.stat.trans.csv <- NA
-   if(write.CY.stat.trans.csv){
-     file.CY.stat.trans.csv <-file.path(report.dir,paste(Station.Code,"-longterm-CY-summary-stat-trans.csv", sep=""))
-     temp <- Q.longterm.trans.CY
+   #  Write out thesummary table in transposed format WATER YEAR
+   Month.wy <- Q.longterm.wy[,"Month"]
+   Q.longterm.trans.wy <- t(Q.longterm.wy[, !grepl('^Month', names(Q.longterm.wy))])
+   colnames(Q.longterm.trans.wy) <- c("Oct","Nov","Dec","Jan", "Feb", "Mar", "Apr", "May","Jun","Jul","Aug","Sep","Long-term")
+   file.wy.stat.trans.csv <- NA
+   if(write.wy.stat.trans.csv){
+     file.wy.stat.trans.csv <-file.path(report.dir,paste(Station.Code,"-longterm-wy-summary-stat-trans.csv", sep=""))
+     temp <- Q.longterm.trans.wy
      temp <- round(temp, csv.nddigits) # round the output
-     utils::write.csv(temp, file=file.CY.stat.trans.csv, row.names=TRUE)
+     utils::write.csv(temp, file=file.wy.stat.trans.csv, row.names=TRUE)
    }
 
-#  Write out thesummary table in transposed format WATER YEAR
-   Month.WY <- Q.longterm.WY[,"Month"]
-   Q.longterm.trans.WY <- t(Q.longterm.WY[, !grepl('^Month', names(Q.longterm.WY))])
-   colnames(Q.longterm.trans.WY) <- c("Oct","Nov","Dec","Jan", "Feb", "Mar", "Apr", "May","Jun","Jul","Aug","Sep","Long-term")
-   file.WY.stat.trans.csv <- NA
-   if(write.WY.stat.trans.csv){
-     file.WY.stat.trans.csv <-file.path(report.dir,paste(Station.Code,"-longterm-WY-summary-stat-trans.csv", sep=""))
-     temp <- Q.longterm.trans.WY
-     temp <- round(temp, csv.nddigits) # round the output
-     utils::write.csv(temp, file=file.WY.stat.trans.csv, row.names=TRUE)
-   }
-   return(list(Q.CY.stat.longterm=Q.longterm.CY,
-               Q.CY.stat.longterm.trans=Q.longterm.trans.CY,
-               file.CY.stat.csv=file.CY.stat.csv,
-               file.CY.stat.trans.csv=file.CY.stat.trans.csv,
-               Q.WY.stat.longterm=Q.longterm.WY,
-               Q.WY.stat.longterm.trans=Q.longterm.trans.WY,
-               file.WY.stat.csv=file.WY.stat.csv,
-               file.WY.stat.trans.csv=file.WY.stat.trans.csv,
+
+   return(list(Q.cy.stat.longterm=Q.longterm.cy,
+               Q.cy.stat.longterm.trans=Q.longterm.trans.cy,
+               file.cy.stat.csv=file.cy.stat.csv,
+               file.cy.stat.trans.csv=file.cy.stat.trans.csv,
+               Q.wy.stat.longterm=Q.longterm.wy,
+               Q.wy.stat.longterm.trans=Q.longterm.trans.wy,
+               file.wy.stat.csv=file.wy.stat.csv,
+               file.wy.stat.trans.csv=file.wy.stat.trans.csv,
                na.rm=na.rm,
                Version=Version,
                Date=Sys.time()))
