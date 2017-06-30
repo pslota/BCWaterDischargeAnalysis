@@ -182,23 +182,23 @@ The long-term summary statistics default action is to IGNORE the missing values.
 ```{r, warning=FALSE}
 stat.longterm <- compute.Q.stat.longterm(
                           Station.Code =Station.Code,
-                          Station.Area =Station.Area,
+                          #Station.Area =Station.Area,
                           flow         =WSC.08HA011,
                           start.year   =start.year,
                           end.year     =end.year)
-head(stat.longterm$Q.stat.longterm)
+head(stat.longterm$Q.cy.stat.longterm)
 ```
 
 If you wish missing values to propagate, use:
 ```{r, warning=FALSE}
 stat.longterm.missing <- compute.Q.stat.longterm(
                           Station.Code =Station.Code,
-                          Station.Area =Station.Area,
+                          #Station.Area =Station.Area,
                           flow         =WSC.08HA011,
                           start.year   =start.year,
                           end.year     =end.year,
                           na.rm=list(na.rm.global=FALSE))
-head(stat.longterm.missing$Q.stat.longterm)
+head(stat.longterm.missing$Q.cy.stat.longterm)
 ```
 
 ## Computing the long term percentile statistics

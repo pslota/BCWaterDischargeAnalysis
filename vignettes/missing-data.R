@@ -66,21 +66,21 @@ head(stat.annual.ignore.missing$Q.stat.annual[, 1:10])
 ## ---- warning=FALSE------------------------------------------------------
 stat.longterm <- compute.Q.stat.longterm(
                           Station.Code =Station.Code,
-                          Station.Area =Station.Area,
+                          #Station.Area =Station.Area,
                           flow         =WSC.08HA011,
                           start.year   =start.year,
                           end.year     =end.year)
-head(stat.longterm$Q.stat.longterm)
+head(stat.longterm$Q.cy.stat.longterm)
 
 ## ---- warning=FALSE------------------------------------------------------
 stat.longterm.missing <- compute.Q.stat.longterm(
                           Station.Code =Station.Code,
-                          Station.Area =Station.Area,
+                          #Station.Area =Station.Area,
                           flow         =WSC.08HA011,
                           start.year   =start.year,
                           end.year     =end.year,
                           na.rm=list(na.rm.global=FALSE))
-head(stat.longterm.missing$Q.stat.longterm)
+head(stat.longterm.missing$Q.cy.stat.longterm)
 
 ## ---- warning=FALSE------------------------------------------------------
 percentile.longterm <- compute.Q.percentile.longterm(

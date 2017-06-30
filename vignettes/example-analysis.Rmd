@@ -157,7 +157,7 @@ We compute the long term summary statistics
 ```{r, warning=FALSE}
 stat.longterm <- compute.Q.stat.longterm(
                           Station.Code =Station.Code,
-                          Station.Area =Station.Area,
+                          #Station.Area =Station.Area,  # removed in recent version
                           flow         =WSC.08HA011,
                           start.year   =start.year,
                           end.year     =end.year)
@@ -170,7 +170,7 @@ names(stat.longterm)
 ```
 This has the long term summary statistics (mean, min, max, etc) by month some of which are shown below:
 ```{r}
-head(stat.longterm$Q.stat.longterm)
+head(stat.longterm$Q.cy.stat.longterm)
 ```
 Because these statistics are computed on the calendar year basis and there were no missing values
 in the period of record, there are no missing summary statistics (see the `missing-data` vignette
@@ -181,8 +181,8 @@ As well, the default arguments will also create several `.csv` file with the sum
 a `.pdf` file with the trends plotted over time in the directory you run the code in. The
 file names are given in the list object:
 ```{r}
-stat.longterm$file.stat.csv
-stat.longterm$file.stat.trans.csv
+stat.longterm$file.cy.stat.csv
+stat.longterm$file.cy.stat.trans.csv
 ```
 
 

@@ -4,7 +4,7 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
@@ -12,7 +12,7 @@
 
 <meta name="author" content="Carl James Schwarz" />
 
-<meta name="date" content="2017-03-03" />
+<meta name="date" content="2017-06-30" />
 
 <title>Impact of missing values</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Impact of missing values</h1>
 <h4 class="author"><em>Carl James Schwarz</em></h4>
-<h4 class="date"><em>2017-03-03</em></h4>
+<h4 class="date"><em>2017-06-30</em></h4>
 
 
 
@@ -316,34 +316,34 @@ WSC.08HA011.sum</code></pre></div>
 <p>The long-term summary statistics default action is to IGNORE the missing values.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stat.longterm &lt;-<span class="st"> </span><span class="kw">compute.Q.stat.longterm</span>(
                           <span class="dt">Station.Code =</span>Station.Code,
-                          <span class="dt">Station.Area =</span>Station.Area,
+                          <span class="co">#Station.Area =Station.Area,</span>
                           <span class="dt">flow         =</span>WSC.08HA011,
                           <span class="dt">start.year   =</span>start.year,
                           <span class="dt">end.year     =</span>end.year)
-<span class="kw">head</span>(stat.longterm$Q.stat.longterm)</code></pre></div>
-<pre><code>##   Month      mean median   max   min
-## 1     1 110.46828  98.65 450.0 15.60
-## 2     2  92.69174  82.90 303.0 14.70
-## 3     3  77.37176  68.80 359.0 15.80
-## 4     4  57.23731  52.40 154.0  8.67
-## 5     5  35.27636  31.00 121.0  6.47
-## 6     6  18.18267  13.60  73.4  2.99</code></pre>
+<span class="kw">head</span>(stat.longterm$Q.cy.stat.longterm)</code></pre></div>
+<pre><code>##   Month      Mean Median Maximum Minimum
+## 5   Jan 110.46828  98.65   450.0   15.60
+## 4   Feb  92.69174  82.90   303.0   14.70
+## 8   Mar  77.37176  68.80   359.0   15.80
+## 1   Apr  57.23731  52.40   154.0    8.67
+## 9   May  35.27636  31.00   121.0    6.47
+## 7   Jun  18.18267  13.60    73.4    2.99</code></pre>
 <p>If you wish missing values to propagate, use:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">stat.longterm.missing &lt;-<span class="st"> </span><span class="kw">compute.Q.stat.longterm</span>(
                           <span class="dt">Station.Code =</span>Station.Code,
-                          <span class="dt">Station.Area =</span>Station.Area,
+                          <span class="co">#Station.Area =Station.Area,</span>
                           <span class="dt">flow         =</span>WSC.08HA011,
                           <span class="dt">start.year   =</span>start.year,
                           <span class="dt">end.year     =</span>end.year,
                           <span class="dt">na.rm=</span><span class="kw">list</span>(<span class="dt">na.rm.global=</span><span class="ot">FALSE</span>))
-<span class="kw">head</span>(stat.longterm.missing$Q.stat.longterm)</code></pre></div>
-<pre><code>##   Month      mean median max   min
-## 1     1 110.46828  98.65 450 15.60
-## 2     2  92.69174  82.90 303 14.70
-## 3     3        NA     NA  NA    NA
-## 4     4  57.23731  52.40 154  8.67
-## 5     5        NA     NA  NA    NA
-## 6     6        NA     NA  NA    NA</code></pre>
+<span class="kw">head</span>(stat.longterm.missing$Q.cy.stat.longterm)</code></pre></div>
+<pre><code>##   Month      Mean Median Maximum Minimum
+## 5   Jan 110.46828  98.65     450   15.60
+## 4   Feb  92.69174  82.90     303   14.70
+## 8   Mar        NA     NA      NA      NA
+## 1   Apr  57.23731  52.40     154    8.67
+## 9   May        NA     NA      NA      NA
+## 7   Jun        NA     NA      NA      NA</code></pre>
 </div>
 <div id="computing-the-long-term-percentile-statistics" class="section level2">
 <h2>Computing the long term percentile statistics</h2>
@@ -500,7 +500,7 @@ vfa.analysis.missing$fitted.quantiles.trans</code></pre></div>
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

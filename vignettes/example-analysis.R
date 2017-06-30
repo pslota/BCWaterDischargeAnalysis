@@ -75,7 +75,7 @@ stat.annual$file.stat.trend.pdf
 ## ---- warning=FALSE------------------------------------------------------
 stat.longterm <- compute.Q.stat.longterm(
                           Station.Code =Station.Code,
-                          Station.Area =Station.Area,
+                          #Station.Area =Station.Area,  # removed in recent version
                           flow         =WSC.08HA011,
                           start.year   =start.year,
                           end.year     =end.year)
@@ -85,11 +85,11 @@ stat.longterm <- compute.Q.stat.longterm(
 names(stat.longterm)
 
 ## ------------------------------------------------------------------------
-head(stat.longterm$Q.stat.longterm)
+head(stat.longterm$Q.cy.stat.longterm)
 
 ## ------------------------------------------------------------------------
-stat.longterm$file.stat.csv
-stat.longterm$file.stat.trans.csv
+stat.longterm$file.cy.stat.csv
+stat.longterm$file.cy.stat.trans.csv
 
 ## ---- warning=FALSE------------------------------------------------------
 percentile.longterm <- compute.Q.percentile.longterm(

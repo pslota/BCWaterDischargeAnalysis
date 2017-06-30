@@ -2,18 +2,16 @@
 % Please edit documentation in R/compute.Q.stat.longterm.R
 \name{compute.Q.stat.longterm}
 \alias{compute.Q.stat.longterm}
-\title{Compute long term annual (calendar year) summary statistics.}
+\title{Compute long-term annual (calendar and water year) summary statistics.}
 \usage{
-compute.Q.stat.longterm(Station.Code = "XXXXX", Station.Area = NA, flow,
-  start.year = 9999, end.year = 0, write.stat.csv = TRUE,
-  write.stat.trans.csv = TRUE, report.dir = ".", csv.nddigits = 3,
-  na.rm = list(na.rm.global = TRUE))
+compute.Q.stat.longterm(Station.Code = "XXXXX", flow, start.year = 9999,
+  end.year = 0, write.cy.stat.csv = TRUE, write.cy.stat.trans.csv = TRUE,
+  write.wy.stat.csv = TRUE, write.wy.stat.trans.csv = TRUE,
+  report.dir = ".", csv.nddigits = 3, na.rm = list(na.rm.global = TRUE))
 }
 \arguments{
 \item{Station.Code}{A character string. Used to name any *.csv or *.pdf files created so be careful
 that the Station.Code will be acceptable in a file name.}
-
-\item{Station.Area}{Area of the water basin (square km), used in computing some statistics}
 
 \item{flow}{Dataframe with two variables (1) \code{Date} with the date as a R date class variable and
          (2) \code{Q} a numeric variable with the flow for that day.
@@ -34,11 +32,17 @@ that the Station.Code will be acceptable in a file name.}
 
 \item{start.year, end.year}{Starting and ending year for statistics in YYYY format, e.g. start.year=2013.}
 
-\item{write.stat.csv}{Should a file be created with the computed percentiles?
-The file name will be  \code{file.path(report.dir,paste(Station.Code,'-longterm-summary-stat.csv'))}.}
+\item{write.cy.stat.csv}{Should a file be created with the computed statistics?
+The file name will be  \code{file.path(report.dir,paste(Station.Code,'-longterm-cy-summary-stat.csv'))}.}
 
-\item{write.stat.trans.csv}{Should a file be created with the transposed of the percentile report?
-The file name will be  \code{file.path(report.dir,paste(Station.Code,'-longterm-summary-stat-trabs.csv'))}.}
+\item{write.cy.stat.trans.csv}{Should a file be created with the transposed of the statistics report?
+The file name will be  \code{file.path(report.dir,paste(Station.Code,'-longterm-cy-summary-stat-trans.csv'))}.}
+
+\item{write.wy.stat.csv}{Should a file be created with the computed statistics?
+The file name will be  \code{file.path(report.dir,paste(Station.Code,'-longterm-wy-summary-stat.csv'))}.}
+
+\item{write.wy.stat.trans.csv}{Should a file be created with the transposed of the statistics report?
+The file name will be  \code{file.path(report.dir,paste(Station.Code,'-longterm-wy-summary-stat-trans.csv'))}.}
 
 \item{report.dir}{Directory in which *.csv or *.pdf files are stored.}
 
@@ -53,17 +57,22 @@ and all statistics that depend on those rolling averages, will also be set to mi
 }
 \value{
 A list with the following elements:
-  \item{Q.stat.longterm}{Data frame with the long term statistics of \code{flow$Q} by month
+  \item{Q.cy.stat.longterm}{Data frame with the long-term statistics of \code{flow$Q} by month
         and overall between \code{start.year} and \code{end.year}}
-  \item{Q.stat.longterm.trans}{Data frame with the long term statistics of \code{flow$Q} transposed.}
-  \item{file.stat.csv}{Object with file name of *.csv file with long term summary statistics.}
-   \item{file.stat.trans.csv}{Object with file name of *.csv file with transposed long term summary statistics.}
+  \item{Q.cy.stat.longterm.trans}{Data frame with the long-term statistics of \code{flow$Q} transposed.}
+  \item{file.cy.stat.csv}{Object with file name of *.csv file with long term summary statistics.}
+   \item{file.cy.stat.trans.csv}{Object with file name of *.csv file with transposed long-term summary statistics.}
+   \item{Q.wy.stat.longterm}{Data frame with the long-term statistics of \code{flow$Q} by month
+        and overall between \code{start.year} and \code{end.year}}
+  \item{Q.wy.stat.longterm.trans}{Data frame with the long-term statistics of \code{flow$Q} transposed.}
+  \item{file.wy.stat.csv}{Object with file name of *.csv file with long-term summary statistics.}
+   \item{file.wy.stat.trans.csv}{Object with file name of *.csv file with transposed long-term summary statistics.}
    \item{na.rm}{Missing value flags.}
    \item{Version}{Version of this function.}
    \item{Date}{Date function was run.}
 }
 \description{
-Computes long term summary statistics on \code{flow$Q} variable
+Computes long-term summary statistics on \code{flow$Q} variable
    between \code{start.year} and \code{end.year} inclusive.
    It (optionally) saves the resutls in *.csv and *.pdf files.
 }
@@ -71,7 +80,6 @@ Computes long term summary statistics on \code{flow$Q} variable
 \dontrun{
 stat.longterm <- compute.Q.stat.longterm(
                          Station.Code  ='ABCDE',
-                         Station.Area  =2458,
                          flow          =flow,
                          start.year    =1960,
                          end.year      =2015)
