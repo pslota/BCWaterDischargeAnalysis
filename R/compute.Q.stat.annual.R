@@ -1,7 +1,7 @@
 #' @title Compute annual (calendar and water year) statistics.
 #'
 #' @description Computes many annual (calendar and water year) statistics
-#' and (optionally) saves the resutls in *.csv and *.pdf files.
+#' and (optionally) saves the results in *.csv and *.pdf files.
 #'
 #' @template Station.Code
 #' @template Station.Area

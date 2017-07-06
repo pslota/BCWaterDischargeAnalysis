@@ -207,23 +207,23 @@ The long-term percentile statistics default action is to IGNORE the missing valu
 ```{r, warning=FALSE}
 percentile.longterm <- compute.Q.percentile.longterm(
                           Station.Code=Station.Code,
-                          Station.Area=Station.Area,
+                          #Station.Area=Station.Area,
                           flow        =WSC.08HA011,
                           start.year  =start.year,
                           end.year    =end.year)
-head(percentile.longterm$Q.percentile.stat)
+head(percentile.longterm$Q.cy.percentile.stat)
 ```
 
 If you want to propagate missing values, again set the **na.rm** argument:
 ```{r, warning=FALSE}
 percentile.longterm.missing <- compute.Q.percentile.longterm(
                           Station.Code=Station.Code,
-                          Station.Area=Station.Area,
+                          #Station.Area=Station.Area,
                           flow        =WSC.08HA011,
                           start.year  =start.year,
                           end.year    =end.year,
                           na.rm=list(na.rm.global=FALSE))
-head(percentile.longterm.missing$Q.percentile.stat)
+head(percentile.longterm.missing$Q.cy.percentile.stat)
 ```
 
 ## Computing a volume frequency analysis

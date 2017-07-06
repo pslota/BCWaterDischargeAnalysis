@@ -12,7 +12,7 @@
 
 <meta name="author" content="Carl James Schwarz" />
 
-<meta name="date" content="2017-06-30" />
+<meta name="date" content="2017-07-06" />
 
 <title>Sample Analysis of Station WSC.08HA011 - Cowichan River near Duncan</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Sample Analysis of Station WSC.08HA011 - Cowichan River near Duncan</h1>
 <h4 class="author"><em>Carl James Schwarz</em></h4>
-<h4 class="date"><em>2017-06-30</em></h4>
+<h4 class="date"><em>2017-07-06</em></h4>
 
 
 
@@ -304,46 +304,48 @@ ggplot2::<span class="kw">ggplot</span>(<span class="dt">data=</span>plotdata, <
 <p>We compute the long term percentile statistics</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">percentile.longterm &lt;-<span class="st"> </span><span class="kw">compute.Q.percentile.longterm</span>(
                           <span class="dt">Station.Code=</span>Station.Code,
-                          <span class="dt">Station.Area=</span>Station.Area,
+                          <span class="co">#Station.Area=Station.Area,</span>
                           <span class="dt">flow        =</span>WSC.08HA011,
                           <span class="dt">start.year  =</span>start.year,
                           <span class="dt">end.year    =</span>end.year)</code></pre></div>
 <p>This will create a list object with many elements:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">names</span>(percentile.longterm)</code></pre></div>
-<pre><code>## [1] &quot;Q.percentile.stat&quot;       &quot;Q.percentile.stat.trans&quot;
-## [3] &quot;file.stat.csv&quot;           &quot;file.stat.trans.csv&quot;    
-## [5] &quot;na.rm&quot;                   &quot;Version&quot;                
-## [7] &quot;Date&quot;</code></pre>
-<p>This has the long term summary statistics (mean, min, max, etc) by month some of which are shown below:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(percentile.longterm$Q.percentile.stat)</code></pre></div>
+<pre><code>##  [1] &quot;Q.cy.percentile.stat&quot;       &quot;Q.cy.percentile.stat.trans&quot;
+##  [3] &quot;Q.wy.percentile.stat&quot;       &quot;Q.wy.percentile.stat.trans&quot;
+##  [5] &quot;file.cy.stat.csv&quot;           &quot;file.cy.stat.trans.csv&quot;    
+##  [7] &quot;file.wy.stat.csv&quot;           &quot;file.wy.stat.trans.csv&quot;    
+##  [9] &quot;na.rm&quot;                      &quot;Version&quot;                   
+## [11] &quot;Date&quot;</code></pre>
+<p>This has the long term summary statistics (mean, min, max, etc) by month for the calendary year some of which are shown below:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(percentile.longterm$Q.cy.percentile.stat)</code></pre></div>
 <pre><code>##   Month     P01     P02    P05   P10   P15    P20    P25   P30     P35
-## 1   Jan 21.8740 25.2000 31.480 40.41 49.60 58.600 65.800 70.81 78.2000
-## 2   Feb 23.2550 29.7200 36.950 43.90 49.60 54.900 60.000 64.10 68.5250
-## 3   Mar 20.3960 24.5740 29.235 36.07 41.91 47.200 51.300 55.40 58.9450
-## 4   Apr 13.4000 16.0120 23.490 28.48 32.30 35.800 38.575 41.30 43.6000
-## 5   May  7.4122  8.7748  9.867 12.20 14.20 16.100 18.350 21.31 23.7000
-## 6   Jun  3.9500  4.6200  5.580  6.28  6.55  6.948  7.580  8.16  9.0965
+## 5   Jan 21.8740 25.2000 31.480 40.41 49.60 58.600 65.800 70.81 78.2000
+## 4   Feb 23.2550 29.7200 36.950 43.90 49.60 54.900 60.000 64.10 68.5250
+## 8   Mar 20.3960 24.5740 29.235 36.07 41.91 47.200 51.300 55.40 58.9450
+## 1   Apr 13.4000 16.0120 23.490 28.48 32.30 35.800 38.575 41.30 43.6000
+## 9   May  7.4122  8.7748  9.867 12.20 14.20 16.100 18.350 21.31 23.7000
+## 7   Jun  3.9500  4.6200  5.580  6.28  6.55  6.948  7.580  8.16  9.0965
 ##     P40    P45   P50     P55    P60     P65    P70     P75    P80     P85
-## 1 84.94 92.215 98.65 106.000 112.00 120.550 129.00 141.000 152.60 169.900
-## 2 73.10 77.275 82.90  89.150  95.40 101.000 107.00 114.000 122.00 133.000
-## 3 62.60 65.115 68.85  71.385  74.84  79.000  85.40  92.900 101.00 112.950
-## 4 45.66 48.655 52.40  56.000  59.70  63.700  68.00  72.425  77.34  85.000
-## 5 26.40 29.000 31.00  33.400  36.62  40.055  43.70  49.000  54.30  60.295
-## 6 10.70 12.000 13.60  15.200  16.84  18.800  20.63  23.025  26.82  32.215
+## 5 84.94 92.215 98.65 106.000 112.00 120.550 129.00 141.000 152.60 169.900
+## 4 73.10 77.275 82.90  89.150  95.40 101.000 107.00 114.000 122.00 133.000
+## 8 62.60 65.115 68.85  71.385  74.84  79.000  85.40  92.900 101.00 112.950
+## 1 45.66 48.655 52.40  56.000  59.70  63.700  68.00  72.425  77.34  85.000
+## 9 26.40 29.000 31.00  33.400  36.62  40.055  43.70  49.000  54.30  60.295
+## 7 10.70 12.000 13.60  15.200  16.84  18.800  20.63  23.025  26.82  32.215
 ##      P90     P95    P98     P99
-## 1 194.00 239.650 282.26 321.000
-## 2 154.00 186.000 229.80 245.450
-## 3 132.30 161.650 188.26 209.520
-## 4  93.91 107.000 120.00 131.610
-## 5  65.83  72.800  79.13  84.082
-## 6  40.40  49.005  57.20  63.954</code></pre>
-<p>Because these statistics are computed on the calendar year basis and there were no missing values in the period of record, there are no missing summary statistics (see <code>missing-data</code> vignette for more details).</p>
+## 5 194.00 239.650 282.26 321.000
+## 4 154.00 186.000 229.80 245.450
+## 8 132.30 161.650 188.26 209.520
+## 1  93.91 107.000 120.00 131.610
+## 9  65.83  72.800  79.13  84.082
+## 7  40.40  49.005  57.20  63.954</code></pre>
+<p>Because these statistics are computed on the calendar year basis and there were no missing values in the period of record, there are no missing summary statistics (see <code>missing-data</code> vignette for more details). Similar statistics are available on the water year basis.</p>
 <p>These statistics can be then processed as you desire.</p>
-<p>As well, the default arguments will also create several <code>.csv</code> file with the summary statistics and a <code>.pdf</code> file with the trends plotted over time in the directory you run the code in. The file names are given in the list object:</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">percentile.longterm$file.stat.csv</code></pre></div>
-<pre><code>## [1] &quot;./WSC-08HA011-longterm-percentile-stat.csv&quot;</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">percentile.longterm$file.stat.trans.csv</code></pre></div>
-<pre><code>## [1] &quot;./WSC-08HA011-longterm-percentile-stat-trans.csv&quot;</code></pre>
+<p>As well, the default arguments will also create several <code>.csv</code> file with the summary statistics for the calendar and water years and a <code>.pdf</code> file with the trends plotted over time in the directory you run the code in. The file names are given in the list object:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">percentile.longterm$file.cy.stat.csv</code></pre></div>
+<pre><code>## [1] &quot;./WSC-08HA011-longterm-cy-percentile-stat.csv&quot;</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">percentile.longterm$file.cy.stat.trans.csv</code></pre></div>
+<pre><code>## [1] &quot;./WSC-08HA011-longterm-cy-percentile-stat-trans.csv&quot;</code></pre>
 </div>
 <div id="computing-a-volume-frequency-analysis" class="section level2">
 <h2>Computing a volume frequency analysis</h2>

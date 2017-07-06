@@ -12,7 +12,7 @@
 
 <meta name="author" content="Carl James Schwarz" />
 
-<meta name="date" content="2017-06-30" />
+<meta name="date" content="2017-07-06" />
 
 <title>Impact of missing values</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">Impact of missing values</h1>
 <h4 class="author"><em>Carl James Schwarz</em></h4>
-<h4 class="date"><em>2017-06-30</em></h4>
+<h4 class="date"><em>2017-07-06</em></h4>
 
 
 
@@ -350,62 +350,62 @@ WSC.08HA011.sum</code></pre></div>
 <p>The long-term percentile statistics default action is to IGNORE the missing values.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">percentile.longterm &lt;-<span class="st"> </span><span class="kw">compute.Q.percentile.longterm</span>(
                           <span class="dt">Station.Code=</span>Station.Code,
-                          <span class="dt">Station.Area=</span>Station.Area,
+                          <span class="co">#Station.Area=Station.Area,</span>
                           <span class="dt">flow        =</span>WSC.08HA011,
                           <span class="dt">start.year  =</span>start.year,
                           <span class="dt">end.year    =</span>end.year)
-<span class="kw">head</span>(percentile.longterm$Q.percentile.stat)</code></pre></div>
+<span class="kw">head</span>(percentile.longterm$Q.cy.percentile.stat)</code></pre></div>
 <pre><code>##   Month     P01     P02    P05   P10   P15    P20    P25   P30    P35
-## 1   Jan 21.8740 25.2000 31.480 40.41 49.60 58.600 65.800 70.81 78.200
-## 2   Feb 23.2550 29.7200 36.950 43.90 49.60 54.900 60.000 64.10 68.525
-## 3   Mar 20.3880 24.5720 29.230 36.06 41.89 47.200 51.300 55.38 58.910
-## 4   Apr 13.4000 16.0120 23.490 28.48 32.30 35.800 38.575 41.30 43.600
-## 5   May  7.4116  8.7744  9.866 12.20 14.20 16.100 18.300 21.30 23.700
-## 6   Jun  3.9500  4.6200  5.580  6.28  6.55  6.946  7.580  8.16  9.093
+## 5   Jan 21.8740 25.2000 31.480 40.41 49.60 58.600 65.800 70.81 78.200
+## 4   Feb 23.2550 29.7200 36.950 43.90 49.60 54.900 60.000 64.10 68.525
+## 8   Mar 20.3880 24.5720 29.230 36.06 41.89 47.200 51.300 55.38 58.910
+## 1   Apr 13.4000 16.0120 23.490 28.48 32.30 35.800 38.575 41.30 43.600
+## 9   May  7.4116  8.7744  9.866 12.20 14.20 16.100 18.300 21.30 23.700
+## 7   Jun  3.9500  4.6200  5.580  6.28  6.55  6.946  7.580  8.16  9.093
 ##     P40    P45   P50    P55    P60    P65    P70     P75    P80    P85
-## 1 84.94 92.215 98.65 106.00 112.00 120.55 129.00 141.000 152.60 169.90
-## 2 73.10 77.275 82.90  89.15  95.40 101.00 107.00 114.000 122.00 133.00
-## 3 62.60 65.100 68.80  71.33  74.80  79.00  85.40  92.850 101.00 113.10
-## 4 45.66 48.655 52.40  56.00  59.70  63.70  68.00  72.425  77.34  85.00
-## 5 26.40 28.940 31.00  33.40  36.66  40.09  43.70  49.000  54.30  60.30
-## 6 10.70 12.000 13.60  15.19  16.80  18.80  20.66  23.050  26.84  32.23
+## 5 84.94 92.215 98.65 106.00 112.00 120.55 129.00 141.000 152.60 169.90
+## 4 73.10 77.275 82.90  89.15  95.40 101.00 107.00 114.000 122.00 133.00
+## 8 62.60 65.100 68.80  71.33  74.80  79.00  85.40  92.850 101.00 113.10
+## 1 45.66 48.655 52.40  56.00  59.70  63.70  68.00  72.425  77.34  85.00
+## 9 26.40 28.940 31.00  33.40  36.66  40.09  43.70  49.000  54.30  60.30
+## 7 10.70 12.000 13.60  15.19  16.80  18.80  20.66  23.050  26.84  32.23
 ##      P90    P95    P98     P99
-## 1 194.00 239.65 282.26 321.000
-## 2 154.00 186.00 229.80 245.450
-## 3 132.40 161.70 188.28 209.560
-## 4  93.91 107.00 120.00 131.610
-## 5  65.84  72.80  79.14  84.096
-## 6  40.40  49.01  57.20  63.968</code></pre>
+## 5 194.00 239.65 282.26 321.000
+## 4 154.00 186.00 229.80 245.450
+## 8 132.40 161.70 188.28 209.560
+## 1  93.91 107.00 120.00 131.610
+## 9  65.84  72.80  79.14  84.096
+## 7  40.40  49.01  57.20  63.968</code></pre>
 <p>If you want to propagate missing values, again set the <strong>na.rm</strong> argument:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">percentile.longterm.missing &lt;-<span class="st"> </span><span class="kw">compute.Q.percentile.longterm</span>(
                           <span class="dt">Station.Code=</span>Station.Code,
-                          <span class="dt">Station.Area=</span>Station.Area,
+                          <span class="co">#Station.Area=Station.Area,</span>
                           <span class="dt">flow        =</span>WSC.08HA011,
                           <span class="dt">start.year  =</span>start.year,
                           <span class="dt">end.year    =</span>end.year,
                           <span class="dt">na.rm=</span><span class="kw">list</span>(<span class="dt">na.rm.global=</span><span class="ot">FALSE</span>))
-<span class="kw">head</span>(percentile.longterm.missing$Q.percentile.stat)</code></pre></div>
+<span class="kw">head</span>(percentile.longterm.missing$Q.cy.percentile.stat)</code></pre></div>
 <pre><code>##   Month    P01    P02   P05   P10  P15  P20    P25   P30    P35   P40
-## 1   Jan 21.874 25.200 31.48 40.41 49.6 58.6 65.800 70.81 78.200 84.94
-## 2   Feb 23.255 29.720 36.95 43.90 49.6 54.9 60.000 64.10 68.525 73.10
-## 3   Mar     NA     NA    NA    NA   NA   NA     NA    NA     NA    NA
-## 4   Apr 13.400 16.012 23.49 28.48 32.3 35.8 38.575 41.30 43.600 45.66
-## 5   May     NA     NA    NA    NA   NA   NA     NA    NA     NA    NA
-## 6   Jun     NA     NA    NA    NA   NA   NA     NA    NA     NA    NA
+## 5   Jan 21.874 25.200 31.48 40.41 49.6 58.6 65.800 70.81 78.200 84.94
+## 4   Feb 23.255 29.720 36.95 43.90 49.6 54.9 60.000 64.10 68.525 73.10
+## 8   Mar     NA     NA    NA    NA   NA   NA     NA    NA     NA    NA
+## 1   Apr 13.400 16.012 23.49 28.48 32.3 35.8 38.575 41.30 43.600 45.66
+## 9   May     NA     NA    NA    NA   NA   NA     NA    NA     NA    NA
+## 7   Jun     NA     NA    NA    NA   NA   NA     NA    NA     NA    NA
 ##      P45   P50    P55   P60    P65 P70     P75    P80   P85    P90    P95
-## 1 92.215 98.65 106.00 112.0 120.55 129 141.000 152.60 169.9 194.00 239.65
-## 2 77.275 82.90  89.15  95.4 101.00 107 114.000 122.00 133.0 154.00 186.00
-## 3     NA    NA     NA    NA     NA  NA      NA     NA    NA     NA     NA
-## 4 48.655 52.40  56.00  59.7  63.70  68  72.425  77.34  85.0  93.91 107.00
-## 5     NA    NA     NA    NA     NA  NA      NA     NA    NA     NA     NA
-## 6     NA    NA     NA    NA     NA  NA      NA     NA    NA     NA     NA
+## 5 92.215 98.65 106.00 112.0 120.55 129 141.000 152.60 169.9 194.00 239.65
+## 4 77.275 82.90  89.15  95.4 101.00 107 114.000 122.00 133.0 154.00 186.00
+## 8     NA    NA     NA    NA     NA  NA      NA     NA    NA     NA     NA
+## 1 48.655 52.40  56.00  59.7  63.70  68  72.425  77.34  85.0  93.91 107.00
+## 9     NA    NA     NA    NA     NA  NA      NA     NA    NA     NA     NA
+## 7     NA    NA     NA    NA     NA  NA      NA     NA    NA     NA     NA
 ##      P98    P99
-## 1 282.26 321.00
-## 2 229.80 245.45
-## 3     NA     NA
-## 4 120.00 131.61
-## 5     NA     NA
-## 6     NA     NA</code></pre>
+## 5 282.26 321.00
+## 4 229.80 245.45
+## 8     NA     NA
+## 1 120.00 131.61
+## 9     NA     NA
+## 7     NA     NA</code></pre>
 </div>
 <div id="computing-a-volume-frequency-analysis" class="section level2">
 <h2>Computing a volume frequency analysis</h2>

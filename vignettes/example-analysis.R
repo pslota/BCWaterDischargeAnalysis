@@ -94,7 +94,7 @@ stat.longterm$file.cy.stat.trans.csv
 ## ---- warning=FALSE------------------------------------------------------
 percentile.longterm <- compute.Q.percentile.longterm(
                           Station.Code=Station.Code,
-                          Station.Area=Station.Area,
+                          #Station.Area=Station.Area,
                           flow        =WSC.08HA011,
                           start.year  =start.year,
                           end.year    =end.year)
@@ -104,11 +104,11 @@ percentile.longterm <- compute.Q.percentile.longterm(
 names(percentile.longterm)
 
 ## ------------------------------------------------------------------------
-head(percentile.longterm$Q.percentile.stat)
+head(percentile.longterm$Q.cy.percentile.stat)
 
 ## ------------------------------------------------------------------------
-percentile.longterm$file.stat.csv
-percentile.longterm$file.stat.trans.csv
+percentile.longterm$file.cy.stat.csv
+percentile.longterm$file.cy.stat.trans.csv
 
 ## ---- warning=FALSE------------------------------------------------------
 vfa.analysis <- compute.volume.frequency.analysis( 

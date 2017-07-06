@@ -192,7 +192,7 @@ We compute the long term percentile statistics
 ```{r, warning=FALSE}
 percentile.longterm <- compute.Q.percentile.longterm(
                           Station.Code=Station.Code,
-                          Station.Area=Station.Area,
+                          #Station.Area=Station.Area,
                           flow        =WSC.08HA011,
                           start.year  =start.year,
                           end.year    =end.year)
@@ -203,22 +203,24 @@ This will create a list object with many elements:
 ```{r}
 names(percentile.longterm)
 ```
-This has the long term summary statistics (mean, min, max, etc) by month some of which are shown below:
+This has the long term summary statistics (mean, min, max, etc) by month for the calendary year
+some of which are shown below:
 ```{r}
-head(percentile.longterm$Q.percentile.stat)
+head(percentile.longterm$Q.cy.percentile.stat)
 ```
 Because these statistics are computed on the calendar year basis and there were no missing values
 in the period of record, there are no missing summary statistics (see `missing-data` vignette
-for more details).
+for more details). Similar statistics are available on the water year basis.
 
 These statistics can be then processed as you desire.
 
-As well, the default arguments will also create several `.csv` file with the summary statistics and
+As well, the default arguments will also create several `.csv` file with the summary statistics
+for the calendar and water years and 
 a `.pdf` file with the trends plotted over time in the directory you run the code in. The
 file names are given in the list object:
 ```{r}
-percentile.longterm$file.stat.csv
-percentile.longterm$file.stat.trans.csv
+percentile.longterm$file.cy.stat.csv
+percentile.longterm$file.cy.stat.trans.csv
 ```
 
 

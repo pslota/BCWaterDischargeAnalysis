@@ -85,21 +85,21 @@ head(stat.longterm.missing$Q.cy.stat.longterm)
 ## ---- warning=FALSE------------------------------------------------------
 percentile.longterm <- compute.Q.percentile.longterm(
                           Station.Code=Station.Code,
-                          Station.Area=Station.Area,
+                          #Station.Area=Station.Area,
                           flow        =WSC.08HA011,
                           start.year  =start.year,
                           end.year    =end.year)
-head(percentile.longterm$Q.percentile.stat)
+head(percentile.longterm$Q.cy.percentile.stat)
 
 ## ---- warning=FALSE------------------------------------------------------
 percentile.longterm.missing <- compute.Q.percentile.longterm(
                           Station.Code=Station.Code,
-                          Station.Area=Station.Area,
+                          #Station.Area=Station.Area,
                           flow        =WSC.08HA011,
                           start.year  =start.year,
                           end.year    =end.year,
                           na.rm=list(na.rm.global=FALSE))
-head(percentile.longterm.missing$Q.percentile.stat)
+head(percentile.longterm.missing$Q.cy.percentile.stat)
 
 ## ---- warning=FALSE------------------------------------------------------
 vfa.analysis <- compute.volume.frequency.analysis( 

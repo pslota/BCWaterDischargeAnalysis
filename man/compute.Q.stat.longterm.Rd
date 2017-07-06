@@ -73,8 +73,8 @@ A list with the following elements:
 }
 \description{
 Computes long-term summary statistics on \code{flow$Q} variable
-   between \code{start.year} and \code{end.year} inclusive.
-   It (optionally) saves the resutls in *.csv and *.pdf files.
+   between \code{start.year} and \code{end.year} inclusive for both calendar and water years.
+   It (optionally) saves the results in *.csv and *.pdf files.
 }
 \examples{
 \dontrun{
