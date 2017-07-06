@@ -218,6 +218,7 @@ compute.Q.stat.annual <- function(Station.Code='XXXXX',
    CY_MIN_DAILY_SW   = min (fy$Q, na.rm=na.rm$na.rm.global)	    # CY Min Daily Q 	CY Min Daily Q
    CY_MAX_DAILY_SW	 = max (fy$Q, na.rm=na.rm$na.rm.global)      # CY Max Daily Q
    CY_MEAN_DAILY_SW  = mean(fy$Q, na.rm=na.rm$na.rm.global)     # CY Mean Discharge (Based on Daily avgs)
+   CY_MEDIAN_DAILY_SW= median(fy$Q, na.rm=na.rm$na.rm.global)  # CY median Discharge (Based on Daily avgs)
    CY_TOTALQ_DAILY_SW= mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Q)*60*60*24    # Yearly sum of daily avg (cms) *60*60*24 # deal with missing values
    CY_CUMQ_DAILY_SW  = CY_TOTALQ_DAILY_SW/(60*60*24)      # Yearly sum of daily avg (cms) # deal with missing values
    CY_YIELDMM_DAILY_SW=mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Q)*60*60*24 /Station.Area/1000   #	(CY Mean*60*60*24*365.25)/(area in km2*1000000))*1000
@@ -229,9 +230,11 @@ compute.Q.stat.annual <- function(Station.Code='XXXXX',
    fy$CumQ <- cumsum(fy$Q2)
    # what is the first date where 25, 50 and 75% of totalQ (see above) are found
    CY_Date_25P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, fy$CumQ > 0.25 *CY_CUMQ_DAILY_SW)]
+   CY_Date_33P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, fy$CumQ > 0.333 *CY_CUMQ_DAILY_SW)]
    CY_Date_50P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, fy$CumQ > 0.50 *CY_CUMQ_DAILY_SW)]
    CY_Date_75P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, fy$CumQ > 0.75 *CY_CUMQ_DAILY_SW)]
    CY_Date_25P_CUMQ_DAILY_SW <- as.numeric(format(CY_Date_25P_CUMQ_DAILY_SW, "%j"))
+   CY_Date_33P_CUMQ_DAILY_SW <- as.numeric(format(CY_Date_33P_CUMQ_DAILY_SW, "%j"))
    CY_Date_50P_CUMQ_DAILY_SW <- as.numeric(format(CY_Date_50P_CUMQ_DAILY_SW, "%j"))
    CY_Date_75P_CUMQ_DAILY_SW <- as.numeric(format(CY_Date_75P_CUMQ_DAILY_SW, "%j"))
 
@@ -321,10 +324,12 @@ compute.Q.stat.annual <- function(Station.Code='XXXXX',
            CY_MIN_DAILY_SW,
            CY_MAX_DAILY_SW,
            CY_MEAN_DAILY_SW,
+           CY_MEDIAN_DAILY_SW,
            CY_TOTALQ_DAILY_SW,
            CY_YIELDMM_DAILY_SW,
            CY_CUMQ_DAILY_SW,
            CY_Date_25P_CUMQ_DAILY_SW,
+           CY_Date_33P_CUMQ_DAILY_SW,
            CY_Date_50P_CUMQ_DAILY_SW,
            CY_Date_75P_CUMQ_DAILY_SW,
            Season_TOTALQ_DAILY_SW,
@@ -365,6 +370,7 @@ Q.stat.wy <- plyr::ddply(flow[ flow$WYear >= start.year,], "WYear", function(fy,
    WY_MIN_DAILY_SW   = min (fy$Q, na.rm=na.rm$na.rm.global)	    # WY Min Daily Q 	WY Min Daily Q
    WY_MAX_DAILY_SW	 = max (fy$Q, na.rm=na.rm$na.rm.global)     # WY Max Daily Q
    WY_MEAN_DAILY_SW  = mean(fy$Q, na.rm=na.rm$na.rm.global)     # WY Mean Discharge (Based on Daily avgs)
+   WY_MEDIAN_DAILY_SW  = median(fy$Q, na.rm=na.rm$na.rm.global)     # WY Mean Discharge (Based on Daily avgs)
    # WY_TOTALQ_DAILY_SW	Oct through Sept sum of daily avg (cms) *60*60*24
    # WY_YIELDMM_DAILY_SW	(Oct_to_Sep_TotalQ/(area in km2*1000000))*1000
 
@@ -380,9 +386,11 @@ Q.stat.wy <- plyr::ddply(flow[ flow$WYear >= start.year,], "WYear", function(fy,
    fy$CumQ <- cumsum(fy$Q2)
    # what is the first date where 25, 50 and 75% of totalQ (see above) are found
    WY_Date_25P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, (fy$CumQ > 0.25 *WY_CUMQ_DAILY_SW))]
+   WY_Date_33P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, (fy$CumQ > 0.333 *WY_CUMQ_DAILY_SW))]
    WY_Date_50P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, (fy$CumQ > 0.50 *WY_CUMQ_DAILY_SW))]
    WY_Date_75P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, (fy$CumQ > 0.75 *WY_CUMQ_DAILY_SW))]
    WY_Date_25P_CUMQ_DAILY_SW <- as.numeric(WY_Date_25P_CUMQ_DAILY_SW - fy$Date[1] +1)
+   WY_Date_33P_CUMQ_DAILY_SW <- as.numeric(WY_Date_33P_CUMQ_DAILY_SW - fy$Date[1] +1)
    WY_Date_50P_CUMQ_DAILY_SW <- as.numeric(WY_Date_50P_CUMQ_DAILY_SW - fy$Date[1] +1)
    WY_Date_75P_CUMQ_DAILY_SW <- as.numeric(WY_Date_75P_CUMQ_DAILY_SW - fy$Date[1] +1)
    #browser()
@@ -426,10 +434,12 @@ Q.stat.wy <- plyr::ddply(flow[ flow$WYear >= start.year,], "WYear", function(fy,
            WY_MIN_DAILY_SW,
            WY_MAX_DAILY_SW,
            WY_MEAN_DAILY_SW,
+           WY_MEDIAN_DAILY_SW,
            WY_TOTALQ_DAILY_SW,
            WY_YIELDMM_DAILY_SW,
            WY_CUMQ_DAILY_SW,
            WY_Date_25P_CUMQ_DAILY_SW,
+           WY_Date_33P_CUMQ_DAILY_SW,
            WY_Date_50P_CUMQ_DAILY_SW,
            WY_Date_75P_CUMQ_DAILY_SW,
            Season_TOTALQ_DAILY_SW,
