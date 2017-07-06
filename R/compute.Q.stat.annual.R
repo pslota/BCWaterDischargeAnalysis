@@ -229,10 +229,10 @@ compute.Q.stat.annual <- function(Station.Code='XXXXX',
    if(na.rm$na.rm.globa) fy$Q2[ is.na(fy$Q2)] <- 0
    fy$CumQ <- cumsum(fy$Q2)
    # what is the first date where 25, 50 and 75% of totalQ (see above) are found
-   CY_Date_25P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, fy$CumQ > 0.25 *CY_CUMQ_DAILY_SW)]
+   CY_Date_25P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, fy$CumQ > 0.25  *CY_CUMQ_DAILY_SW)]
    CY_Date_33P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, fy$CumQ > 0.333 *CY_CUMQ_DAILY_SW)]
-   CY_Date_50P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, fy$CumQ > 0.50 *CY_CUMQ_DAILY_SW)]
-   CY_Date_75P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, fy$CumQ > 0.75 *CY_CUMQ_DAILY_SW)]
+   CY_Date_50P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, fy$CumQ > 0.50  *CY_CUMQ_DAILY_SW)]
+   CY_Date_75P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, fy$CumQ > 0.75  *CY_CUMQ_DAILY_SW)]
    CY_Date_25P_CUMQ_DAILY_SW <- as.numeric(format(CY_Date_25P_CUMQ_DAILY_SW, "%j"))
    CY_Date_33P_CUMQ_DAILY_SW <- as.numeric(format(CY_Date_33P_CUMQ_DAILY_SW, "%j"))
    CY_Date_50P_CUMQ_DAILY_SW <- as.numeric(format(CY_Date_50P_CUMQ_DAILY_SW, "%j"))
@@ -385,10 +385,10 @@ Q.stat.wy <- plyr::ddply(flow[ flow$WYear >= start.year,], "WYear", function(fy,
    if(na.rm$na.rm.globa) fy$Q2[ is.na(fy$Q2)] <- 0
    fy$CumQ <- cumsum(fy$Q2)
    # what is the first date where 25, 50 and 75% of totalQ (see above) are found
-   WY_Date_25P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, (fy$CumQ > 0.25 *WY_CUMQ_DAILY_SW))]
+   WY_Date_25P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, (fy$CumQ > 0.25  *WY_CUMQ_DAILY_SW))]
    WY_Date_33P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, (fy$CumQ > 0.333 *WY_CUMQ_DAILY_SW))]
-   WY_Date_50P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, (fy$CumQ > 0.50 *WY_CUMQ_DAILY_SW))]
-   WY_Date_75P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, (fy$CumQ > 0.75 *WY_CUMQ_DAILY_SW))]
+   WY_Date_50P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, (fy$CumQ > 0.50  *WY_CUMQ_DAILY_SW))]
+   WY_Date_75P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, (fy$CumQ > 0.75  *WY_CUMQ_DAILY_SW))]
    WY_Date_25P_CUMQ_DAILY_SW <- as.numeric(WY_Date_25P_CUMQ_DAILY_SW - fy$Date[1] +1)
    WY_Date_33P_CUMQ_DAILY_SW <- as.numeric(WY_Date_33P_CUMQ_DAILY_SW - fy$Date[1] +1)
    WY_Date_50P_CUMQ_DAILY_SW <- as.numeric(WY_Date_50P_CUMQ_DAILY_SW - fy$Date[1] +1)
@@ -686,7 +686,10 @@ if(plot.stat.trend){
    if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
       range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
      set.month.mean = set.month.mean | grepl("^CY_MEAN_DAILY_SW", plotdata$Statistic)   }
-   plotdata$statgroup [set.month.mean] <- 'Monthly/Annual Means  -  JFM'
+   if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
+      range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
+     set.month.mean = set.month.mean | grepl("^CY_MEDIAN_DAILY_SW", plotdata$Statistic)   }
+   plotdata$statgroup [set.month.mean] <- 'Monthly/Annual Means/Annual Medians  -  JFM'
    plotdata$transform [set.month.mean] <- "log"
    plotdata$Ylabel    [set.month.mean] <- "Flow (cms)"
    plot_trend(plotdata, set.month.mean)
@@ -695,7 +698,10 @@ if(plot.stat.trend){
    if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
       range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
      set.month.mean = set.month.mean | grepl("^CY_MEAN_DAILY_SW", plotdata$Statistic)   }
-   plotdata$statgroup [set.month.mean] <- 'Monthly/Annual Means  -  AMJ'
+   if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
+      range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
+     set.month.mean = set.month.mean | grepl("^CY_MEDIAN_DAILY_SW", plotdata$Statistic)   }
+   plotdata$statgroup [set.month.mean] <- 'Monthly/Annual Means/Annual Medians  -  AMJ'
    plotdata$transform [set.month.mean] <- "log"
    plotdata$Ylabel    [set.month.mean] <- "Flow (cms)"
    plot_trend(plotdata, set.month.mean)
@@ -704,7 +710,10 @@ if(plot.stat.trend){
    if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
       range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
      set.month.mean = set.month.mean | grepl("^CY_MEAN_DAILY_SW", plotdata$Statistic)   }
-   plotdata$statgroup [set.month.mean] <- 'Monthly/Annual Means  -  JAS'
+   if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
+      range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
+     set.month.mean = set.month.mean | grepl("^CY_MEDIAN_DAILY_SW", plotdata$Statistic)   }
+   plotdata$statgroup [set.month.mean] <- 'Monthly/Annual Means/Annual Medians  -  JAS'
    plotdata$transform [set.month.mean] <- "log"
    plotdata$Ylabel    [set.month.mean] <- "Flow (cms)"
    plot_trend(plotdata, set.month.mean)
@@ -713,7 +722,10 @@ if(plot.stat.trend){
    if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
       range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
      set.month.mean = set.month.mean | grepl("^CY_MEAN_DAILY_SW", plotdata$Statistic)   }
-   plotdata$statgroup [set.month.mean] <- 'Monthly/Annual Means  -  OND'
+   if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
+      range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
+     set.month.mean = set.month.mean | grepl("^CY_MEDIAN_DAILY_SW", plotdata$Statistic)   }
+   plotdata$statgroup [set.month.mean] <- 'Monthly/Annual Means/Annual Medians  -  OND'
    plotdata$transform [set.month.mean] <- "log"
    plotdata$Ylabel    [set.month.mean] <- "Flow (cms)"
    plot_trend(plotdata, set.month.mean)
@@ -845,10 +857,11 @@ if(plot.stat.trend){
    plotdata$Ylabel    [set.annual.mindoy] <- 'Day into year'
    plot_trend(plotdata, set.annual.mindoy)
 
-   set.min.max.mean <- grepl("WY_MIN_", plotdata$Statistic) |
-                       grepl("WY_MAX_", plotdata$Statistic) |
-                       grepl("WY_MEAN_",plotdata$Statistic)
-   plotdata$statgroup [set.min.max.mean] <- 'WY Minimum, Maximum, Mean'
+   set.min.max.mean <- grepl("WY_MIN_",   plotdata$Statistic) |
+                       grepl("WY_MAX_",   plotdata$Statistic) |
+                       grepl("WY_MEAN_",  plotdata$Statistic) |
+                       grepl("WY_MEDIAN_",plotdata$Statistic)
+   plotdata$statgroup [set.min.max.mean] <- 'WY Minimum, Maximum, Mean, Median'
    plotdata$transform [set.min.max.mean] <- "log"
    plotdata$Ylabel    [set.min.max.mean] <- "Flow (cms)"
    plot_trend(plotdata, set.min.max.mean)

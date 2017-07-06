@@ -1,6 +1,8 @@
 # BCWaterDischargeAnalysis 2017-07-07
 
 - Changed Q.compute.percentile.stat to compute statistics on both calendar year (CY) and water year (WY) basis.
+- Changed Q.stat.annual to compute CY_MEDIAN, WY_MEDIAN, CY_DATE_33P, WY_DATE_33P. 
+- Added CY_MEDIAN, WY_MEDIAN, CY_DATE_33P, WY_DATE_33P to plots.
 - Updated vignettes to reflect changes.
 
 # BCWaterDischargeAnalysis 2017-06-30

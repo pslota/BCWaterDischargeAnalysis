@@ -11,7 +11,7 @@ vignette: >
 
 This will demonstrate the impact of missing values on the computations using 
 a sample analysis of the stream discharge data from station
-08HA011 (Cowichan River near Duncan) after creating some missing values (at random) during
+WSC.08HA011 (Cowichan River near Duncan) after creating some missing values (at random) during
 the period of record.
 
 The base data is provided as a sample dataset (WSC.08HA011) with this package.
