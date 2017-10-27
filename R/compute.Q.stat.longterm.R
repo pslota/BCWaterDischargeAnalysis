@@ -10,9 +10,9 @@
 #' @template start.year
 #' @template end.year
 #' @template water.year
-#' @param write.stat.csv Should a file be created with the computed statistics?
+#' @param write.table Should a file be created with the computed statistics?
 #'    The file name will be  \code{file.path(report.dir,paste(Station.Name,'-longterm-summary-stat.csv'))}.
-#' @param write.stat.trans.csv Should a file be created with the transposed of the statistics report?
+#' @param write.transposed.table Should a file be created with the transposed of the statistics report?
 #'    The file name will be  \code{file.path(report.dir,paste(Station.Name,'-longterm-summary-stat-trans.csv'))}.
 #' @template report.dir
 #' @template csv.nddigits
@@ -63,8 +63,8 @@ compute.Q.stat.longterm <- function(
                           start.year=NULL, #not required
                           end.year=NULL, #not required
                           water.year= FALSE, #not required
-                          write.stat.csv=TRUE,         # write out calendar year statistics
-                          write.stat.trans.csv=TRUE,   # write out statistics in transposed format
+                          write.table=TRUE,         # write out calendar year statistics
+                          write.transposed.table=TRUE,   # write out statistics in transposed format
                           report.dir='.',
                           csv.nddigits=3,               # decimal digit for csv files.
                           na.rm=list(na.rm.global=TRUE)){
@@ -83,24 +83,22 @@ compute.Q.stat.longterm <- function(
    if( is.null(HYDAT) & length(Station.Name)>1)        {stop("Station.Name cannot have length > 1")}
    if( is.null(flow) & is.null(HYDAT)){stop("Flow or HYDAT parameters must be set")}
    if( is.null(HYDAT) & !is.data.frame(flow))         {stop("Flow is not a data frame.")}
-   if( is.null(HYDAT) &! all(c("Date","Q") %in% names(flow))){
-                                      stop("Flow dataframe doesn't contain the variables Date and Q.")}
-   if( is.null(HYDAT) & ! inherits(flow$Date[1], "Date")){
-                                      stop("Date column in Flow data frame is not a date.")}
+   if( is.null(HYDAT) &! all(c("Date","Q") %in% names(flow))){stop("Flow dataframe doesn't contain the variables Date and Q.")}
+   if( is.null(HYDAT) & ! inherits(flow$Date[1], "Date")){stop("Date column in Flow data frame is not a date.")}
    if( is.null(HYDAT) & !is.numeric(flow$Q))          {stop("Q column in flow dataframe is not numeric.")}
    if( is.null(HYDAT) & any(flow$Q <0, na.rm=TRUE))   {stop('flow cannot have negative values - check your data')}
-   if(! (is.numeric(start.year) | is.null(start.year)))   {stop("start.year must be numeric.")}
-   if(! (is.numeric(end.year) | is.null(end.year)))   {stop("end.year must be numeric.")}
+   if( !(is.numeric(start.year) | is.null(start.year)))   {stop("start.year must be numeric.")}
+   if( !(is.numeric(end.year) | is.null(end.year)))   {stop("end.year must be numeric.")}
    if( !is.logical(water.year))  {stop("water.year must be logical (TRUE/FALSE")}
-   if( !is.logical(write.stat.csv))  {stop("write.stat.csv must be logical (TRUE/FALSE")}
-   if( !is.logical(write.stat.trans.csv)){stop("write.stat.trans.csv must be logical (TRUE/FALSE")}
+   if( !is.logical(write.table))  {stop("write.table must be logical (TRUE/FALSE")}
+   if( !is.logical(write.transposed.table)){stop("write.transposed.table must be logical (TRUE/FALSE")}
    if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exist")}
 
    if(!is.numeric(csv.nddigits)){ stop("csv.nddigits must be numeric")}
    csv.nddigits <- round(csv.nddigits)[1]
 
    if( !is.list(na.rm))              {stop("na.rm is not a list") }
-   if(! is.logical(unlist(na.rm))){   stop("na.rm is list of logical (TRUE/FALSE) values only.")}
+   if( !is.logical(unlist(na.rm))){   stop("na.rm is list of logical (TRUE/FALSE) values only.")}
    my.na.rm <- list(na.rm.global=FALSE)
    if( !all(names(na.rm) %in% names(my.na.rm))){stop("Illegal element in na.rm")}
    my.na.rm[names(na.rm)]<- na.rm
@@ -119,7 +117,6 @@ compute.Q.stat.longterm <- function(
    flow$MonthNum  <- lubridate::month(flow$Date)
    flow$Month <- month.abb[flow$MonthNum]
    flow$WaterYear <- as.numeric(ifelse(flow$MonthNum>=10,flow$Year+1,flow$Year))
-
 
 
 # Filter for start and end years, and if water year
@@ -165,7 +162,7 @@ compute.Q.stat.longterm <- function(
 #  Write out summary tables for calendar years
    #  Write out the summary table for comparison to excel spreadsheet
    file.stat.csv <- NA
-   if(write.stat.csv){
+   if(write.table){
       file.stat.csv <-file.path(report.dir, paste(Station.Name,"-longterm-summary-stat.csv", sep=""))
       temp <- Q.longterm
       temp[,2:ncol(temp)] <- round(temp[,2:ncol(temp)], csv.nddigits)  # round the output
@@ -177,7 +174,7 @@ compute.Q.stat.longterm <- function(
    Q.longterm.trans.temp <- dplyr::mutate(Q.longterm.trans,Value=round(Value,csv.nddigits)) # for writing to csv
    Q.longterm.trans <- tidyr::spread(Q.longterm.trans,Month,Value)
    file.stat.trans.csv <- NA
-   if(write.stat.trans.csv){
+   if(write.transposed.table){
      file.stat.trans.csv <-file.path(report.dir,paste(Station.Name,"-longterm-summary-stat-trans.csv", sep=""))
      Q.longterm.trans.temp <- tidyr::spread(Q.longterm.trans.temp,Month,Value)
      utils::write.csv(Q.longterm.trans.temp, file=file.stat.trans.csv, row.names=FALSE)
