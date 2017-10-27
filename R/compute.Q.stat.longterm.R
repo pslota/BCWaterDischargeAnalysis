@@ -1,4 +1,4 @@
-#' @title Compute long-term annual (calendar or water year) summary statistics.
+#' @title Compute long-term monthly and annual (calendar or water year) summary statistics.
 #'
 #' @description Computes long-term summary statistics on \code{flow$Q} variable
 #'    between \code{start.year} and \code{end.year} inclusive for calendar or water years.
