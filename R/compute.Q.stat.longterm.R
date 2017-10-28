@@ -77,7 +77,7 @@ compute.Q.stat.longterm <- function(
 #
    Version <- packageVersion("BCWaterDischargeAnalysis")
 
-   if( !is.null(HYDAT) & !is.null(flow.data))  {stop("Must select either flow.data or HYDAT parameters.")}
+   if( !is.null(HYDAT) & !is.null(flow.data))  {stop("Must select either flow.data or HYDAT parameters, not both.")}
    if( is.null(HYDAT) & is.null(station.name))  {stop("station.name required with flow.data parameter.")}
    if( is.null(HYDAT) & !is.character(station.name))  {stop("station.name must be a character string.")}
    if( is.null(HYDAT) & length(station.name)>1)        {stop("station.name cannot have length > 1")}
