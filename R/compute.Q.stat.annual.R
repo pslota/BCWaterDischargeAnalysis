@@ -6,19 +6,19 @@
 #' @template station.name
 #' @template basin.area
 #' @template flow.data
+#' @template water.year
 #' @template start.year
-#' @param write.cy.stat.csv Should a file be created with the calendar year computed percentiles?
+#' @template end.year
+#' @param write.table Should a file be created with the calendar year computed percentiles?
 #'    The file name will be  \code{file.path(report.dir,paste(station.name,'-annual-cy-summary-stat.csv'))}.
-#' @param write.wy.stat.csv Should a file be created with the water year computed percentiles?
-#'    The file name will be  \code{file.path(report.dir,paste(station.name,'-annual-wy-summary-stat.csv'))}.
-#' @param write.stat.trans.csv Should a file be created with the transposed of the annual statistics
+#' @param write.transposed.table Should a file be created with the transposed of the annual statistics
 #'    (both calendar and water year)?
 #'    The file name will be  \code{file.path(report.dir,paste(station.name,'-annual-summary-stat-trans.csv'))}.
-#' @param write.flow.summary.csv Should a file be created with a flow summary over the years between the
+#' @param write.summary.table Should a file be created with a flow summary over the years between the
 #'    start.year and end.year (inclusive). This summary includes number of days, number of missing values,
 #'    mean, median, minimum, maximum, and standard deviation of \code{flow.data$Q}.
 #'    The file name will be \code{file.path(report.dir, paste(station.name,"-period-record-summary.csv", sep=""))}.
-#' @param write.lowflow.csv Should a file be created with the minimum value of \code{flow.data$Q} and date the
+#' @param write.lowflow.table Should a file be created with the minimum value of \code{flow.data$Q} and date the
 #'    minimum occured.
 #'    The file name will be \code{file.path(report.dir,paste(station.name,"-lowflow-summary.csv",sep=""))}
 #' @param plot.stat.trend Should a file be created with plots of the statistics over the years
@@ -38,8 +38,7 @@
 #'   \item{Q.stat.annual.trans}{Data frame with transposed summary statistics as listed at \code{\link{SummaryStatistics}}.}
 #'   \item{dates.missing.flow}{Data framw with dates of missing \code{flow.data$Q} between
 #'          \code{start.year} and \code{end.year}}
-#'   \item{file.cy.stat.csv}{Object with file name of *.csv file with calendar year summary statistics.}
-#'   \item{file.wy.stat.csv}{Object with file name of *.csv file with water year summary statistics.}
+#'   \item{file.stat.csv}{Object with file name of *.csv file with calendar year summary statistics.}
 #'   \item{file.stat.trans.csv}{Object with file name of *.csv file with transposed summary statistics.}
 #'   \item{file.stat.trend.pdf}{Object with file name of *.pdf file with plot of statistics over time.}
 #'   \item{file.cumdepart.pdf}{Object with file name of *.pdf file with plot of yearly and cumulative departures.}
@@ -56,6 +55,7 @@
 #'                          basin.area  =12345,
 #'                          HYDAT="08HB048",
 #'                          flow.data          =flow,
+#'                          water.year = TRUE,
 #'                          start.year    =1960,
 #'                          end.year      =2014)
 #' }
@@ -82,30 +82,30 @@
 # See the License for the specific language governing permissions and limitations under the License.
 
 compute.Q.stat.annual <- function(station.name=NULL,
-                        basin.area=NA,
-                        flow.data=NULL,
-                        HYDAT=NULL,
-                        start.year=9999,
-                        end.year=0,
-                        write.cy.stat.csv=TRUE,        # write out statistics on calendar year
-                        write.wy.stat.csv=TRUE,        # write out statistics on water year
-                        write.stat.trans.csv=TRUE,  # write out statistics in transposed format (cy & wy)
-                        write.flow.summary.csv=TRUE, # write out a summary of period of record
-                        write.lowflow.csv=TRUE,      # write out a summary of low flows
-                        plot.stat.trend=TRUE,        # should you plot all of stat trends?
-                        plot.cumdepart=TRUE,         # plot cumulative departure curves
-                        report.dir=".",
-                        na.rm=list(na.rm.global=FALSE),
-                        csv.nddigits=3,              # decimal digits for csv files for statistics
-                        debug=FALSE){
-#  Compute statistics on an annual (calendar and water) year basis
-#
-#  See the man-roxygen director for definition of parameters
-#
-#  Output: List with elements given above.
-#
-#############################################################
-#  Some basic error checking on the input parameters
+                                  basin.area=NA,
+                                  flow.data=NULL,
+                                  HYDAT=NULL,
+                                  water.year=FALSE,
+                                  start.year=NULL,
+                                  end.year=NULL,
+                                  write.table=TRUE,        # write out statistics on calendar year
+                                  write.transposed.table=TRUE,  # write out statistics in transposed format (cy & wy)
+                                  write.summary.table=TRUE, # write out a summary of period of record
+                                  write.lowflow.table=TRUE,      # write out a summary of low flows
+                                  plot.stat.trend=FALSE,        # should you plot all of stat trends?
+                                  plot.cumdepart=FALSE,         # plot cumulative departure curves
+                                  report.dir=".",
+                                  na.rm=list(na.rm.global=FALSE),
+                                  csv.nddigits=3,              # decimal digits for csv files for statistics
+                                  debug=FALSE){
+  #  Compute statistics on an annual (calendar and water) year basis
+  #
+  #  See the man-roxygen director for definition of parameters
+  #
+  #  Output: List with elements given above.
+  #
+  #############################################################
+  #  Some basic error checking on the input parameters
   #
   Version <- packageVersion("BCWaterDischargeAnalysis")
   if( is.null(flow.data) & is.null(HYDAT)){stop("Flow or HYDAT parameters must be set")}
@@ -122,14 +122,10 @@ compute.Q.stat.annual <- function(station.name=NULL,
     stop("Date column in Flow data frame is not a date.")}
   if( is.null(HYDAT) & !is.numeric(flow.data$Q))          {stop("Q column in flow dataframe is not numeric.")}
   if( is.null(HYDAT) & any(flow.data$Q <0, na.rm=TRUE))   {stop('flow.data cannot have negative values - check your data')}
-  if(! (is.numeric(start.year) & is.numeric(end.year))){
-    stop("start.year and end.year not numberic.")}
-  if(! (start.year <= end.year))    {stop("start.year > end.year")}
-  if( !is.logical(write.cy.stat.csv))  {stop("write.cy.stat.csv must be logical (TRUE/FALSE")}
-  if( !is.logical(write.wy.stat.csv))  {stop("write.wy.stat.csv must be logical (TRUE/FALSE")}
-  if( !is.logical(write.stat.trans.csv)){stop("write.stat.trans.csv must be logical (TRUE/FALSE")}
-  if( !is.logical(write.flow.summary.csv)){stop("write.flow.summary.csv must be logical (TRUE/FALSE")}
-  if( !is.logical(write.lowflow.csv)){ stop("write.lowflow.csv must be logical (TRUE/FALSE)")}
+  if( !is.logical(write.table))  {stop("write.table must be logical (TRUE/FALSE")}
+  if( !is.logical(write.transposed.table)){stop("write.transposed.table must be logical (TRUE/FALSE")}
+  if( !is.logical(write.summary.table)){stop("write.summary.table must be logical (TRUE/FALSE")}
+  if( !is.logical(write.lowflow.table)){ stop("write.lowflow.table must be logical (TRUE/FALSE)")}
   if( !is.logical(plot.stat.trend)) {stop("plot.stat.trend must be logical (TRUE/FALSE")}
   if( !is.logical(plot.cumdepart))  {stop("plot.cumdepart must be logical (TRUE/FALSE")}
 
@@ -153,762 +149,583 @@ compute.Q.stat.annual <- function(station.name=NULL,
   #  Generate all dates between min and max dates and merge with flow
   #  data frame to generate any dates that were missing.
   #  This will automatically generate NA for the days that were not in the file
-  temp <- data.frame(Date=seq(min(flow.data$Date,na.rm=TRUE),
-                              max(flow.data$Date,na.rm=TRUE),1))
+  temp <- data.frame(Date=seq(as.Date(paste(lubridate::year(min(flow.data$Date))-1,'10-01',sep='-'), "%Y-%m-%d"),
+                              as.Date(paste(lubridate::year(max(flow.data$Date))  ,'12-31',sep='-'), '%Y-%m-%d'), 1))
   flow.data <- merge(flow.data, temp, all.y=TRUE)
 
-#  Compute the 3, 7, and 30 day rolling average values
- flow.data$Q.03DAvg <- zoo::rollapply( flow.data$Q,  3, mean, fill=NA, align="right")
- flow.data$Q.07DAvg <- zoo::rollapply( flow.data$Q,  7, mean, fill=NA, align="right")
- flow.data$Q.30DAvg <- zoo::rollapply( flow.data$Q, 30, mean, fill=NA, align="right")
+  #  create the year (annual and water), seasonal, and month variables
+  flow.data$Year  <- lubridate::year(flow.data$Date)
+  flow.data$Month  <- lubridate::month(flow.data$Date)
+  flow.data$MonthText <- month.abb[flow.data$Month]
+  flow.data$WaterYear <- as.numeric(ifelse(flow.data$Month>=10,flow.data$Year+1,flow.data$Year))
+  flow.data$DayofYear <- lubridate::yday(flow.data$Date)
+  flow.data$WaterDoY <- ifelse(flow.data$Month<10,flow.data$DayofYear+92,
+                               ifelse((as.Date(with(flow.data, paste(Year+1,01,01,sep="-")),"%Y-%m-%d")-as.Date(with(flow.data, paste(Year,01,01,sep="-")),"%Y-%m-%d"))==366,
+                                      flow.data$DayofYear-274,
+                                      flow.data$DayofYear-273))
+  flow.data <- dplyr::mutate(flow.data,
+                             Seasons4= ifelse(Month<=3,"JFM",
+                                              ifelse(Month>=4&Month<=6,"AMJ",
+                                                     ifelse(Month>=7&Month<=9,"JAS",
+                                                            ifelse(Month>=10,"OND",NA)))),
+                             Seasons2=ifelse(Month<=3|Month>=10,"ONDJFM",
+                                             ifelse(Month>=4&Month<=9,"AMJJAS",NA)))
 
-#  Truncate flow data to between 1 October of (start.year-1) and 31 December of end.year
-#  We go back to 1 Oct of start.year-1 to enable water year computations if data is present
- flow.data <- flow.data[ flow.data$Date >= as.Date(paste(start.year-1,'10-01',sep='-'), "%Y-%m-%d") &
-                           flow.data$Date <= as.Date(paste(end.year    ,'12-31',sep='-'), '%Y-%m-%d'),]
-
-#  Generate all dates between 1 Oct start.year-1 and 31 Dec end.year and merge with flow
-#  data frame to generate any dates that were missing.
-#  This will automatically generate NA for the days that were not in the file
- temp <- data.frame(Date=seq(as.Date(paste(start.year-1,'10-01',sep='-'), "%Y-%m-%d"),
-                             as.Date(paste(end.year    ,'12-31',sep='-'), '%Y-%m-%d'), 1))
- flow.data <- merge(flow.data, temp, all.y=TRUE)
-
-#  create the year (annual and water) and month variables
- flow.data$Year  <- as.numeric(format(flow.data$Date, "%Y"))
- flow.data$Month <- as.numeric(format(flow.data$Date, '%m'))
- flow.data$WYear <- as.numeric(ifelse(flow.data$Month>=10,flow.data$Year+1,flow.data$Year))
-
-#  which dates have missing flows.
- dates.missing.flows <- flow.data$Date[ is.na(flow.data$Q) &
-                             as.numeric(format(flow.data$Date,"%Y"))>=start.year &
-                             as.numeric(format(flow.data$Date,"%Y"))<=end.year  ]
-
-#  simple summary statistics
- flow.sum <- plyr::ddply(flow.data[ flow.data$Year >= start.year & flow.data$Year <=end.year,], "Year", function(x, na.rm=FALSE){
-       n.days   = length(x$Year)
-       n.Q      = sum (!is.na(x$Q))
-       n.miss.Q = sum ( is.na(x$Q))
-       min.Q    = min (x$Q,          na.rm=na.rm$na.rm.global)
-       max.Q    = max (x$Q,          na.rm=na.rm$na.rm.global)
-       mean.Q   = mean(x$Q,          na.rm=na.rm$na.rm.global)
-       median.Q = stats::median(x$Q, na.rm=na.rm$na.rm.global)
-       sd.Q     = stats::sd  (x$Q,   na.rm=na.rm$na.rm.global)
-       data.frame(n.day=n.days, n.Q=n.Q, n.miss.Q=n.miss.Q,
-                  min.Q=min.Q, max.Q=max.Q, mean.Q=mean.Q, median.Q=median.Q, sd.Q=sd.Q)
-       }, na.rm=na.rm)
- flow.sum
-
- if(debug)browser()
-#  Compute statistics on calendar year basis
-#
- Q.stat.cy <- plyr::ddply(flow.data[ flow.data$Year >= start.year,], "Year", function(fy, basin.area, na.rm){
-   # process each year's flow values (fy)
-   CY_MIN_01Day_SW    = min(fy$Q, na.rm=na.rm$na.rm.global)	      # CY Min Daily Q
-   CY_MINDOY_01Day_SW = as.numeric(format( fy$Date[which.min( fy$Q)], "%j"))        # Date of CY Min Daily Q
-   if(length(CY_MINDOY_01Day_SW)==0) CY_MINDOY_01Day_SW <- NA
-   if(is.na(CY_MIN_01Day_SW)) CY_MINDOY_01Day_SW = NA                       # no date of min if missing
-
-   CY_MIN_03Day_SW	   = min(fy$Q.03DAvg, na.rm=na.rm$na.rm.global) # Min CY Rolling 3 day avg
-   CY_MINDOY_03Day_SW = as.numeric(format( fy$Date[which.min( fy$Q.03DAvg)], "%j")) # Date of Min CY Rolling 3 day avg
-   if(length(CY_MINDOY_03Day_SW)==0) CY_MINDOY_03Day_SW <- NA
-   if(is.na(CY_MIN_03Day_SW)) CY_MINDOY_03Day_SW = NA                       # no date of min if missing
-
-   CY_MIN_07Day_SW	   = min(fy$Q.07DAvg, na.rm=na.rm$na.rm.global) # Min CY Rolling 7 day avg
-   CY_MINDOY_07Day_SW = as.numeric(format( fy$Date[which.min( fy$Q.07DAvg)], "%j")) # Date of Min CY Rolling 7 day avg
-   if(length(CY_MINDOY_07Day_SW)==0) CY_MINDOY_07Day_SW <- NA
-   if(is.na(CY_MIN_07Day_SW)) CY_MINDOY_07Day_SW = NA                       # no date of min if missing
-
-   CY_MIN_30Day_SW	 = min(fy$Q.30DAvg, na.rm=na.rm$na.rm.global) # Min CY Rolling 30 day avg
-   CY_MINDOY_30Day_SW= as.numeric(format( fy$Date[which.min( fy$Q.30DAvg)], "%j")) # Date of Min CY Rolling 30 day avg
-   if(length(CY_MINDOY_30Day_SW)==0) CY_MINDOY_30Day_SW <- NA
-   if(is.na(CY_MIN_30Day_SW)) CY_MINDOY_30Day_SW = NA                       # no date of min if missing
-
-   CY_MIN_DAILY_SW   = min (fy$Q, na.rm=na.rm$na.rm.global)	    # CY Min Daily Q 	CY Min Daily Q
-   CY_MAX_DAILY_SW	 = max (fy$Q, na.rm=na.rm$na.rm.global)      # CY Max Daily Q
-   CY_MEAN_DAILY_SW  = mean(fy$Q, na.rm=na.rm$na.rm.global)     # CY Mean Discharge (Based on Daily avgs)
-   CY_MEDIAN_DAILY_SW= median(fy$Q, na.rm=na.rm$na.rm.global)  # CY median Discharge (Based on Daily avgs)
-   CY_TOTALQ_DAILY_SW= mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Q)*60*60*24    # Yearly sum of daily avg (cms) *60*60*24 # deal with missing values
-   CY_CUMQ_DAILY_SW  = CY_TOTALQ_DAILY_SW/(60*60*24)      # Yearly sum of daily avg (cms) # deal with missing values
-   CY_YIELDMM_DAILY_SW=mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Q)*60*60*24 /basin.area/1000   #	(CY Mean*60*60*24*365.25)/(area in km2*1000000))*1000
-
-   # Get the cumulative Q values
-   # Notice that if missing values are removed, the individual values are replaced by zero
-   fy$Q2 <- fy$Q
-   if(na.rm$na.rm.globa) fy$Q2[ is.na(fy$Q2)] <- 0
-   fy$CumQ <- cumsum(fy$Q2)
-   # what is the first date where 25, 50 and 75% of totalQ (see above) are found
-   CY_Date_25P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, fy$CumQ > 0.25  *CY_CUMQ_DAILY_SW)]
-   CY_Date_33P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, fy$CumQ > 0.333 *CY_CUMQ_DAILY_SW)]
-   CY_Date_50P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, fy$CumQ > 0.50  *CY_CUMQ_DAILY_SW)]
-   CY_Date_75P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, fy$CumQ > 0.75  *CY_CUMQ_DAILY_SW)]
-   CY_Date_25P_CUMQ_DAILY_SW <- as.numeric(format(CY_Date_25P_CUMQ_DAILY_SW, "%j"))
-   CY_Date_33P_CUMQ_DAILY_SW <- as.numeric(format(CY_Date_33P_CUMQ_DAILY_SW, "%j"))
-   CY_Date_50P_CUMQ_DAILY_SW <- as.numeric(format(CY_Date_50P_CUMQ_DAILY_SW, "%j"))
-   CY_Date_75P_CUMQ_DAILY_SW <- as.numeric(format(CY_Date_75P_CUMQ_DAILY_SW, "%j"))
-
-   # Assign seasons to the month (JFM, AMJ, JJA, OND)
-   fy$Season <- car::recode(fy$Month,
-                     "1:3='JFM'; 4:6='AMJ'; 7:9='JAS'; 10:12='OND'; else=NA")
-   fy$Season <- factor(fy$Season, levels=c("JFM",'AMJ','JAS','OND'), ordered=TRUE)
-
-   # compute totalQ and assign variable names for total Q
-   # JFM_TOTALQ_DAILY_SW	Jan+Feb+Mar  sum of daily avg (cms) *60*60*24
-   # AMJ_TOTALQ_DAILY_SW	Apr+May+Jun  sum of daily avg (cms) *60*60*24
-   # JAS_TOTALQ	DAILY_SW  Jul+Aug+Sep  sum of daily avg (cms) *60*60*24
-   # OND_TOTALQ_DAILY_SW  Oct+Nov+Dec  sum of daily avg (cms) *60*60*24
-   season.stats <- plyr::ddply(fy, "Season", function(fy, na.rm){
-                             vname.totalq  <- paste(fy$Season[1],"_TOTALQ_DAILY_SW",sep="")
-                             totalq <- mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Season)*60*60*24  # deal with missing values
-                             data.frame(vname.totalq, totalq, stringsAsFactors=FALSE)
-                             },na.rm=na.rm)
-   season.stats$vname.totalq <- factor(season.stats$vname.totalq, levels=season.stats$vname.totalq, ordered=TRUE) # keep ordering
-
-   # compute Yield and assign variable names for yield
-   # JFM_YIELDMM_DAILY_SW	(JFM_TOTALQ_DAILY_SW/(area in km2*1000000))*1000
-   # AMJ_YIELDMM_DAILY_SW	(AMJ_TOTALQ_DAILY_SW/(area in km2*1000000))*1000
-   # JAS_YIELDMM_DAILY_SW	(JAS_TOTALQ_DAILY_SW/(area in km2*1000000))*1000
-   # OND_YIELDM_DAILY_SWM	(OND_TOTALQ_DAILY_SW/(area in km2*1000000))*1000
-   season.stats$vname.yieldmm <- sub('TOTALQ','YIELDMM', season.stats$vname.totalq)
-   season.stats$yieldmm       <- season.stats$totalq/basin.area/1000
-   season.stats$vname.yieldmm <- factor(season.stats$vname.yieldmm, levels=season.stats$vname.yieldmm, ordered=TRUE) # keep ordering
-
-   # extract the variables for adding to the data frame later
-   Season_TOTALQ_DAILY_SW <- reshape2::acast(season.stats, .~vname.totalq, value.var='totalq')
-   Season_YIELDMM_DAILY_SW<- reshape2::acast(season.stats, .~vname.yieldmm,value.var='yieldmm')
-
-   # Monthly values
-   # JAN_MIN_DAILY_SW	  Min Daily Avg Q for Jan
-   # JAN_MAX_DAILY_SW	  Max Daily Avg Q for Jan
-   # JAN_MEAN_DAILY_SW	Mean Monthly Q for Jan
-   # JAN_P50_DAILY_SW	  Median Monthly Q for Jan
-   # JAN_P10_SW	Low Flow, 90th Percentile for Jan  -- see contract - this is the 10th percentile
-   # JAN_P20_SW	Low Flow, 80th Percentile for Jan  -- see contract - this is the 20th percentile
-
-   month.stats <- plyr::ddply(fy, "Month", function(fy, na.rm){
-                      month.min = min   (fy$Q, na.rm=na.rm$na.rm.global)
-                      month.max = max   (fy$Q, na.rm=na.rm$na.rm.global)
-                      month.mean= mean  (fy$Q, na.rm=na.rm$na.rm.global)
-                      month.p50 = stats::median(fy$Q, na.rm=na.rm$na.rm.global)
-                      month.p10 = try(stats::quantile(fy$Q, prob=.10, na.rm=na.rm$na.rm.global), TRUE)  # quantile bombs is na present and na.rm=FALSE !
-                      if (class(month.p10) == "try-error") month.p10 <- NA
-                      month.p20 = try(stats::quantile(fy$Q, prob=.20, na.rm=na.rm$na.rm.global), TRUE)
-                      if (class(month.p20) == "try-error") month.p20 <- NA
-                      data.frame(month.min, month.max, month.mean,
-                                 month.p50, month.p20, month.p10, stringsAsFactors=FALSE)
-                      },na.rm=na.rm)
-   month.name<- c("JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC")
-   # create variable names for each type of category
-   month.stats$vname.min <- paste(month.name[month.stats$Month],"_MIN_DAILY_SW", sep="")
-   month.stats$vname.max <- paste(month.name[month.stats$Month],"_MAX_DAILY_SW", sep="")
-   month.stats$vname.mean<- paste(month.name[month.stats$Month],"_MEAN_DAILY_SW",sep="")
-   month.stats$vname.p50 <- paste(month.name[month.stats$Month],"_P50_DAILY_SW",sep="")
-   month.stats$vname.p20 <- paste(month.name[month.stats$Month],"_P20_DAILY_SW",sep="")
-   month.stats$vname.p10 <- paste(month.name[month.stats$Month],"_P10_DAILY_SW",sep="")
-
-   month.stats$vname.min <- factor(month.stats$vname.min, levels=month.stats$vname.min, ordered=TRUE)
-   month.stats$vname.max <- factor(month.stats$vname.max, levels=month.stats$vname.max, ordered=TRUE)
-   month.stats$vname.mean<- factor(month.stats$vname.mean,levels=month.stats$vname.mean,ordered=TRUE)
-   month.stats$vname.p50 <- factor(month.stats$vname.p50, levels=month.stats$vname.p50, ordered=TRUE)
-   month.stats$vname.p20 <- factor(month.stats$vname.p20, levels=month.stats$vname.p20, ordered=TRUE)
-   month.stats$vname.p10 <- factor(month.stats$vname.p10, levels=month.stats$vname.p10, ordered=TRUE)
-
-   Month_MIN_DAILY_SW <- reshape2::acast(month.stats, .~vname.min , value.var='month.min')
-   Month_MAX_DAILY_SW <- reshape2::acast(month.stats, .~vname.max , value.var='month.max')
-   Month_MEAN_DAILY_SW<- reshape2::acast(month.stats, .~vname.mean, value.var='month.mean')
-   Month_P50_DAILY_SW <- reshape2::acast(month.stats, .~vname.p50,  value.var='month.p50')
-   Month_P20_DAILY_SW <- reshape2::acast(month.stats, .~vname.p20,  value.var='month.p20')
-   Month_P10_DAILY_SW <- reshape2::acast(month.stats, .~vname.p10,  value.var='month.p10')
-
-   # return the CY results
-   res <- data.frame(
-           CY_MIN_01Day_SW,
-           CY_MINDOY_01Day_SW,
-           CY_MIN_03Day_SW,
-           CY_MINDOY_03Day_SW,
-           CY_MIN_07Day_SW,
-           CY_MINDOY_07Day_SW,
-           CY_MIN_30Day_SW,
-           CY_MINDOY_30Day_SW,
-           CY_MIN_DAILY_SW,
-           CY_MAX_DAILY_SW,
-           CY_MEAN_DAILY_SW,
-           CY_MEDIAN_DAILY_SW,
-           CY_TOTALQ_DAILY_SW,
-           CY_YIELDMM_DAILY_SW,
-           CY_CUMQ_DAILY_SW,
-           CY_Date_25P_CUMQ_DAILY_SW,
-           CY_Date_33P_CUMQ_DAILY_SW,
-           CY_Date_50P_CUMQ_DAILY_SW,
-           CY_Date_75P_CUMQ_DAILY_SW,
-           Season_TOTALQ_DAILY_SW,
-           Season_YIELDMM_DAILY_SW,
-           Month_MIN_DAILY_SW,
-           Month_MAX_DAILY_SW,
-           Month_MEAN_DAILY_SW,
-           Month_P50_DAILY_SW,
-           Month_P20_DAILY_SW,
-           Month_P10_DAILY_SW,
-           stringsAsFactors=FALSE)
- }, basin.area=basin.area, na.rm=na.rm)
-
-#  Compute the statistics on a water year basis  (October -> Sept)
-
-Q.stat.wy <- plyr::ddply(flow.data[ flow.data$WYear >= start.year,], "WYear", function(fy, basin.area, na.rm){
-   # process each waters year's flow values (fy)
-   WY_MIN_01Day_SW    = min(fy$Q, na.rm=na.rm$na.rm.global)	                # WY Min Daily Q
-   WY_MINDOY_01Day_SW = as.numeric(fy$Date[which.min( fy$Q)]-fy$Date[1]+1)  # Date of WY Min Daily Q
-   if(is.na(WY_MIN_01Day_SW)) WY_MINDOY_01Day_SW = NA                       # no date of min if missing
-   if(length(WY_MINDOY_01Day_SW)==0) WY_MINDOY_01Day_SW <- NA
-
-   WY_MIN_03Day_SW	   = min(fy$Q.03DAvg, na.rm=na.rm$na.rm.global)                  # Min WY Rolling 3 day avg
-   WY_MINDOY_03Day_SW =  as.numeric(fy$Date[which.min( fy$Q.03DAvg)] - fy$Date[1]+1) # Date of Min WY Rolling 3 day avg
-   if(length(WY_MINDOY_03Day_SW)==0) WY_MINDOY_03Day_SW <- NA
-   if(is.na(WY_MIN_03Day_SW)) WY_MINDOY_03Day_SW = NA                       # no date of min if missing
-
-   WY_MIN_07Day_SW	   = min(fy$Q.07DAvg, na.rm=na.rm$na.rm.global)                   # Min WY Rolling 7 day avg
-   WY_MINDOY_07Day_SW = as.numeric(fy$Date[which.min( fy$Q.07DAvg)] - fy$Date[1]+1)   # Date of Min WY Rolling 7 day avg
-   if(length(WY_MINDOY_07Day_SW)==0) WY_MINDOY_07Day_SW <- NA
-   if(is.na(WY_MIN_07Day_SW)) WY_MINDOY_07Day_SW = NA                       # no date of min if missing
-
-   WY_MIN_30Day_SW	 = min(fy$Q.30DAvg, na.rm=na.rm$na.rm.global)                     # Min WY Rolling 30 day avg
-   WY_MINDOY_30Day_SW= as.numeric(fy$Date[which.min( fy$Q.30DAvg)] - fy$Date[1]+1)    # Date of Min WY Rolling 30 day avg
-   if(length(WY_MINDOY_30Day_SW)==0) WY_MINDOY_30Day_SW <- NA
-   if(is.na(WY_MIN_30Day_SW)) WY_MINDOY_30Day_SW = NA                       # no date of min if missing
-
-   WY_MIN_DAILY_SW   = min (fy$Q, na.rm=na.rm$na.rm.global)	    # WY Min Daily Q 	WY Min Daily Q
-   WY_MAX_DAILY_SW	 = max (fy$Q, na.rm=na.rm$na.rm.global)     # WY Max Daily Q
-   WY_MEAN_DAILY_SW  = mean(fy$Q, na.rm=na.rm$na.rm.global)     # WY Mean Discharge (Based on Daily avgs)
-   WY_MEDIAN_DAILY_SW  = median(fy$Q, na.rm=na.rm$na.rm.global)     # WY Mean Discharge (Based on Daily avgs)
-   # WY_TOTALQ_DAILY_SW	Oct through Sept sum of daily avg (cms) *60*60*24
-   # WY_YIELDMM_DAILY_SW	(Oct_to_Sep_TotalQ/(area in km2*1000000))*1000
-
-   WY_TOTALQ_DAILY_SW <- mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Q)*60*60*24
-   WY_YIELDMM_DAILY_SW<- WY_TOTALQ_DAILY_SW /basin.area/1000
-
-   WY_CUMQ_DAILY_SW  = WY_TOTALQ_DAILY_SW/(60*60*24)      # Yearly sum of daily avg (cms) # deal with missing values
-
-   # Get the cumulative Q values
-   # Notice that if missing values are removed, the individual values are replaced by zero
-   fy$Q2 <- fy$Q
-   if(na.rm$na.rm.globa) fy$Q2[ is.na(fy$Q2)] <- 0
-   fy$CumQ <- cumsum(fy$Q2)
-   # what is the first date where 25, 50 and 75% of totalQ (see above) are found
-   WY_Date_25P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, (fy$CumQ > 0.25  *WY_CUMQ_DAILY_SW))]
-   WY_Date_33P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, (fy$CumQ > 0.333 *WY_CUMQ_DAILY_SW))]
-   WY_Date_50P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, (fy$CumQ > 0.50  *WY_CUMQ_DAILY_SW))]
-   WY_Date_75P_CUMQ_DAILY_SW <- fy$Date[ match(TRUE, (fy$CumQ > 0.75  *WY_CUMQ_DAILY_SW))]
-   WY_Date_25P_CUMQ_DAILY_SW <- as.numeric(WY_Date_25P_CUMQ_DAILY_SW - fy$Date[1] +1)
-   WY_Date_33P_CUMQ_DAILY_SW <- as.numeric(WY_Date_33P_CUMQ_DAILY_SW - fy$Date[1] +1)
-   WY_Date_50P_CUMQ_DAILY_SW <- as.numeric(WY_Date_50P_CUMQ_DAILY_SW - fy$Date[1] +1)
-   WY_Date_75P_CUMQ_DAILY_SW <- as.numeric(WY_Date_75P_CUMQ_DAILY_SW - fy$Date[1] +1)
-   #browser()
-   # half water-year statistics
-   # Assign seasons to the month (AMJJAS ONDJFM)
-   fy$Season <- car::recode(fy$Month,
-                     "1:3='ONDJFM'; 4:9='AMJJAS'; 10:12='ONDJFM'; else=NA")
-   fy$Season <- factor(fy$Season, levels=c("ONDJFM",'AMJJAS'), ordered=TRUE)
-
-   # compute totalQ and assign variable names for total Q
-   # AMJJAS_TotalQ_DAILY_SW	Apr through Sep  sum of daily avg (cms) *60*60*24
-   # ONDJFM_TOTALQ_DAILY_SW 	Oct through Mar sum of daily avg (cms) *60*60*24
-   season.stats <- plyr::ddply(fy, "Season", function(fy, na.rm){
-                             vname.totalq  = paste(fy$Season[1],"_TOTALQ_DAILY_SW",sep="")
-                             totalq = mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Season)*60*60*24  # deal with missing values
-                             data.frame(vname.totalq, totalq, stringsAsFactors=FALSE)
-                             }, na.rm=na.rm)
-   season.stats$vname.totalq <- factor(season.stats$vname.totalq, levels=season.stats$vname.totalq, ordered=TRUE) # keep ordering
-
-   # compute Yield and assign variable names for yield
-   # AMJJAS_YIELDMM_DAILY_SW	(AMJJAS_TotalQ/(area in km2*1000000))*1000
-   # ONDJFM_YIELDMM_DAILY_SW	(ONDJFM_TotalQ/(area in km2*1000000))*1000
-   season.stats$vname.yieldmm <- sub('TOTALQ','YIELDMM', season.stats$vname.totalq)
-   season.stats$yieldmm       <- season.stats$totalq/basin.area/1000
-   season.stats$vname.yieldmm <- factor(season.stats$vname.yieldmm, levels=season.stats$vname.yieldmm, ordered=TRUE) # keep ordering
-
-   # extract the variables for adding to the data frame later
-   Season_TOTALQ_DAILY_SW  <- reshape2::acast(season.stats, .~vname.totalq, value.var='totalq')
-   Season_YIELDMM_DAILY_SW <- reshape2::acast(season.stats, .~vname.yieldmm,value.var='yieldmm')
-
-   # return the results
-   res <- data.frame(
-           WY_MIN_01Day_SW,
-           WY_MINDOY_01Day_SW,
-           WY_MIN_03Day_SW,
-           WY_MINDOY_03Day_SW,
-           WY_MIN_07Day_SW,
-           WY_MINDOY_07Day_SW,
-           WY_MIN_30Day_SW,
-           WY_MINDOY_30Day_SW,
-           WY_MIN_DAILY_SW,
-           WY_MAX_DAILY_SW,
-           WY_MEAN_DAILY_SW,
-           WY_MEDIAN_DAILY_SW,
-           WY_TOTALQ_DAILY_SW,
-           WY_YIELDMM_DAILY_SW,
-           WY_CUMQ_DAILY_SW,
-           WY_Date_25P_CUMQ_DAILY_SW,
-           WY_Date_33P_CUMQ_DAILY_SW,
-           WY_Date_50P_CUMQ_DAILY_SW,
-           WY_Date_75P_CUMQ_DAILY_SW,
-           Season_TOTALQ_DAILY_SW,
-           Season_YIELDMM_DAILY_SW,
-           stringsAsFactors=FALSE)
-}, basin.area=basin.area,  na.rm=na.rm)
-
-
-# compute the number of days in a year outside of the 25th or 75th percentile for each day.
-flow.data$jdate <- as.numeric(format(flow.data$Date, "%j")) # the julian date
-daily.quant <- plyr::ddply(flow.data, "jdate", plyr::summarize,
-                           p25=stats::quantile(Q, prob=0.25, na.rm=TRUE),
-                           p75=stats::quantile(Q, prob=0.75, na.rm=TRUE))
-flow.data <- merge(flow.data, daily.quant, by='jdate') # merge back with the original data
-outside.quant <- plyr::ddply(flow.data, "Year", plyr::summarize,
-                             CY_N_BELOW_25=sum(Q < p25, na.rm=TRUE),
-                             CY_N_ABOVE_75=sum(Q > p75, na.rm=TRUE),
-                             CY_N_OUTSIDE_25_75 = CY_N_BELOW_25 + CY_N_ABOVE_75)
-
-# merge the annual and water year statistics
-Q.stat <- merge(Q.stat.cy, Q.stat.wy, by.x='Year', by.y="WYear", all.x=TRUE)
-Q.stat <- merge(Q.stat, outside.quant, by="Year", all.x=TRUE)
-
-file.summary.csv <- NA
-if(write.flow.summary.csv){
-   # write out the flow summary
-   file.summary.csv <- file.path(report.dir, paste(station.name,"-period-record-summary.csv", sep=""))
-   temp <- flow.sum
-   temp[,5:ncol(flow.sum)] <- round(temp[,5:ncol(flow.sum)], csv.nddigits)
-   utils::write.csv(temp,file=file.summary.csv, row.names=FALSE)
-}
-
-# See if you want to write out the summary tables?
-file.cy.stat.csv <- NA
-if(write.cy.stat.csv){
-   if(debug)browser()
-   # Write out the summary table for comparison to excel spreadsheet for calendar year
-   file.cy.stat.csv <- file.path(report.dir, paste(station.name,"-annual-cy-summary-stat.csv", sep=""))
-   select <- !grepl("^WY", colnames(Q.stat)) # exclude water year information
-   temp <- Q.stat[, select]
-   temp <- round(temp, csv.nddigits)
-   utils::write.csv(temp,file=file.cy.stat.csv, row.names=FALSE)
-}
-
-file.wy.stat.csv <- NA
-if(write.wy.stat.csv){
-  if(debug)browser()
-  # Write out the summary table for comparison to excel spreadsheet for water year
-  file.wy.stat.csv <- file.path(report.dir, paste(station.name,"-annual-wy-summary-stat.csv", sep=""))
-  select <-grepl("^WY", colnames(Q.stat))  | (colnames(Q.stat) %in% c("Year"))
-  temp <- Q.stat[,select]
-  temp <- round(temp, csv.nddigits)
-  utils::write.csv(temp,file=file.wy.stat.csv, row.names=FALSE)
-}
-
-# Write out the annual summary table in transposed format?
-file.stat.trans.csv<- NA
-Year <- Q.stat[,"Year"]
-Q.stat.trans <- t(Q.stat[, !grepl('^Year', names(Q.stat))])
-colnames(Q.stat.trans) <- paste("",Year,sep="")
-if(write.stat.trans.csv){
-  file.stat.trans.csv <-file.path(report.dir,paste(station.name,"-annual-summary-stat-trans.csv",sep=""))
-  temp <- Q.stat.trans
-  temp <- round(temp, csv.nddigits)
-  utils::write.csv(temp, file=file.stat.trans.csv, row.names=TRUE)
-}
-
-# Write out the low flow summary
-file.lowflow.csv <- NA
-if(write.lowflow.csv){
-   file.lowflow.csv <- file.path(report.dir,paste(station.name,"-lowflow-summary.csv",sep=""))
-   select <-          grepl("CY_MIN", names(Q.stat))
-   select <- select | grepl("WY_MIN", names(Q.stat))
-   temp <- Q.stat[,c("Year", names(Q.stat)[select])]
-   temp <- round(temp, csv.nddigits)
-   # now convert columns that are doy to an actual date
-   for(i in 1:ncol(temp)){
-      if(grepl("CY_MINDOY", names(temp)[i])){
-        temp[,i] <- as.Date(paste(temp$Year,'-01-01',sep=""))+temp[,i]-1
-      }
-   }
-   for(i in 1:ncol(temp)){
-     if(grepl("WY_MINDOY", names(temp)[i])){
-       temp[,i] <- as.Date(paste(temp$Year-1,'-10-01',sep=""))+temp[,i]-1
-     }
-   }
-   utils::write.csv(temp, file=file.lowflow.csv, row.names=FALSE)
-}
-
-# make a plot of the cumulative departures
-  plot_cumdepart <- function(Q.stat, variable){
-      # find the grand mean over all of the years ignoring all missing values
-      grand.mean <- mean( Q.stat[, variable], na.rm=TRUE)
-      plotdata <- Q.stat[,c("Year",variable)]
-      plotdata <- plotdata[stats::complete.cases(plotdata),]   # remove all missing values
-      plotdata$diff.from.mean <- plotdata[, variable] - grand.mean
-      plotdata$cum.diff.from.mean <- cumsum(plotdata$diff.from.mean)
-      plot1 <- ggplot2::ggplot(data=plotdata,  ggplot2::aes(x=Year, y=cum.diff.from.mean))+
-        ggplot2::ggtitle(paste(station.name," - cumulative departure curve for ",variable,sep=""))+
-        ggplot2::geom_hline(yintercept=0)+
-        ggplot2::geom_segment( ggplot2::aes(x=Year, y=0, xend=Year, yend=diff.from.mean), size=2)+
-        ggplot2::geom_line()+
-        ggplot2::ylab("Departure from the mean")
-      plot1
+  # Set selected year-type column for analysis
+  if (water.year) {
+    flow.data$AnalysisYear <- flow.data$WaterYear
+    flow.data$AnalysisDoY <- flow.data$WaterDoY
+  }  else {
+    flow.data$AnalysisYear <- flow.data$Year
+    flow.data$AnalysisDoY <- flow.data$DayofYear
   }
 
-file.cumdepart.pdf <- NA
-if(plot.cumdepart){
-   # cumulative departure plots
-   file.cumdepart.pdf <- file.path(report.dir, paste(station.name,"-cumulative departure.pdf",sep=""))
-   var.list <- c("CY_MEAN_DAILY_SW","WY_MEAN_DAILY_SW", "CY_YIELDMM_DAILY_SW", "WY_YIELDMM_DAILY_SW",
+  #  Compute the 3, 7, and 30 day rolling average values
+  flow.data$Q.03DAvg <- zoo::rollapply( flow.data$Q,  3, mean, fill=NA, align="right")
+  flow.data$Q.07DAvg <- zoo::rollapply( flow.data$Q,  7, mean, fill=NA, align="right")
+  flow.data$Q.30DAvg <- zoo::rollapply( flow.data$Q, 30, mean, fill=NA, align="right")
+
+  # compuate the annual cumulative total
+  flow.data <- dplyr::mutate(dplyr::group_by(flow.data,AnalysisYear),CumQ=cumsum(Q))
+
+  # Filter for start and end years
+  if (!is.numeric(start.year)) {start.year <- min(flow.data$AnalysisYear)}
+  if (!is.numeric(end.year)) {end.year <- max(flow.data$AnalysisYear)}
+  if(! (start.year <= end.year))    {stop("start.year must be less than end.year")}
+
+  flow.data <- dplyr::filter(flow.data, AnalysisYear >= start.year & AnalysisYear <=end.year)
+
+
+
+  #  which dates have missing flows.
+  dates.missing.flows <- flow.data$Date[ is.na(flow.data$Q)]
+
+  #  simple summary statistics
+  flow.sum <-   dplyr::summarize(dplyr::group_by(flow.data,AnalysisYear),
+                                 n.days   = length(Year),
+                                 n.Q      = sum (!is.na(Q)),
+                                 n.miss.Q = sum ( is.na(Q)),
+                                 min.Q    = min (Q,          na.rm=na.rm$na.rm.global),
+                                 max.Q    = max (Q,          na.rm=na.rm$na.rm.global),
+                                 mean.Q   = mean(Q,          na.rm=na.rm$na.rm.global),
+                                 median.Q = stats::median(Q, na.rm=na.rm$na.rm.global),
+                                 sd.Q     = stats::sd  (Q,   na.rm=na.rm$na.rm.global)
+  )
+  flow.sum <-   dplyr::rename(flow.sum,Year=AnalysisYear)
+
+
+  if(debug)browser()
+  #
+
+  Q.stat.lowflow <-   dplyr::summarize(dplyr::group_by(flow.data,AnalysisYear),
+                                       MIN_01Day    = min(Q, na.rm=na.rm$na.rm.global),	      # CY Min Daily Q
+                                       MINDOY_01Day = ifelse(is.na(MIN_01Day),NA,
+                                                             DayofYear[which.min(Q)]),# Date of CY Min Daily Q
+                                       MIN_03Day    = min(Q, na.rm=na.rm$na.rm.global),	      # CY Min Daily Q
+                                       MINDOY_03Day = ifelse(is.na(MIN_03Day),NA,
+                                                             DayofYear[which.min(Q.03DAvg)]),# Date of CY Min Daily Q
+                                       MIN_07Day    = min(Q, na.rm=na.rm$na.rm.global),	      # CY Min Daily Q
+                                       MINDOY_07Day = ifelse(is.na(MIN_07Day),NA,
+                                                             DayofYear[which.min(Q.07DAvg)]),# Date of CY Min Daily Q
+                                       MIN_30Day    = min(Q, na.rm=na.rm$na.rm.global),	      # CY Min Daily Q
+                                       MINDOY_30Day = ifelse(is.na(MIN_30Day),NA,
+                                                             DayofYear[which.min(Q.30DAvg)]))# Date of CY Min Daily Q
+  Q.stat.lowflow <-   dplyr::rename(Q.stat.lowflow,Year=AnalysisYear)
+
+  #  Compute statistics on  year basis
+  Q.stat.annual <-   dplyr::summarize(dplyr::group_by(flow.data,AnalysisYear),
+                                      MIN_DAILY     = min (Q, na.rm=na.rm$na.rm.global),	    # CY Min Daily Q 	CY Min Daily Q
+                                      MAX_DAILY	    = max (Q, na.rm=na.rm$na.rm.global),      # CY Max Daily Q
+                                      MEAN_DAILY    = mean(Q, na.rm=na.rm$na.rm.global),     # CY Mean Discharge (Based on Daily avgs)
+                                      MEDIAN_DAILY  = median(Q, na.rm=na.rm$na.rm.global),  # CY median Discharge (Based on Daily avgs)
+                                      TOTALQ_DAILY  = MEAN_DAILY*length(Q)*60*60*24,    # Yearly sum of daily avg (cms) *60*60*24 # deal with missing values
+                                      CUMQ_DAILY    = TOTALQ_DAILY/(60*60*24),      # Yearly sum of daily avg (cms) # deal with missing values
+                                      YIELDMM_DAILY = TOTALQ_DAILY/basin.area/1000 ,
+                                      Date_25P_CUMQ_DAILY = DayofYear[ match(TRUE, CumQ > 0.25  *CUMQ_DAILY)],
+                                      Date_33P_CUMQ_DAILY = DayofYear[ match(TRUE, CumQ > 0.333 *CUMQ_DAILY)],
+                                      Date_50P_CUMQ_DAILY = DayofYear[ match(TRUE, CumQ > 0.50  *CUMQ_DAILY)],
+                                      Date_75P_CUMQ_DAILY = DayofYear[ match(TRUE, CumQ > 0.75  *CUMQ_DAILY)])
+  Q.stat.annual <-   dplyr::rename(Q.stat.annual,Year=AnalysisYear)
+
+  # four seasons
+  Q.stat.seasons4 <- dplyr::summarize(dplyr::group_by(flow.data,AnalysisYear,Seasons4),
+                                      TOTALQ_DAILY=mean(Q, na.rm=na.rm$na.rm.global)*length(Q)*60*60*24,
+                                      YIELDMM_DAILY=mean(Q, na.rm=na.rm$na.rm.global)*length(Q)*60*60*24 /basin.area/1000)
+  Q.stat.seasons4 <- tidyr::gather(Q.stat.seasons4,stat,value,3:4)
+  Q.stat.seasons4 <- dplyr::mutate(Q.stat.seasons4,title=paste0(Seasons4,"_",stat))
+  Q.stat.seasons4 <- dplyr::select(Q.stat.seasons4,-Seasons4,-stat)
+  Q.stat.seasons4 <- tidyr::spread(Q.stat.seasons4,title,value)
+  Q.stat.seasons4 <-   dplyr::rename(Q.stat.seasons4,Year=AnalysisYear)
+
+  # two seasons  MUST BE WATER YEAR
+  Q.stat.seasons2 <- dplyr::summarize(dplyr::group_by(flow.data,WaterYear,Seasons2),
+                                      TOTALQ_DAILY=mean(Q, na.rm=na.rm$na.rm.global)*length(Q)*60*60*24,
+                                      YIELDMM_DAILY=mean(Q, na.rm=na.rm$na.rm.global)*length(Q)*60*60*24 /basin.area/1000)
+  Q.stat.seasons2 <- tidyr::gather(Q.stat.seasons2,stat,value,3:4)
+  Q.stat.seasons2 <- dplyr::mutate(Q.stat.seasons2,title=paste0(Seasons2,"_",stat))
+  Q.stat.seasons2 <- dplyr::select(Q.stat.seasons2,-Seasons2,-stat)
+  Q.stat.seasons2 <- tidyr::spread(Q.stat.seasons2,title,value)
+  Q.stat.seasons2 <- dplyr::rename(Q.stat.seasons2,Year=WaterYear)
+
+  # monthly
+  Q.stat.month <- dplyr::summarize(dplyr::group_by(flow.data,AnalysisYear,MonthText),
+                                   "_MIN_DAILY" = min   (Q, na.rm=na.rm$na.rm.global),
+                                   "_MAX_DAILY" = max   (Q, na.rm=na.rm$na.rm.global),
+                                   "_MEAN_DAILY"= mean  (Q, na.rm=na.rm$na.rm.global),
+                                   "_MEDIAN_DAILY" = stats::median(Q, na.rm=na.rm$na.rm.global),
+                                   "_P10_DAILY" = stats::quantile(Q, prob=.10, na.rm=T),
+                                   "_P20_DAILY" = stats::quantile(Q, prob=.20, na.rm=T)
+  )
+  Q.stat.month <- tidyr::gather(Q.stat.month,stat,value,3:8)
+  Q.stat.month <- dplyr::mutate(Q.stat.month,title=paste0(MonthText,stat))
+  Q.stat.month <- dplyr::select(Q.stat.month,-MonthText,-stat)
+  Q.stat.month <- tidyr::spread(Q.stat.month,title,value)
+  Q.stat.month <- dplyr::rename(Q.stat.month,Year=AnalysisYear)
+
+  # compute the number of days in a year outside of the 25th or 75th percentile for each day.
+  daily.quant <- dplyr::summarise(dplyr::group_by(flow.data,AnalysisDoY),
+                                  P25=stats::quantile(Q, prob=0.25, na.rm=TRUE),
+                                  P75=stats::quantile(Q, prob=0.75, na.rm=TRUE))
+  flow.data.temp <- merge(flow.data, daily.quant, by="AnalysisDoY") # merge back with the original data
+  Q.outside.quant <- dplyr::summarise(dplyr::group_by(flow.data.temp,AnalysisYear),
+                                      DAYS_BELOW_25=sum(Q < P25, na.rm=TRUE),
+                                      DAYS_ABOVE_75=sum(Q > P75, na.rm=TRUE),
+                                      DAYS_OUTSIDE_25_75 = DAYS_BELOW_25 + DAYS_ABOVE_75)
+  Q.outside.quant <- dplyr::rename(Q.outside.quant,Year=AnalysisYear)
+
+
+  # Combine all and label columns
+  Q.stat <- merge(Q.stat.lowflow,Q.stat.annual,by="Year",all = TRUE)
+  Q.stat <- merge(Q.stat,Q.stat.seasons4,by="Year",all = TRUE)
+  Q.stat <- merge(Q.stat,Q.stat.seasons2,by="Year",all = TRUE)
+  Q.stat <- merge(Q.stat,Q.stat.month,by="Year",all = TRUE)
+  Q.stat <- merge(Q.stat,Q.outside.quant,by="Year",all = TRUE)
+  Q.stat <- tidyr::gather(Q.stat,Stat,Value,2:ncol(Q.stat))
+  Q.stat <- dplyr::mutate(Q.stat,Stat=paste0(ifelse(water.year,paste("WY_"),paste("CY_")),Stat))
+  Q.stat <- tidyr::spread(Q.stat,Stat,Value)
+
+
+  file.summary.csv <- NA
+  if(write.summary.table){
+    # write out the flow summary
+    file.summary.csv <- file.path(report.dir, paste(station.name,"-period-record-summary.csv", sep=""))
+    temp <- flow.sum
+    temp[,2:ncol(flow.sum)] <- round(temp[,2:ncol(flow.sum)], csv.nddigits)
+    utils::write.csv(temp,file=file.summary.csv, row.names=FALSE)
+  }
+
+  # See if you want to write out the summary tables?
+  file.stat.csv <- NA
+  if(write.table){
+    if(debug)browser()
+    # Write out the summary table for comparison to excel spreadsheet for calendar year
+    file.stat.csv <- file.path(report.dir, paste(station.name,"-annual-summary-stat.csv", sep=""))
+    temp <- Q.stat
+    temp <- round(temp, csv.nddigits)
+    utils::write.csv(temp,file=file.stat.csv, row.names=FALSE)
+  }
+
+
+  # Write out the annual summary table in transposed format?
+  file.stat.trans.csv<- NA
+  options(scipen = 999)
+  Q.stat.trans <- tidyr::gather(Q.stat,Statistic,Value,-Year)
+  Q.stat.trans.temp <- dplyr::mutate(Q.stat.trans,Value=round(Value,csv.nddigits)) # for writing to csv
+  Q.stat.trans <- tidyr::spread(Q.stat.trans,Year,Value)
+
+  if(write.transposed.table){
+    file.stat.trans.csv <-file.path(report.dir,paste(station.name,"-annual-summary-stat-trans.csv",sep=""))
+    Q.stat.trans.temp <- tidyr::spread(Q.stat.trans.temp,Year,Value)
+    utils::write.csv(Q.stat.trans.temp, file=file.stat.trans.csv, row.names=FALSE)
+  }
+
+  # Write out the low flow summary
+  file.lowflow.csv <- NA
+  if(write.lowflow.table){
+    file.lowflow.csv <- file.path(report.dir,paste(station.name,"-lowflow-summary.csv",sep=""))
+    # all mins and acutal dates
+    Q.lowflows <- round(Q.stat.lowflow, csv.nddigits)
+    Q.lowflows <- dplyr::mutate(Q.stat.lowflow,
+                                MINDate_01Day = as.Date(MINDOY_01Day, origin=as.Date(paste0(Year,"-01-01"))),
+                                MINDate_03Day = as.Date(MINDOY_03Day, origin=as.Date(paste0(Year,"-01-01"))),
+                                MINDate_07Day = as.Date(MINDOY_07Day, origin=as.Date(paste0(Year,"-01-01"))),
+                                MINDate_30Day = as.Date(MINDOY_30Day, origin=as.Date(paste0(Year,"-01-01"))) )
+    Q.lowflows <- dplyr::select(Q.lowflows,Year,
+                                dplyr::contains("_01"),dplyr::contains("_03"),
+                                dplyr::contains("_07"),dplyr::contains("_30"))
+    utils::write.csv(Q.lowflows, file=file.lowflow.csv, row.names=FALSE)
+  }
+
+  # make a plot of the cumulative departures
+  plot_cumdepart <- function(Q.stat, variable){
+    # find the grand mean over all of the years ignoring all missing values
+    grand.mean <- mean( Q.stat[, variable], na.rm=TRUE)
+    plotdata <- Q.stat[,c("Year",variable)]
+    plotdata <- plotdata[stats::complete.cases(plotdata),]   # remove all missing values
+    plotdata$diff.from.mean <- plotdata[, variable] - grand.mean
+    plotdata$cum.diff.from.mean <- cumsum(plotdata$diff.from.mean)
+    plot1 <- ggplot2::ggplot(data=plotdata,  ggplot2::aes(x=Year, y=cum.diff.from.mean))+
+      ggplot2::ggtitle(paste(station.name," - cumulative departure curve for ",variable,sep=""))+
+      ggplot2::geom_hline(yintercept=0)+
+      ggplot2::geom_segment( ggplot2::aes(x=Year, y=0, xend=Year, yend=diff.from.mean), size=2)+
+      ggplot2::geom_line()+
+      ggplot2::ylab("Departure from the mean")
+    plot1
+  }
+
+  file.cumdepart.pdf <- NA
+  if(plot.cumdepart){
+    # cumulative departure plots
+    file.cumdepart.pdf <- file.path(report.dir, paste(station.name,"-cumulative departure.pdf",sep=""))
+    var.list <- c("CY_MEAN_DAILY_SW","WY_MEAN_DAILY_SW", "CY_YIELDMM_DAILY_SW", "WY_YIELDMM_DAILY_SW",
                   "ONDJFM_YIELDMM_DAILY_SW","AMJJAS_YIELDMM_DAILY_SW"   )
-   grDevices::pdf(file=file.cumdepart.pdf, h=8, w=11)
-   plyr::l_ply(var.list, function(x, Q.stat){
+    grDevices::pdf(file=file.cumdepart.pdf, h=8, w=11)
+    plyr::l_ply(var.list, function(x, Q.stat){
       plot1 <- plot_cumdepart(Q.stat, x)
       graphics::plot(plot1)
-   },Q.stat=Q.stat)
-   grDevices::dev.off()
-}
+    },Q.stat=Q.stat)
+    grDevices::dev.off()
+  }
 
-# Make a plot of all of the statistics over time and save to a pdf file
-file.stat.trend.pdf <- NA
-if(plot.stat.trend){
-   file.stat.trend.pdf <- file.path(report.dir, paste(station.name,"-annual-trend.pdf",sep=""))
-   grDevices::pdf(file.stat.trend.pdf, h=8, w=11)
+  # Make a plot of all of the statistics over time and save to a pdf file
+  file.stat.trend.pdf <- NA
+  if(plot.stat.trend){
+    file.stat.trend.pdf <- file.path(report.dir, paste(station.name,"-annual-trend.pdf",sep=""))
+    grDevices::pdf(file.stat.trend.pdf, h=8, w=11)
 
-   plot_trend <- function(plotdata, select){
-     x <- plotdata[select,]
-     myplot <- ggplot2::ggplot(data=x,  ggplot2::aes(x=Year, y=Value, group=Statistic, color=Statistic, linetype=Statistic))+
-       ggplot2::ggtitle(paste(station.name, " - Trend for ", x$statgroup[1]))+
-       ggplot2::geom_point()+
-       ggplot2::geom_line()+
-       ggplot2::xlab("Year")+
-       ggplot2::ylab(x$Ylabel[1])
-     if(x$transform[1] == 'log'){
-       myplot <- myplot +
-         ggplot2::ylab(paste("log(",x$Ylabel[1],")",sep=""))+
-         ggplot2::scale_y_continuous(trans='log10')
-     }
-     graphics::plot(myplot)
-   }
+    plot_trend <- function(plotdata, select){
+      x <- plotdata[select,]
+      myplot <- ggplot2::ggplot(data=x,  ggplot2::aes(x=Year, y=Value, group=Statistic, color=Statistic, linetype=Statistic))+
+        ggplot2::ggtitle(paste(station.name, " - Trend for ", x$statgroup[1]))+
+        ggplot2::geom_point()+
+        ggplot2::geom_line()+
+        ggplot2::xlab("Year")+
+        ggplot2::ylab(x$Ylabel[1])
+      if(x$transform[1] == 'log'){
+        myplot <- myplot +
+          ggplot2::ylab(paste("log(",x$Ylabel[1],")",sep=""))+
+          ggplot2::scale_y_continuous(trans='log10')
+      }
+      graphics::plot(myplot)
+    }
 
-   plotdata <- reshape2::melt(Q.stat, id.var="Year", variable.name="Statistic", value.name="Value")
-   plotdata$statgroup <- NA
-   plotdata$transform <- ""
-   plotdata$Ylabel    <- 'Value'
+    plotdata <- reshape2::melt(Q.stat, id.var="Year", variable.name="Statistic", value.name="Value")
+    plotdata$statgroup <- NA
+    plotdata$transform <- ""
+    plotdata$Ylabel    <- 'Value'
 
-   # yearly minimums. Remove redundancy between CY_MIN_01DAY_SW and CY_MIN+DAILY_SW if a 01 rolling average
-   # has been requested.
-   set.annual.min  <- grepl("^CY_MIN_", plotdata$Statistic) & !grepl("DAILY", plotdata$Statistic)
-   plotdata$statgroup [set.annual.min] <- 'CY Annual Minimums'
-   plotdata$Ylabel    [set.annual.min] <- 'Flow (cms)'
-   plot_trend(plotdata, set.annual.min)
+    # yearly minimums. Remove redundancy between CY_MIN_01DAY_SW and CY_MIN+DAILY_SW if a 01 rolling average
+    # has been requested.
+    set.annual.min  <- grepl("^CY_MIN_", plotdata$Statistic) & !grepl("DAILY", plotdata$Statistic)
+    plotdata$statgroup [set.annual.min] <- 'CY Annual Minimums'
+    plotdata$Ylabel    [set.annual.min] <- 'Flow (cms)'
+    plot_trend(plotdata, set.annual.min)
 
-   # more plots on the water year basis
-   set.annual.min  <- grepl("^WY_MIN_", plotdata$Statistic) & !grepl("DAILY", plotdata$Statistic)
-   plotdata$statgroup [set.annual.min] <- 'WY Annual Minimums'
-   plotdata$Ylabel    [set.annual.min] <- 'Flow (cms)'
-   plot_trend(plotdata, set.annual.min)
+    # more plots on the water year basis
+    set.annual.min  <- grepl("^WY_MIN_", plotdata$Statistic) & !grepl("DAILY", plotdata$Statistic)
+    plotdata$statgroup [set.annual.min] <- 'WY Annual Minimums'
+    plotdata$Ylabel    [set.annual.min] <- 'Flow (cms)'
+    plot_trend(plotdata, set.annual.min)
 
-   set.annual.mindoy  <- grepl("^CY_MINDOY", plotdata$Statistic)
-   plotdata$statgroup [set.annual.mindoy] <- 'Annual Day of CY for Minimums'
-   plotdata$Ylabel    [set.annual.mindoy] <- 'Day into year'
-   plot_trend(plotdata, set.annual.mindoy)
+    set.annual.mindoy  <- grepl("^CY_MINDOY", plotdata$Statistic)
+    plotdata$statgroup [set.annual.mindoy] <- 'Annual Day of CY for Minimums'
+    plotdata$Ylabel    [set.annual.mindoy] <- 'Day into year'
+    plot_trend(plotdata, set.annual.mindoy)
 
-   # make a plot for each 3 month period. Include the daily min in period with similar range.
-   annual.avg.min <- mean( plotdata$Value[ plotdata$Statistic=='CY_MIN_DAILY_SW'], na.rm=TRUE)
-   set.month.min      <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[1:3],"_MIN",sep=""))
-   if(range(plotdata$Value[set.month.min],na.rm=TRUE)[1] < annual.avg.min  &
-      range(plotdata$Value[set.month.min],na.rm=TRUE)[2] > annual.avg.min){
+    # make a plot for each 3 month period. Include the daily min in period with similar range.
+    annual.avg.min <- mean( plotdata$Value[ plotdata$Statistic=='CY_MIN_DAILY_SW'], na.rm=TRUE)
+    set.month.min      <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[1:3],"_MIN",sep=""))
+    if(range(plotdata$Value[set.month.min],na.rm=TRUE)[1] < annual.avg.min  &
+       range(plotdata$Value[set.month.min],na.rm=TRUE)[2] > annual.avg.min){
       set.month.min = set.month.min | grepl("^CY_MIN_DAILY_SW", plotdata$Statistic)   }
-   plotdata$statgroup [set.month.min] <- 'Monthly Minimums - JFM'
-   plotdata$transform [set.month.min] <- "log"
-   plotdata$Ylabel    [set.month.min] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.min)
+    plotdata$statgroup [set.month.min] <- 'Monthly Minimums - JFM'
+    plotdata$transform [set.month.min] <- "log"
+    plotdata$Ylabel    [set.month.min] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.min)
 
-   set.month.min      <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[4:6],"_MIN",sep=""))
-   if(range(plotdata$Value[set.month.min],na.rm=TRUE)[1] < annual.avg.min  &
-      range(plotdata$Value[set.month.min],na.rm=TRUE)[2] > annual.avg.min){
-     set.month.min = set.month.min | grepl("^CY_MIN_DAILY_SW", plotdata$Statistic)   }
-   plotdata$statgroup [set.month.min] <- 'Monthly Minimums - AMJ'
-   plotdata$transform [set.month.min] <- "log"
-   plotdata$Ylabel    [set.month.min] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.min)
+    set.month.min      <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[4:6],"_MIN",sep=""))
+    if(range(plotdata$Value[set.month.min],na.rm=TRUE)[1] < annual.avg.min  &
+       range(plotdata$Value[set.month.min],na.rm=TRUE)[2] > annual.avg.min){
+      set.month.min = set.month.min | grepl("^CY_MIN_DAILY_SW", plotdata$Statistic)   }
+    plotdata$statgroup [set.month.min] <- 'Monthly Minimums - AMJ'
+    plotdata$transform [set.month.min] <- "log"
+    plotdata$Ylabel    [set.month.min] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.min)
 
-   set.month.min      <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[7:9],"_MIN",sep=""))
-   if(range(plotdata$Value[set.month.min],na.rm=TRUE)[1] < annual.avg.min  &
-      range(plotdata$Value[set.month.min],na.rm=TRUE)[2] > annual.avg.min){
-     set.month.min = set.month.min | grepl("^CY_MIN_DAILY_SW", plotdata$Statistic)   }
-   plotdata$statgroup [set.month.min] <- 'Monthly Minimums - JAS'
-   plotdata$transform [set.month.min] <- "log"
-   plotdata$Ylabel    [set.month.min] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.min)
+    set.month.min      <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[7:9],"_MIN",sep=""))
+    if(range(plotdata$Value[set.month.min],na.rm=TRUE)[1] < annual.avg.min  &
+       range(plotdata$Value[set.month.min],na.rm=TRUE)[2] > annual.avg.min){
+      set.month.min = set.month.min | grepl("^CY_MIN_DAILY_SW", plotdata$Statistic)   }
+    plotdata$statgroup [set.month.min] <- 'Monthly Minimums - JAS'
+    plotdata$transform [set.month.min] <- "log"
+    plotdata$Ylabel    [set.month.min] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.min)
 
-   set.month.min      <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[10:20],"_MIN",sep=""))
-   if(range(plotdata$Value[set.month.min],na.rm=TRUE)[1] < annual.avg.min  &
-      range(plotdata$Value[set.month.min],na.rm=TRUE)[2] > annual.avg.min){
-     set.month.min = set.month.min | grepl("^CY_MIN_DAILY_SW", plotdata$Statistic)   }
-   plotdata$statgroup [set.month.min] <- 'Monthly Minimums - OND'
-   plotdata$transform [set.month.min] <- "log"
-   plotdata$Ylabel    [set.month.min] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.min)
+    set.month.min      <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[10:20],"_MIN",sep=""))
+    if(range(plotdata$Value[set.month.min],na.rm=TRUE)[1] < annual.avg.min  &
+       range(plotdata$Value[set.month.min],na.rm=TRUE)[2] > annual.avg.min){
+      set.month.min = set.month.min | grepl("^CY_MIN_DAILY_SW", plotdata$Statistic)   }
+    plotdata$statgroup [set.month.min] <- 'Monthly Minimums - OND'
+    plotdata$transform [set.month.min] <- "log"
+    plotdata$Ylabel    [set.month.min] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.min)
 
 
 
-   # make a plot for each 3 month period. Include the daily max in period with similar range.
-   annual.avg.max <- mean( plotdata$Value[ plotdata$Statistic=='CY_MAX_DAILY_SW'], na.rm=TRUE)
-   set.month.max     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[1:3],"_MAX",sep=""))
-   if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
-      range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
+    # make a plot for each 3 month period. Include the daily max in period with similar range.
+    annual.avg.max <- mean( plotdata$Value[ plotdata$Statistic=='CY_MAX_DAILY_SW'], na.rm=TRUE)
+    set.month.max     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[1:3],"_MAX",sep=""))
+    if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
+       range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
       set.month.max = set.month.max | grepl("^CY_MAX_DAILY_SW", plotdata$Statistic)   }
-   plotdata$statgroup [set.month.max] <- 'Monthly/Annual Maximums  -  JFM'
-   plotdata$transform [set.month.max] <- "log"
-   plotdata$Ylabel    [set.month.max] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.max)
+    plotdata$statgroup [set.month.max] <- 'Monthly/Annual Maximums  -  JFM'
+    plotdata$transform [set.month.max] <- "log"
+    plotdata$Ylabel    [set.month.max] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.max)
 
-   set.month.max     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[4:6],"_MAX",sep=""))
-   if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
-      range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
-     set.month.max = set.month.max | grepl("^CY_MAX_DAILY_SW", plotdata$Statistic)   }
-   plotdata$statgroup [set.month.max] <- 'Monthly/Annual Maximums  -  AMJ'
-   plotdata$transform [set.month.max] <- "log"
-   plotdata$Ylabel    [set.month.max] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.max)
+    set.month.max     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[4:6],"_MAX",sep=""))
+    if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
+       range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
+      set.month.max = set.month.max | grepl("^CY_MAX_DAILY_SW", plotdata$Statistic)   }
+    plotdata$statgroup [set.month.max] <- 'Monthly/Annual Maximums  -  AMJ'
+    plotdata$transform [set.month.max] <- "log"
+    plotdata$Ylabel    [set.month.max] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.max)
 
-   set.month.max     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[7:9],"_MAX",sep=""))
-   if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
-      range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
-     set.month.max = set.month.max | grepl("^CY_MAX_DAILY_SW", plotdata$Statistic)   }
-   plotdata$statgroup [set.month.max] <- 'Monthly/Annual Maximums  -  JAS'
-   plotdata$transform [set.month.max] <- "log"
-   plotdata$Ylabel    [set.month.max] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.max)
+    set.month.max     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[7:9],"_MAX",sep=""))
+    if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
+       range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
+      set.month.max = set.month.max | grepl("^CY_MAX_DAILY_SW", plotdata$Statistic)   }
+    plotdata$statgroup [set.month.max] <- 'Monthly/Annual Maximums  -  JAS'
+    plotdata$transform [set.month.max] <- "log"
+    plotdata$Ylabel    [set.month.max] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.max)
 
-   set.month.max     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[10:12],"_MAX",sep=""))
-   if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
-      range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
-     set.month.max = set.month.max | grepl("^CY_MAX_DAILY_SW", plotdata$Statistic)   }
-   plotdata$statgroup [set.month.max] <- 'Monthly/Annual Maximums  -  OND'
-   plotdata$transform [set.month.max] <- "log"
-   plotdata$Ylabel    [set.month.max] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.max)
-
-
-   # make a plot for each 3 month period. Include the daily max in period with similar range.
-   annual.avg.mean <- mean( plotdata$Value[ plotdata$Statistic=='CY_MEAN_DAILY_SW'], na.rm=TRUE)
-   set.month.mean     <- substr(plotdata$Statistic,1,8) %in% toupper(paste(month.abb[1:3],"_MEAN",sep=""))
-   if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
-      range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
-     set.month.mean = set.month.mean | grepl("^CY_MEAN_DAILY_SW", plotdata$Statistic)   }
-   if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
-      range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
-     set.month.mean = set.month.mean | grepl("^CY_MEDIAN_DAILY_SW", plotdata$Statistic)   }
-   plotdata$statgroup [set.month.mean] <- 'Monthly/Annual Means/Annual Medians  -  JFM'
-   plotdata$transform [set.month.mean] <- "log"
-   plotdata$Ylabel    [set.month.mean] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.mean)
-
-   set.month.mean     <- substr(plotdata$Statistic,1,8) %in% toupper(paste(month.abb[4:6],"_MEAN",sep=""))
-   if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
-      range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
-     set.month.mean = set.month.mean | grepl("^CY_MEAN_DAILY_SW", plotdata$Statistic)   }
-   if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
-      range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
-     set.month.mean = set.month.mean | grepl("^CY_MEDIAN_DAILY_SW", plotdata$Statistic)   }
-   plotdata$statgroup [set.month.mean] <- 'Monthly/Annual Means/Annual Medians  -  AMJ'
-   plotdata$transform [set.month.mean] <- "log"
-   plotdata$Ylabel    [set.month.mean] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.mean)
-
-   set.month.mean     <- substr(plotdata$Statistic,1,8) %in% toupper(paste(month.abb[7:9],"_MEAN",sep=""))
-   if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
-      range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
-     set.month.mean = set.month.mean | grepl("^CY_MEAN_DAILY_SW", plotdata$Statistic)   }
-   if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
-      range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
-     set.month.mean = set.month.mean | grepl("^CY_MEDIAN_DAILY_SW", plotdata$Statistic)   }
-   plotdata$statgroup [set.month.mean] <- 'Monthly/Annual Means/Annual Medians  -  JAS'
-   plotdata$transform [set.month.mean] <- "log"
-   plotdata$Ylabel    [set.month.mean] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.mean)
-
-   set.month.mean     <- substr(plotdata$Statistic,1,8) %in% toupper(paste(month.abb[10:12],"_MEAN",sep=""))
-   if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
-      range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
-     set.month.mean = set.month.mean | grepl("^CY_MEAN_DAILY_SW", plotdata$Statistic)   }
-   if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
-      range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
-     set.month.mean = set.month.mean | grepl("^CY_MEDIAN_DAILY_SW", plotdata$Statistic)   }
-   plotdata$statgroup [set.month.mean] <- 'Monthly/Annual Means/Annual Medians  -  OND'
-   plotdata$transform [set.month.mean] <- "log"
-   plotdata$Ylabel    [set.month.mean] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.mean)
+    set.month.max     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[10:12],"_MAX",sep=""))
+    if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
+       range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
+      set.month.max = set.month.max | grepl("^CY_MAX_DAILY_SW", plotdata$Statistic)   }
+    plotdata$statgroup [set.month.max] <- 'Monthly/Annual Maximums  -  OND'
+    plotdata$transform [set.month.max] <- "log"
+    plotdata$Ylabel    [set.month.max] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.max)
 
 
-   set.month.p50     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[1:3],"_P50",sep=""))
-   plotdata$statgroup [set.month.p50] <- 'Monthly P50  -  JFM'
-   plotdata$transform [set.month.p50] <- "log"
-   plotdata$Ylabel    [set.month.p50] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.p50)
+    # make a plot for each 3 month period. Include the daily max in period with similar range.
+    annual.avg.mean <- mean( plotdata$Value[ plotdata$Statistic=='CY_MEAN_DAILY_SW'], na.rm=TRUE)
+    set.month.mean     <- substr(plotdata$Statistic,1,8) %in% toupper(paste(month.abb[1:3],"_MEAN",sep=""))
+    if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
+       range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
+      set.month.mean = set.month.mean | grepl("^CY_MEAN_DAILY_SW", plotdata$Statistic)   }
+    if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
+       range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
+      set.month.mean = set.month.mean | grepl("^CY_MEDIAN_DAILY_SW", plotdata$Statistic)   }
+    plotdata$statgroup [set.month.mean] <- 'Monthly/Annual Means/Annual Medians  -  JFM'
+    plotdata$transform [set.month.mean] <- "log"
+    plotdata$Ylabel    [set.month.mean] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.mean)
 
-   set.month.p50     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[4:6],"_P50",sep=""))
-   plotdata$statgroup [set.month.p50] <- 'Monthly P50  -  AMJ'
-   plotdata$transform [set.month.p50] <- "log"
-   plotdata$Ylabel    [set.month.p50] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.p50)
+    set.month.mean     <- substr(plotdata$Statistic,1,8) %in% toupper(paste(month.abb[4:6],"_MEAN",sep=""))
+    if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
+       range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
+      set.month.mean = set.month.mean | grepl("^CY_MEAN_DAILY_SW", plotdata$Statistic)   }
+    if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
+       range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
+      set.month.mean = set.month.mean | grepl("^CY_MEDIAN_DAILY_SW", plotdata$Statistic)   }
+    plotdata$statgroup [set.month.mean] <- 'Monthly/Annual Means/Annual Medians  -  AMJ'
+    plotdata$transform [set.month.mean] <- "log"
+    plotdata$Ylabel    [set.month.mean] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.mean)
 
-   set.month.p50     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[7:9],"_P50",sep=""))
-   plotdata$statgroup [set.month.p50] <- 'Monthly P50  -  JAS'
-   plotdata$transform [set.month.p50] <- "log"
-   plotdata$Ylabel    [set.month.p50] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.p50)
+    set.month.mean     <- substr(plotdata$Statistic,1,8) %in% toupper(paste(month.abb[7:9],"_MEAN",sep=""))
+    if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
+       range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
+      set.month.mean = set.month.mean | grepl("^CY_MEAN_DAILY_SW", plotdata$Statistic)   }
+    if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
+       range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
+      set.month.mean = set.month.mean | grepl("^CY_MEDIAN_DAILY_SW", plotdata$Statistic)   }
+    plotdata$statgroup [set.month.mean] <- 'Monthly/Annual Means/Annual Medians  -  JAS'
+    plotdata$transform [set.month.mean] <- "log"
+    plotdata$Ylabel    [set.month.mean] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.mean)
 
-   set.month.p50     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[10:12],"_P50",sep=""))
-   plotdata$statgroup [set.month.p50] <- 'Monthly P50  - OND'
-   plotdata$transform [set.month.p50] <- "log"
-   plotdata$Ylabel    [set.month.p50] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.p50)
-
-
-   set.month.p20     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[1:3],"_P20",sep=""))
-   plotdata$statgroup [set.month.p20] <- 'Monthly P20  -  JFM'
-   plotdata$transform [set.month.p20] <- "log"
-   plotdata$Ylabel    [set.month.p20] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.p20)
-
-   set.month.p20     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[4:6],"_P20",sep=""))
-   plotdata$statgroup [set.month.p20] <- 'Monthly P20  -  AMJ'
-   plotdata$transform [set.month.p20] <- "log"
-   plotdata$Ylabel    [set.month.p20] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.p20)
-
-   set.month.p20     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[7:9],"_P20",sep=""))
-   plotdata$statgroup [set.month.p20] <- 'Monthly P20  -  JAS'
-   plotdata$transform [set.month.p20] <- "log"
-   plotdata$Ylabel    [set.month.p20] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.p20)
-
-   set.month.p20     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[10:12],"_P20",sep=""))
-   plotdata$statgroup [set.month.p20] <- 'Monthly P20  -  OND'
-   plotdata$transform [set.month.p20] <- "log"
-   plotdata$Ylabel    [set.month.p20] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.p20)
-
-
-   set.month.p10     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[1:3],"_P10",sep=""))
-   plotdata$statgroup [set.month.p10] <- 'Monthly P10  -  JFM'
-   plotdata$transform [set.month.p10] <- "log"
-   plotdata$Ylabel    [set.month.p10] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.p10)
-
-   set.month.p10     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[4:6],"_P10",sep=""))
-   plotdata$statgroup [set.month.p10] <- 'Monthly P10  -  AMJ'
-   plotdata$transform [set.month.p10] <- "log"
-   plotdata$Ylabel    [set.month.p10] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.p10)
-
-   set.month.p10     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[7:9],"_P10",sep=""))
-   plotdata$statgroup [set.month.p10] <- 'Monthly P10  -  JAS'
-   plotdata$transform [set.month.p10] <- "log"
-   plotdata$Ylabel    [set.month.p10] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.p10)
-
-   set.month.p10     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[10:12],"_P10",sep=""))
-   plotdata$statgroup [set.month.p10] <- 'Monthly P10  -  OND'
-   plotdata$transform [set.month.p10] <- "log"
-   plotdata$Ylabel    [set.month.p10] <- "Flow (cms)"
-   plot_trend(plotdata, set.month.p10)
+    set.month.mean     <- substr(plotdata$Statistic,1,8) %in% toupper(paste(month.abb[10:12],"_MEAN",sep=""))
+    if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
+       range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
+      set.month.mean = set.month.mean | grepl("^CY_MEAN_DAILY_SW", plotdata$Statistic)   }
+    if(range(plotdata$Value[set.month.max],na.rm=TRUE)[1] < annual.avg.max  &
+       range(plotdata$Value[set.month.max],na.rm=TRUE)[2] > annual.avg.max){
+      set.month.mean = set.month.mean | grepl("^CY_MEDIAN_DAILY_SW", plotdata$Statistic)   }
+    plotdata$statgroup [set.month.mean] <- 'Monthly/Annual Means/Annual Medians  -  OND'
+    plotdata$transform [set.month.mean] <- "log"
+    plotdata$Ylabel    [set.month.mean] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.mean)
 
 
-   set.yieldmm     <- grepl("YIELDMM", plotdata$Statistic) &
-                      (substr(plotdata$Statistic,1,3) %in% c("AMJ","JAS"))
-   plotdata$statgroup [set.yieldmm] <- 'Water Yield (Spring/Summer)'
-   plotdata$transform [set.yieldmm] <- "log"
-   plotdata$Ylabel    [set.yieldmm] <- 'Yield (MM)'
-   plot_trend(plotdata, set.yieldmm)
+    set.month.p50     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[1:3],"_P50",sep=""))
+    plotdata$statgroup [set.month.p50] <- 'Monthly P50  -  JFM'
+    plotdata$transform [set.month.p50] <- "log"
+    plotdata$Ylabel    [set.month.p50] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.p50)
 
-   set.yieldmm     <- grepl("YIELDMM", plotdata$Statistic) &
-                      (substr(plotdata$Statistic,1,3) %in% c("JFM","OND"))
-   plotdata$statgroup [set.yieldmm] <- 'Water Yield (Fall/Winter)'
-   plotdata$transform [set.yieldmm] <- "log"
-   plotdata$Ylabel    [set.yieldmm] <- 'Yield (MM)'
-   plot_trend(plotdata, set.yieldmm)
+    set.month.p50     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[4:6],"_P50",sep=""))
+    plotdata$statgroup [set.month.p50] <- 'Monthly P50  -  AMJ'
+    plotdata$transform [set.month.p50] <- "log"
+    plotdata$Ylabel    [set.month.p50] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.p50)
 
-   set.yieldmm     <- grepl("YIELDMM", plotdata$Statistic) &
-                     (substr(plotdata$Statistic,1,2) %in% c("CY","WY"))
-   plotdata$statgroup [set.yieldmm] <- 'Water Yield (Calendar and Water Year)'
-   plotdata$transform [set.yieldmm] <- "log"
-   plotdata$Ylabel    [set.yieldmm] <- 'Yield (MM)'
-   plot_trend(plotdata, set.yieldmm)
+    set.month.p50     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[7:9],"_P50",sep=""))
+    plotdata$statgroup [set.month.p50] <- 'Monthly P50  -  JAS'
+    plotdata$transform [set.month.p50] <- "log"
+    plotdata$Ylabel    [set.month.p50] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.p50)
+
+    set.month.p50     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[10:12],"_P50",sep=""))
+    plotdata$statgroup [set.month.p50] <- 'Monthly P50  - OND'
+    plotdata$transform [set.month.p50] <- "log"
+    plotdata$Ylabel    [set.month.p50] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.p50)
 
 
-   set.totalq     <- grepl("TOTALQ", plotdata$Statistic) &
-                    (substr(plotdata$Statistic,1,3) %in% c("AMJ","JAS"))
-   plotdata$statgroup [set.totalq] <- 'Total Q  -  Spring/Summer'
-   plotdata$transform [set.totalq] <- "log"
-   plotdata$Ylabel    [set.totalq] <- 'Total Q (cms)'
-   plot_trend(plotdata, set.totalq)
-   set.totalq     <- grepl("TOTALQ", plotdata$Statistic) &
-                    (substr(plotdata$Statistic,1,3) %in% c("JFM","OND"))
-   plotdata$statgroup [set.totalq] <- 'Total Q   - Fall/Winter'
-   plotdata$transform [set.totalq] <- "log"
-   plotdata$Ylabel    [set.totalq] <- 'Total Q (cms)'
-   plot_trend(plotdata, set.totalq)
-   set.totalq     <- grepl("TOTALQ", plotdata$Statistic) &
-                    (substr(plotdata$Statistic,1,2) %in% c("CY","WY"))
-   plotdata$statgroup [set.totalq] <- 'Total Q   -  Calendar and Water Year'
-   plotdata$transform [set.totalq] <- "log"
-   plotdata$Ylabel    [set.totalq] <- 'Total Q (cms)'
-   plot_trend(plotdata, set.totalq)
+    set.month.p20     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[1:3],"_P20",sep=""))
+    plotdata$statgroup [set.month.p20] <- 'Monthly P20  -  JFM'
+    plotdata$transform [set.month.p20] <- "log"
+    plotdata$Ylabel    [set.month.p20] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.p20)
 
-   set.annual.date     <- grepl("CY_Date", plotdata$Statistic)
-   plotdata$statgroup [set.annual.date] <- 'Annual Day of CY for Total Discharge Milestones'
-   plotdata$Ylabel    [set.annual.date] <- "Day into the year"
-   plot_trend(plotdata, set.annual.date)
+    set.month.p20     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[4:6],"_P20",sep=""))
+    plotdata$statgroup [set.month.p20] <- 'Monthly P20  -  AMJ'
+    plotdata$transform [set.month.p20] <- "log"
+    plotdata$Ylabel    [set.month.p20] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.p20)
 
-   set.annual.mindoy  <- grepl("^WY_MINDOY", plotdata$Statistic)
-   plotdata$statgroup [set.annual.mindoy] <- 'Annual Day of WY for Minimums'
-   plotdata$Ylabel    [set.annual.mindoy] <- 'Day into year'
-   plot_trend(plotdata, set.annual.mindoy)
+    set.month.p20     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[7:9],"_P20",sep=""))
+    plotdata$statgroup [set.month.p20] <- 'Monthly P20  -  JAS'
+    plotdata$transform [set.month.p20] <- "log"
+    plotdata$Ylabel    [set.month.p20] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.p20)
 
-   set.min.max.mean <- grepl("WY_MIN_",   plotdata$Statistic) |
-                       grepl("WY_MAX_",   plotdata$Statistic) |
-                       grepl("WY_MEAN_",  plotdata$Statistic) |
-                       grepl("WY_MEDIAN_",plotdata$Statistic)
-   plotdata$statgroup [set.min.max.mean] <- 'WY Minimum, Maximum, Mean, Median'
-   plotdata$transform [set.min.max.mean] <- "log"
-   plotdata$Ylabel    [set.min.max.mean] <- "Flow (cms)"
-   plot_trend(plotdata, set.min.max.mean)
+    set.month.p20     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[10:12],"_P20",sep=""))
+    plotdata$statgroup [set.month.p20] <- 'Monthly P20  -  OND'
+    plotdata$transform [set.month.p20] <- "log"
+    plotdata$Ylabel    [set.month.p20] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.p20)
 
-   set.annual.date     <- grepl("WY_Date", plotdata$Statistic)
-   plotdata$statgroup [set.annual.date] <- 'Annual Day of WY for Total Discharge Milestones'
-   plotdata$Ylabel    [set.annual.date] <- "Day into the year"
-   plot_trend(plotdata, set.annual.date)
 
-   set.outside         <- grepl("CY_N_", plotdata$Statistic)
-   plotdata$statgroup [set.outside] <- 'Days Outside 25/75 Daily Percentiles'
-   plotdata$Ylabel    [set.outside] <- 'Days'
-   plot_trend(plotdata, set.outside)
+    set.month.p10     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[1:3],"_P10",sep=""))
+    plotdata$statgroup [set.month.p10] <- 'Monthly P10  -  JFM'
+    plotdata$transform [set.month.p10] <- "log"
+    plotdata$Ylabel    [set.month.p10] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.p10)
 
-   set.misc <- is.na(plotdata$statgroup)
-   plotdata$statgroup[ set.misc] <- "Misc Statistics"
-   plotdata$Ylabel   [ set.misc] <- 'Cumulative Flow (cms)'
-   plot_trend(plotdata, set.misc)
+    set.month.p10     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[4:6],"_P10",sep=""))
+    plotdata$statgroup [set.month.p10] <- 'Monthly P10  -  AMJ'
+    plotdata$transform [set.month.p10] <- "log"
+    plotdata$Ylabel    [set.month.p10] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.p10)
 
-   grDevices::dev.off()
-}
-return(list( Q.flow.summary=flow.sum,
-             Q.stat.annual=Q.stat,
-             Q.stat.annual.trans=Q.stat.trans,
-             dates.missing.flows=dates.missing.flows,
-             file.cy.stat.csv=file.cy.stat.csv,
-             file.wy.stat.csv=file.wy.stat.csv,
-             file.stat.trans.csv=file.stat.trans.csv,
-             file.stat.trend.pdf=file.stat.trend.pdf,
-             file.cumdepart.pdf=file.cumdepart.pdf,
-             file.summary.csv=file.summary.csv,
-             file.lowflow.csv=file.lowflow.csv,
-             na.rm = na.rm,
-             Version=Version,
-             Date=Sys.time()))
+    set.month.p10     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[7:9],"_P10",sep=""))
+    plotdata$statgroup [set.month.p10] <- 'Monthly P10  -  JAS'
+    plotdata$transform [set.month.p10] <- "log"
+    plotdata$Ylabel    [set.month.p10] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.p10)
+
+    set.month.p10     <- substr(plotdata$Statistic,1,7) %in% toupper(paste(month.abb[10:12],"_P10",sep=""))
+    plotdata$statgroup [set.month.p10] <- 'Monthly P10  -  OND'
+    plotdata$transform [set.month.p10] <- "log"
+    plotdata$Ylabel    [set.month.p10] <- "Flow (cms)"
+    plot_trend(plotdata, set.month.p10)
+
+
+    set.yieldmm     <- grepl("YIELDMM", plotdata$Statistic) &
+      (substr(plotdata$Statistic,1,3) %in% c("AMJ","JAS"))
+    plotdata$statgroup [set.yieldmm] <- 'Water Yield (Spring/Summer)'
+    plotdata$transform [set.yieldmm] <- "log"
+    plotdata$Ylabel    [set.yieldmm] <- 'Yield (MM)'
+    plot_trend(plotdata, set.yieldmm)
+
+    set.yieldmm     <- grepl("YIELDMM", plotdata$Statistic) &
+      (substr(plotdata$Statistic,1,3) %in% c("JFM","OND"))
+    plotdata$statgroup [set.yieldmm] <- 'Water Yield (Fall/Winter)'
+    plotdata$transform [set.yieldmm] <- "log"
+    plotdata$Ylabel    [set.yieldmm] <- 'Yield (MM)'
+    plot_trend(plotdata, set.yieldmm)
+
+    set.yieldmm     <- grepl("YIELDMM", plotdata$Statistic) &
+      (substr(plotdata$Statistic,1,2) %in% c("CY","WY"))
+    plotdata$statgroup [set.yieldmm] <- 'Water Yield (Calendar and Water Year)'
+    plotdata$transform [set.yieldmm] <- "log"
+    plotdata$Ylabel    [set.yieldmm] <- 'Yield (MM)'
+    plot_trend(plotdata, set.yieldmm)
+
+
+    set.totalq     <- grepl("TOTALQ", plotdata$Statistic) &
+      (substr(plotdata$Statistic,1,3) %in% c("AMJ","JAS"))
+    plotdata$statgroup [set.totalq] <- 'Total Q  -  Spring/Summer'
+    plotdata$transform [set.totalq] <- "log"
+    plotdata$Ylabel    [set.totalq] <- 'Total Q (cms)'
+    plot_trend(plotdata, set.totalq)
+    set.totalq     <- grepl("TOTALQ", plotdata$Statistic) &
+      (substr(plotdata$Statistic,1,3) %in% c("JFM","OND"))
+    plotdata$statgroup [set.totalq] <- 'Total Q   - Fall/Winter'
+    plotdata$transform [set.totalq] <- "log"
+    plotdata$Ylabel    [set.totalq] <- 'Total Q (cms)'
+    plot_trend(plotdata, set.totalq)
+    set.totalq     <- grepl("TOTALQ", plotdata$Statistic) &
+      (substr(plotdata$Statistic,1,2) %in% c("CY","WY"))
+    plotdata$statgroup [set.totalq] <- 'Total Q   -  Calendar and Water Year'
+    plotdata$transform [set.totalq] <- "log"
+    plotdata$Ylabel    [set.totalq] <- 'Total Q (cms)'
+    plot_trend(plotdata, set.totalq)
+
+    set.annual.date     <- grepl("CY_Date", plotdata$Statistic)
+    plotdata$statgroup [set.annual.date] <- 'Annual Day of CY for Total Discharge Milestones'
+    plotdata$Ylabel    [set.annual.date] <- "Day into the year"
+    plot_trend(plotdata, set.annual.date)
+
+    set.annual.mindoy  <- grepl("^WY_MINDOY", plotdata$Statistic)
+    plotdata$statgroup [set.annual.mindoy] <- 'Annual Day of WY for Minimums'
+    plotdata$Ylabel    [set.annual.mindoy] <- 'Day into year'
+    plot_trend(plotdata, set.annual.mindoy)
+
+    set.min.max.mean <- grepl("WY_MIN_",   plotdata$Statistic) |
+      grepl("WY_MAX_",   plotdata$Statistic) |
+      grepl("WY_MEAN_",  plotdata$Statistic) |
+      grepl("WY_MEDIAN_",plotdata$Statistic)
+    plotdata$statgroup [set.min.max.mean] <- 'WY Minimum, Maximum, Mean, Median'
+    plotdata$transform [set.min.max.mean] <- "log"
+    plotdata$Ylabel    [set.min.max.mean] <- "Flow (cms)"
+    plot_trend(plotdata, set.min.max.mean)
+
+    set.annual.date     <- grepl("WY_Date", plotdata$Statistic)
+    plotdata$statgroup [set.annual.date] <- 'Annual Day of WY for Total Discharge Milestones'
+    plotdata$Ylabel    [set.annual.date] <- "Day into the year"
+    plot_trend(plotdata, set.annual.date)
+
+    set.outside         <- grepl("CY_N_", plotdata$Statistic)
+    plotdata$statgroup [set.outside] <- 'Days Outside 25/75 Daily Percentiles'
+    plotdata$Ylabel    [set.outside] <- 'Days'
+    plot_trend(plotdata, set.outside)
+
+    set.misc <- is.na(plotdata$statgroup)
+    plotdata$statgroup[ set.misc] <- "Misc Statistics"
+    plotdata$Ylabel   [ set.misc] <- 'Cumulative Flow (cms)'
+    plot_trend(plotdata, set.misc)
+
+    grDevices::dev.off()
+  }
+  return(list( Q.flow.summary=flow.sum,
+               Q.stat.annual=Q.stat,
+               Q.stat.annual.trans=Q.stat.trans,
+               dates.missing.flows=dates.missing.flows,
+               file.stat.csv=file.stat.csv,
+               file.stat.trans.csv=file.stat.trans.csv,
+               file.stat.trend.pdf=file.stat.trend.pdf,
+               file.cumdepart.pdf=file.cumdepart.pdf,
+               file.summary.csv=file.summary.csv,
+               file.lowflow.csv=file.lowflow.csv,
+               na.rm = na.rm,
+               Version=Version,
+               Date=Sys.time()))
 } # end of function
 
