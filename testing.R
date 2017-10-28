@@ -1,4 +1,9 @@
-flow <- read.csv("example_data_08NM116.csv",stringsAsFactors = FALSE,col.names = c("Date","Q"))
+#flow <- read.csv("example_data_08NM116.csv",stringsAsFactors = FALSE,col.names = c("Date","Q"))
+flow <- read.csv("08NM116 - daily discharge.csv",stringsAsFactors = FALSE)
+flow <- dplyr::filter(flow,Parameter=="FLOW")
+flow <- dplyr::select(flow,Date,Q=Value)
+flow <- dplyr::mutate(flow,Date=as.Date(Date))
+
 flow$Date <- as.Date(flow$Date)
 
 flow$Year  <- lubridate::year(flow$Date)
@@ -52,17 +57,17 @@ long.term <- compute.Q.stat.longterm(
   annual
   annual <- compute.Q.stat.annual(station.name='Carnation',
                                   basin.area=100,
-                                  flow.data=flow,
-                                  HYDAT = "08HB048",
-                                  start.year=1990,
-                                  end.year=2000,
-                                  write.cy.stat.csv=TRUE,        # write out statistics on calendar year
-                                  write.wy.stat.csv=TRUE,        # write out statistics on water year
-                                  write.stat.trans.csv=TRUE,  # write out statistics in transposed format (cy & wy)
-                                  write.flow.summary.csv=TRUE, # write out a summary of period of record
-                                  write.lowflow.csv=TRUE,      # write out a summary of low flows
-                                  plot.stat.trend=TRUE,        # should you plot all of stat trends?
-                                  plot.cumdepart=TRUE,         # plot cumulative departure curves
+                                  #flow.data=flow,
+                                  HYDAT = "08NM116",
+                                  water.year = TRUE,
+                                  #start.year=1975,
+                                  #end.year=2000,
+                                  write.table=TRUE,        # write out statistics on calendar year
+                                  write.transposed.table=TRUE,  # write out statistics in transposed format (cy & wy)
+                                  write.summary.table=TRUE, # write out a summary of period of record
+                                  write.lowflow.table=TRUE,      # write out a summary of low flows
+                                  plot.stat.trend=FALSE,        # should you plot all of stat trends?
+                                  plot.cumdepart=FALSE,         # plot cumulative departure curves
                                   report.dir="testing",
                                   na.rm=list(na.rm.global=FALSE),
                                   csv.nddigits=3,              # decimal digits for csv files for statistics
