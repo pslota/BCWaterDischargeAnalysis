@@ -217,6 +217,9 @@ compute.Q.stat.annual <- function(station.name=NULL,
   if(debug)browser()
   #
 
+  ## Compute statistics on  year basis
+  #################################
+
   Q.stat.lowflow <-   dplyr::summarize(dplyr::group_by(flow.data,AnalysisYear),
                                        MIN_01Day    = min(Q, na.rm=na.rm$na.rm.global),	      # CY Min Daily Q
                                        MINDOY_01Day = ifelse(is.na(MIN_01Day),NA,
@@ -232,7 +235,6 @@ compute.Q.stat.annual <- function(station.name=NULL,
                                                              DayofYear[which.min(Q.30DAvg)]))# Date of CY Min Daily Q
   Q.stat.lowflow <-   dplyr::rename(Q.stat.lowflow,Year=AnalysisYear)
 
-  #  Compute statistics on  year basis
   Q.stat.annual <-   dplyr::summarize(dplyr::group_by(flow.data,AnalysisYear),
                                       MIN_DAILY     = min (Q, na.rm=na.rm$na.rm.global),	    # CY Min Daily Q 	CY Min Daily Q
                                       MAX_DAILY	    = max (Q, na.rm=na.rm$na.rm.global),      # CY Max Daily Q
@@ -305,6 +307,9 @@ compute.Q.stat.annual <- function(station.name=NULL,
   Q.stat <- tidyr::spread(Q.stat,Stat,Value)
 
 
+  ## Write the files
+  #################################
+
   file.summary.csv <- NA
   if(write.summary.table){
     # write out the flow summary
@@ -355,6 +360,9 @@ compute.Q.stat.annual <- function(station.name=NULL,
                                 dplyr::contains("_07"),dplyr::contains("_30"))
     utils::write.csv(Q.lowflows, file=file.lowflow.csv, row.names=FALSE)
   }
+
+  ## Do some plotting
+  #################################
 
   # make a plot of the cumulative departures
   plot_cumdepart <- function(Q.stat, variable){
@@ -714,7 +722,10 @@ compute.Q.stat.annual <- function(station.name=NULL,
 
     grDevices::dev.off()
   }
-  return(list( Q.flow.summary=flow.sum,
+  return(list( station name= station.name,
+               "year type"=ifelse(!water.year,"Calendar Year (Jan-Dec)","Water Year (Oct-Sep)"),
+               "year range"=paste0(start.year," - ",end.year),
+               Q.flow.summary=flow.sum,
                Q.stat.annual=Q.stat,
                Q.stat.annual.trans=Q.stat.trans,
                dates.missing.flows=dates.missing.flows,

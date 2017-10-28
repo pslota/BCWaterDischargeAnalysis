@@ -177,12 +177,13 @@ compute.Q.stat.longterm <- function(
    }
 
 
-   return(list(Q.stat.longterm=Q.longterm,
+   return(list("station name"= station.name,
+               "year type"=ifelse(!water.year,"Calendar Year (Jan-Dec)","Water Year (Oct-Sep)"),
+               "year range"=paste0(start.year," - ",end.year),
+               Q.stat.longterm=Q.longterm,
                Q.stat.longterm.trans=Q.longterm.trans,
                file.stat.csv=file.stat.csv,
                file.stat.trans.csv=file.stat.trans.csv,
-               "year type"=ifelse(!water.year,"Calendar Year (Jan-Dec)","Water Year (Oct-Sep)"),
-               "start and end years"=c(start.year,end.year),
                na.rm=na.rm,
                Version=Version,
                Date=Sys.time()))
