@@ -4,7 +4,7 @@
 #' and (optionally) saves the results in *.csv and *.pdf files.
 #'
 #' @template station.name
-#' @template Station.Area
+#' @template basin.area
 #' @template flow.data
 #' @template start.year
 #' @param write.cy.stat.csv Should a file be created with the calendar year computed percentiles?
@@ -53,7 +53,8 @@
 #' \dontrun{
 #' stat.annual <- compute.Q.stat.annual(
 #'                          station.name  ='ABCD',
-#'                          Station.Area  =12345,
+#'                          basin.area  =12345,
+#'                          HYDAT="08HB048",
 #'                          flow.data          =flow,
 #'                          start.year    =1960,
 #'                          end.year      =2014)
@@ -80,9 +81,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-compute.Q.stat.annual <- function(station.name='XXXXX',
-                        Station.Area=NA,
-                        flow.data,
+compute.Q.stat.annual <- function(station.name=NULL,
+                        basin.area=NA,
+                        flow.data=NULL,
+                        HYDAT=NULL,
                         start.year=9999,
                         end.year=0,
                         write.cy.stat.csv=TRUE,        # write out statistics on calendar year
@@ -104,48 +106,56 @@ compute.Q.stat.annual <- function(station.name='XXXXX',
 #
 #############################################################
 #  Some basic error checking on the input parameters
-#
+  #
   Version <- packageVersion("BCWaterDischargeAnalysis")
+  if( is.null(flow.data) & is.null(HYDAT)){stop("Flow or HYDAT parameters must be set")}
+  if( !is.null(HYDAT) & !is.null(flow.data))  {stop("Must select either flow.data or HYDAT parameters, not both.")}
+  if( is.null(HYDAT) & is.null(station.name))  {stop("station.name required with flow.data parameter.")}
+  if( is.null(HYDAT) & !is.character(station.name))  {stop("station.name must be a character string.")}
+  if( is.null(HYDAT) & length(station.name)>1)        {stop("station.name cannot have length > 1")}
+  if( !is.numeric(basin.area))    {stop("basin.area must be numeric")}
+  if(length(basin.area)>1)        {stop("basin.area cannot have length > 1")}
+  if( is.null(HYDAT) & !is.data.frame(flow.data))         {stop("flow.data is not a data frame.")}
+  if( is.null(HYDAT) & !all(c("Date","Q") %in% names(flow.data))){
+    stop("flow.data dataframe doesn't contain the variables Date and Q.")}
+  if( is.null(HYDAT) & !inherits(flow.data$Date[1], "Date")){
+    stop("Date column in Flow data frame is not a date.")}
+  if( is.null(HYDAT) & !is.numeric(flow.data$Q))          {stop("Q column in flow dataframe is not numeric.")}
+  if( is.null(HYDAT) & any(flow.data$Q <0, na.rm=TRUE))   {stop('flow.data cannot have negative values - check your data')}
+  if(! (is.numeric(start.year) & is.numeric(end.year))){
+    stop("start.year and end.year not numberic.")}
+  if(! (start.year <= end.year))    {stop("start.year > end.year")}
+  if( !is.logical(write.cy.stat.csv))  {stop("write.cy.stat.csv must be logical (TRUE/FALSE")}
+  if( !is.logical(write.wy.stat.csv))  {stop("write.wy.stat.csv must be logical (TRUE/FALSE")}
+  if( !is.logical(write.stat.trans.csv)){stop("write.stat.trans.csv must be logical (TRUE/FALSE")}
+  if( !is.logical(write.flow.summary.csv)){stop("write.flow.summary.csv must be logical (TRUE/FALSE")}
+  if( !is.logical(write.lowflow.csv)){ stop("write.lowflow.csv must be logical (TRUE/FALSE)")}
+  if( !is.logical(plot.stat.trend)) {stop("plot.stat.trend must be logical (TRUE/FALSE")}
+  if( !is.logical(plot.cumdepart))  {stop("plot.cumdepart must be logical (TRUE/FALSE")}
 
- if( !is.character(station.name))  {stop("Station Code must be a character string.")}
- if(length(station.name)>1)        {stop("station.name cannot have length > 1")}
- if( !is.numeric(Station.Area))    {stop("Station.Area must be numeric")}
- if(length(Station.Area)>1)        {stop("Station.Area cannot have length > 1")}
- if( !is.data.frame(flow.data))         {stop("flow.data is not a data frame.")}
- if(! all(c("Date","Q") %in% names(flow.data))){
-                                    stop("flow.data dataframe doesn't contain the variables Date and Q.")}
- if( ! inherits(flow.data$Date[1], "Date")){
-                                    stop("Date column in Flow data frame is not a date.")}
- if( !is.numeric(flow.data$Q))          {stop("Q column in flow dataframe is not numeric.")}
- if( any(flow.data$Q <0, na.rm=TRUE))   {stop('flow.data cannot have negative values - check your data')}
- if(! (is.numeric(start.year) & is.numeric(end.year))){
-                                    stop("start.year and end.year not numberic.")}
- if(! (start.year <= end.year))    {stop("start.year > end.year")}
- if( !is.logical(write.cy.stat.csv))  {stop("write.cy.stat.csv must be logical (TRUE/FALSE")}
- if( !is.logical(write.wy.stat.csv))  {stop("write.wy.stat.csv must be logical (TRUE/FALSE")}
- if( !is.logical(write.stat.trans.csv)){stop("write.stat.trans.csv must be logical (TRUE/FALSE")}
- if( !is.logical(write.flow.summary.csv)){stop("write.flow.summary.csv must be logical (TRUE/FALSE")}
- if( !is.logical(write.lowflow.csv)){ stop("write.lowflow.csv must be logical (TRUE/FALSE)")}
- if( !is.logical(plot.stat.trend)) {stop("plot.stat.trend must be logical (TRUE/FALSE")}
- if( !is.logical(plot.cumdepart))  {stop("plot.cumdepart must be logical (TRUE/FALSE")}
+  if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exist")}
+  if( !is.numeric(csv.nddigits))  { stop("csv.ndddigits needs to be numeric")}
+  csv.nddigits <- round(csv.nddigits[1])  # number of decimal digits for rounding in csv files
 
- if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exist")}
- if( !is.numeric(csv.nddigits))  { stop("csv.ndddigits needs to be numeric")}
- csv.nddigits <- round(csv.nddigits[1])  # number of decimal digits for rounding in csv files
+  if( !is.list(na.rm))              {stop("na.rm is not a list") }
+  if(! is.logical(unlist(na.rm))){   stop("na.rm is list of logical (TRUE/FALSE) values only.")}
+  my.na.rm <- list(na.rm.global=FALSE)
+  if( !all(names(na.rm) %in% names(my.na.rm))){stop("Illegal element in na.rm")}
+  my.na.rm[names(na.rm)]<- na.rm
+  na.rm <- my.na.rm  # set the na.rm for the rest of the function.
 
- if( !is.list(na.rm))              {stop("na.rm is not a list") }
- if(! is.logical(unlist(na.rm))){   stop("na.rm is list of logical (TRUE/FALSE) values only.")}
- my.na.rm <- list(na.rm.global=FALSE)
- if( !all(names(na.rm) %in% names(my.na.rm))){stop("Illegal element in na.rm")}
- my.na.rm[names(na.rm)]<- na.rm
- na.rm <- my.na.rm  # set the na.rm for the rest of the function.
+  if (!is.null(HYDAT)) {
+    if (is.null(station.name)) {station.name <- HYDAT}
+    flow.data <- tidyhydat::DLY_FLOWS(STATION_NUMBER = HYDAT)
+    flow.data <- dplyr::select(flow.data,Date,Q=Value)
+  }
 
-#  Generate all dates between min and max dates and merge with flow
-#  data frame to generate any dates that were missing.
-#  This will automatically generate NA for the days that were not in the file
- temp <- data.frame(Date=seq(min(flow.data$Date,na.rm=TRUE),
-                             max(flow.data$Date,na.rm=TRUE),1))
- flow.data <- merge(flow.data, temp, all.y=TRUE)
+  #  Generate all dates between min and max dates and merge with flow
+  #  data frame to generate any dates that were missing.
+  #  This will automatically generate NA for the days that were not in the file
+  temp <- data.frame(Date=seq(min(flow.data$Date,na.rm=TRUE),
+                              max(flow.data$Date,na.rm=TRUE),1))
+  flow.data <- merge(flow.data, temp, all.y=TRUE)
 
 #  Compute the 3, 7, and 30 day rolling average values
  flow.data$Q.03DAvg <- zoo::rollapply( flow.data$Q,  3, mean, fill=NA, align="right")
@@ -167,7 +177,7 @@ compute.Q.stat.annual <- function(station.name='XXXXX',
 #  create the year (annual and water) and month variables
  flow.data$Year  <- as.numeric(format(flow.data$Date, "%Y"))
  flow.data$Month <- as.numeric(format(flow.data$Date, '%m'))
- flow.data$WYear <- as.numeric(ifelse(flow.data$MonthNum>=10,flow.data$Year+1,flow.data$Year))
+ flow.data$WYear <- as.numeric(ifelse(flow.data$Month>=10,flow.data$Year+1,flow.data$Year))
 
 #  which dates have missing flows.
  dates.missing.flows <- flow.data$Date[ is.na(flow.data$Q) &
@@ -192,7 +202,7 @@ compute.Q.stat.annual <- function(station.name='XXXXX',
  if(debug)browser()
 #  Compute statistics on calendar year basis
 #
- Q.stat.cy <- plyr::ddply(flow.data[ flow.data$Year >= start.year,], "Year", function(fy, Station.Area, na.rm){
+ Q.stat.cy <- plyr::ddply(flow.data[ flow.data$Year >= start.year,], "Year", function(fy, basin.area, na.rm){
    # process each year's flow values (fy)
    CY_MIN_01Day_SW    = min(fy$Q, na.rm=na.rm$na.rm.global)	      # CY Min Daily Q
    CY_MINDOY_01Day_SW = as.numeric(format( fy$Date[which.min( fy$Q)], "%j"))        # Date of CY Min Daily Q
@@ -220,7 +230,7 @@ compute.Q.stat.annual <- function(station.name='XXXXX',
    CY_MEDIAN_DAILY_SW= median(fy$Q, na.rm=na.rm$na.rm.global)  # CY median Discharge (Based on Daily avgs)
    CY_TOTALQ_DAILY_SW= mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Q)*60*60*24    # Yearly sum of daily avg (cms) *60*60*24 # deal with missing values
    CY_CUMQ_DAILY_SW  = CY_TOTALQ_DAILY_SW/(60*60*24)      # Yearly sum of daily avg (cms) # deal with missing values
-   CY_YIELDMM_DAILY_SW=mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Q)*60*60*24 /Station.Area/1000   #	(CY Mean*60*60*24*365.25)/(area in km2*1000000))*1000
+   CY_YIELDMM_DAILY_SW=mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Q)*60*60*24 /basin.area/1000   #	(CY Mean*60*60*24*365.25)/(area in km2*1000000))*1000
 
    # Get the cumulative Q values
    # Notice that if missing values are removed, the individual values are replaced by zero
@@ -260,7 +270,7 @@ compute.Q.stat.annual <- function(station.name='XXXXX',
    # JAS_YIELDMM_DAILY_SW	(JAS_TOTALQ_DAILY_SW/(area in km2*1000000))*1000
    # OND_YIELDM_DAILY_SWM	(OND_TOTALQ_DAILY_SW/(area in km2*1000000))*1000
    season.stats$vname.yieldmm <- sub('TOTALQ','YIELDMM', season.stats$vname.totalq)
-   season.stats$yieldmm       <- season.stats$totalq/Station.Area/1000
+   season.stats$yieldmm       <- season.stats$totalq/basin.area/1000
    season.stats$vname.yieldmm <- factor(season.stats$vname.yieldmm, levels=season.stats$vname.yieldmm, ordered=TRUE) # keep ordering
 
    # extract the variables for adding to the data frame later
@@ -340,11 +350,11 @@ compute.Q.stat.annual <- function(station.name='XXXXX',
            Month_P20_DAILY_SW,
            Month_P10_DAILY_SW,
            stringsAsFactors=FALSE)
- }, Station.Area=Station.Area, na.rm=na.rm)
+ }, basin.area=basin.area, na.rm=na.rm)
 
 #  Compute the statistics on a water year basis  (October -> Sept)
 
-Q.stat.wy <- plyr::ddply(flow.data[ flow.data$WYear >= start.year,], "WYear", function(fy, Station.Area, na.rm){
+Q.stat.wy <- plyr::ddply(flow.data[ flow.data$WYear >= start.year,], "WYear", function(fy, basin.area, na.rm){
    # process each waters year's flow values (fy)
    WY_MIN_01Day_SW    = min(fy$Q, na.rm=na.rm$na.rm.global)	                # WY Min Daily Q
    WY_MINDOY_01Day_SW = as.numeric(fy$Date[which.min( fy$Q)]-fy$Date[1]+1)  # Date of WY Min Daily Q
@@ -374,7 +384,7 @@ Q.stat.wy <- plyr::ddply(flow.data[ flow.data$WYear >= start.year,], "WYear", fu
    # WY_YIELDMM_DAILY_SW	(Oct_to_Sep_TotalQ/(area in km2*1000000))*1000
 
    WY_TOTALQ_DAILY_SW <- mean(fy$Q, na.rm=na.rm$na.rm.global)*length(fy$Q)*60*60*24
-   WY_YIELDMM_DAILY_SW<- WY_TOTALQ_DAILY_SW /Station.Area/1000
+   WY_YIELDMM_DAILY_SW<- WY_TOTALQ_DAILY_SW /basin.area/1000
 
    WY_CUMQ_DAILY_SW  = WY_TOTALQ_DAILY_SW/(60*60*24)      # Yearly sum of daily avg (cms) # deal with missing values
 
@@ -413,7 +423,7 @@ Q.stat.wy <- plyr::ddply(flow.data[ flow.data$WYear >= start.year,], "WYear", fu
    # AMJJAS_YIELDMM_DAILY_SW	(AMJJAS_TotalQ/(area in km2*1000000))*1000
    # ONDJFM_YIELDMM_DAILY_SW	(ONDJFM_TotalQ/(area in km2*1000000))*1000
    season.stats$vname.yieldmm <- sub('TOTALQ','YIELDMM', season.stats$vname.totalq)
-   season.stats$yieldmm       <- season.stats$totalq/Station.Area/1000
+   season.stats$yieldmm       <- season.stats$totalq/basin.area/1000
    season.stats$vname.yieldmm <- factor(season.stats$vname.yieldmm, levels=season.stats$vname.yieldmm, ordered=TRUE) # keep ordering
 
    # extract the variables for adding to the data frame later
@@ -444,7 +454,7 @@ Q.stat.wy <- plyr::ddply(flow.data[ flow.data$WYear >= start.year,], "WYear", fu
            Season_TOTALQ_DAILY_SW,
            Season_YIELDMM_DAILY_SW,
            stringsAsFactors=FALSE)
-}, Station.Area=Station.Area,  na.rm=na.rm)
+}, basin.area=basin.area,  na.rm=na.rm)
 
 
 # compute the number of days in a year outside of the 25th or 75th percentile for each day.
@@ -537,11 +547,11 @@ if(write.lowflow.csv){
       plotdata$diff.from.mean <- plotdata[, variable] - grand.mean
       plotdata$cum.diff.from.mean <- cumsum(plotdata$diff.from.mean)
       plot1 <- ggplot2::ggplot(data=plotdata,  ggplot2::aes(x=Year, y=cum.diff.from.mean))+
-         ggtitle(paste(station.name," - cumulative departure curve for ",variable,sep=""))+
-         geom_hline(yintercept=0)+
-         geom_segment(aes(x=Year, y=0, xend=Year, yend=diff.from.mean), size=2)+
-         geom_line()+
-         ylab("Departure from the mean")
+        ggplot2::ggtitle(paste(station.name," - cumulative departure curve for ",variable,sep=""))+
+        ggplot2::geom_hline(yintercept=0)+
+        ggplot2::geom_segment( ggplot2::aes(x=Year, y=0, xend=Year, yend=diff.from.mean), size=2)+
+        ggplot2::geom_line()+
+        ggplot2::ylab("Departure from the mean")
       plot1
   }
 
@@ -567,12 +577,16 @@ if(plot.stat.trend){
 
    plot_trend <- function(plotdata, select){
      x <- plotdata[select,]
-     myplot <- ggplot2::ggplot(data=x, aes(x=Year, y=Value, group=Statistic, color=Statistic, linetype=Statistic))+
-       ggtitle(paste(station.name, " - Trend for ", x$statgroup[1]))+
-       geom_point()+
-       geom_line()+xlab("Year")+ylab(x$Ylabel[1])
+     myplot <- ggplot2::ggplot(data=x,  ggplot2::aes(x=Year, y=Value, group=Statistic, color=Statistic, linetype=Statistic))+
+       ggplot2::ggtitle(paste(station.name, " - Trend for ", x$statgroup[1]))+
+       ggplot2::geom_point()+
+       ggplot2::geom_line()+
+       ggplot2::xlab("Year")+
+       ggplot2::ylab(x$Ylabel[1])
      if(x$transform[1] == 'log'){
-       myplot <- myplot + ylab(paste("log(",x$Ylabel[1],")",sep=""))+scale_y_continuous(trans='log10')
+       myplot <- myplot +
+         ggplot2::ylab(paste("log(",x$Ylabel[1],")",sep=""))+
+         ggplot2::scale_y_continuous(trans='log10')
      }
      graphics::plot(myplot)
    }
