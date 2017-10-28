@@ -4,24 +4,24 @@
 #'    between \code{start.year} and \code{end.year} inclusive for calendar or water years.
 #'    It (optionally) saves the results in *.csv and *.pdf files.
 #'
-#' @template Station.Name
-#' @template flow
+#' @template station.name
+#' @template flow.data
 #' @template HYDAT
 #' @template start.year
 #' @template end.year
 #' @template water.year
 #' @param write.table Should a file be created with the computed statistics?
-#'    The file name will be  \code{file.path(report.dir,paste(Station.Name,'-longterm-summary-stat.csv'))}.
+#'    The file name will be  \code{file.path(report.dir,paste(station.name,'-longterm-summary-stat.csv'))}.
 #' @param write.transposed.table Should a file be created with the transposed of the statistics report?
-#'    The file name will be  \code{file.path(report.dir,paste(Station.Name,'-longterm-summary-stat-trans.csv'))}.
+#'    The file name will be  \code{file.path(report.dir,paste(station.name,'-longterm-summary-stat-trans.csv'))}.
 #' @template report.dir
 #' @template csv.nddigits
 #' @template na.rm
 #'
 #' @return A list with the following elements:
-#'   \item{Q.stat.longterm}{Data frame with the long-term statistics of \code{flow$Q} by month
+#'   \item{Q.stat.longterm}{Data frame with the long-term statistics of \code{flow.data$Q} by month
 #'         and overall between \code{start.year} and \code{end.year}}
-#'   \item{Q.stat.longterm.trans}{Data frame with the long-term statistics of \code{flow$Q} transposed.}
+#'   \item{Q.stat.longterm.trans}{Data frame with the long-term statistics of \code{flow.data$Q} transposed.}
 #'   \item{file.stat.csv}{Object with file name of *.csv file with long term summary statistics.}
 #'    \item{file.stat.trans.csv}{Object with file name of *.csv file with transposed long-term summary statistics.}
 #'    \item{na.rm}{Missing value flags.}
@@ -30,8 +30,8 @@
 #' @examples
 #' \dontrun{
 #' stat.longterm <- compute.Q.stat.longterm(
-#'                          Station.Name  ='ABCDE',
-#'                          flow          =flow,
+#'                          station.name  ='ABCDE',
+#'                          flow.data          =flow,
 #'                          start.year    =1960,
 #'                          end.year      =2015)
 #' }
@@ -57,8 +57,8 @@
 # See the License for the specific language governing permissions and limitations under the License.
 
 compute.Q.stat.longterm <- function(
-                          Station.Name=NULL,
-                          flow=NULL,
+                          station.name=NULL,
+                          flow.data=NULL,
                           HYDAT=NULL,
                           start.year=NULL, #not required
                           end.year=NULL, #not required
@@ -77,16 +77,16 @@ compute.Q.stat.longterm <- function(
 #
    Version <- packageVersion("BCWaterDischargeAnalysis")
 
-   if( !is.null(HYDAT) & !is.null(flow))  {stop("Must select either flow or HYDAT parameters.")}
-   if( is.null(HYDAT) & is.null(Station.Name))  {stop("Station.Name required with flow parameter.")}
-   if( is.null(HYDAT) & !is.character(Station.Name))  {stop("Station.Name must be a character string.")}
-   if( is.null(HYDAT) & length(Station.Name)>1)        {stop("Station.Name cannot have length > 1")}
-   if( is.null(flow) & is.null(HYDAT)){stop("Flow or HYDAT parameters must be set")}
-   if( is.null(HYDAT) & !is.data.frame(flow))         {stop("Flow is not a data frame.")}
+   if( !is.null(HYDAT) & !is.null(flow.data))  {stop("Must select either flow.data or HYDAT parameters.")}
+   if( is.null(HYDAT) & is.null(station.name))  {stop("station.name required with flow.data parameter.")}
+   if( is.null(HYDAT) & !is.character(station.name))  {stop("station.name must be a character string.")}
+   if( is.null(HYDAT) & length(station.name)>1)        {stop("station.name cannot have length > 1")}
+   if( is.null(flow.data) & is.null(HYDAT)){stop("Flow or HYDAT parameters must be set")}
+   if( is.null(HYDAT) & !is.data.frame(flow.data))         {stop("Flow is not a data frame.")}
    if( is.null(HYDAT) &! all(c("Date","Q") %in% names(flow))){stop("Flow dataframe doesn't contain the variables Date and Q.")}
-   if( is.null(HYDAT) & ! inherits(flow$Date[1], "Date")){stop("Date column in Flow data frame is not a date.")}
-   if( is.null(HYDAT) & !is.numeric(flow$Q))          {stop("Q column in flow dataframe is not numeric.")}
-   if( is.null(HYDAT) & any(flow$Q <0, na.rm=TRUE))   {stop('flow cannot have negative values - check your data')}
+   if( is.null(HYDAT) & ! inherits(flow.data$Date[1], "Date")){stop("Date column in Flow data frame is not a date.")}
+   if( is.null(HYDAT) & !is.numeric(flow.data$Q))          {stop("Q column in flow.data dataframe is not numeric.")}
+   if( is.null(HYDAT) & any(flow.data$Q <0, na.rm=TRUE))   {stop('flow.data cannot have negative values - check your data')}
    if( !(is.numeric(start.year) | is.null(start.year)))   {stop("start.year must be numeric.")}
    if( !(is.numeric(end.year) | is.null(end.year)))   {stop("end.year must be numeric.")}
    if( !is.logical(water.year))  {stop("water.year must be logical (TRUE/FALSE")}
@@ -106,50 +106,46 @@ compute.Q.stat.longterm <- function(
 
 
    if (!is.null(HYDAT)) {
-     if (is.null(Station.Name)) {Station.Name <- HYDAT}
-     flow <- tidyhydat::DLY_FLOWS(STATION_NUMBER = HYDAT)
-     flow <- dplyr::select(flow,Date,Q=Value)
+     if (is.null(station.name)) {station.name <- HYDAT}
+     flow.data <- tidyhydat::DLY_FLOWS(STATION_NUMBER = HYDAT)
+     flow.data <- dplyr::select(flow.data,Date,Q=Value)
    }
 
 
 #  create the year (annual ) and month variables
-   flow$Year  <- lubridate::year(flow$Date)
-   flow$MonthNum  <- lubridate::month(flow$Date)
-   flow$Month <- month.abb[flow$MonthNum]
-   flow$WaterYear <- as.numeric(ifelse(flow$MonthNum>=10,flow$Year+1,flow$Year))
+   flow.data$Year  <- lubridate::year(flow.data$Date)
+   flow.data$MonthNum  <- lubridate::month(flow.data$Date)
+   flow.data$Month <- month.abb[flow.data$MonthNum]
+   flow.data$WaterYear <- as.numeric(ifelse(flow.data$MonthNum>=10,flow.data$Year+1,flow.data$Year))
 
 
 # Filter for start and end years, and if water year
    if (water.year) {
-     if (!is.numeric(start.year)) {start.year <- min(flow$WaterYear)}
-     if (!is.numeric(end.year)) {end.year <- max(flow$WaterYear)}
+     if (!is.numeric(start.year)) {start.year <- min(flow.data$WaterYear)}
+     if (!is.numeric(end.year)) {end.year <- max(flow.data$WaterYear)}
      if(! (start.year <= end.year))    {stop("start.year must be less than end.year")}
 
-     flow <- dplyr::filter(flow, WaterYear >= start.year & WaterYear<=end.year)
+     flow.data <- dplyr::filter(flow.data, WaterYear >= start.year & WaterYear<=end.year)
    }
    else {
-     if (!is.numeric(start.year)) {start.year <- min(flow$Year)}
-     if (!is.numeric(end.year)) {end.year <- max(flow$Year)}
+     if (!is.numeric(start.year)) {start.year <- min(flow.data$Year)}
+     if (!is.numeric(end.year)) {end.year <- max(flow.data$Year)}
      if(! (start.year <= end.year))    {stop("start.year must be less than end.year")}
 
-     flow <- dplyr::filter(flow, Year >= start.year & Year<=end.year)
+     flow.data <- dplyr::filter(flow.data, Year >= start.year & Year<=end.year)
    }
 
    #  Compute calendar year long-term stats
-   Q.month.longterm <-   dplyr::summarize(dplyr::group_by(flow,Month),
+   Q.month.longterm <-   dplyr::summarize(dplyr::group_by(flow.data,Month),
                                           Mean = mean(Q,na.rm=TRUE),
                                           Median = median(Q,na.rm=TRUE),
                                           Maximum = max(Q,na.rm=TRUE),
-                                          Minimum = min(Q,na.rm=TRUE),
-                                          Max.year=max(Year),
-                                          Min.year=min(Year))
-   Q.all.longterm <-   dplyr::summarize(flow,
+                                          Minimum = min(Q,na.rm=TRUE))
+   Q.all.longterm <-   dplyr::summarize(flow.data,
                                         Mean = mean(Q,na.rm=TRUE),
                                         Median = median(Q,na.rm=TRUE),
                                         Maximum = max(Q,na.rm=TRUE),
-                                        Minimum = min(Q,na.rm=TRUE),
-                                        Max.year=max(Year),
-                                        Min.year=min(Year))
+                                        Minimum = min(Q,na.rm=TRUE))
    Q.all.longterm <- dplyr::mutate(Q.all.longterm,Month="Long-term")
 
 
@@ -163,7 +159,7 @@ compute.Q.stat.longterm <- function(
    #  Write out the summary table for comparison to excel spreadsheet
    file.stat.csv <- NA
    if(write.table){
-      file.stat.csv <-file.path(report.dir, paste(Station.Name,"-longterm-summary-stat.csv", sep=""))
+      file.stat.csv <-file.path(report.dir, paste(station.name,"-longterm-summary-stat.csv", sep=""))
       temp <- Q.longterm
       temp[,2:ncol(temp)] <- round(temp[,2:ncol(temp)], csv.nddigits)  # round the output
       utils::write.csv(temp, file=file.stat.csv, row.names=FALSE)
@@ -175,7 +171,7 @@ compute.Q.stat.longterm <- function(
    Q.longterm.trans <- tidyr::spread(Q.longterm.trans,Month,Value)
    file.stat.trans.csv <- NA
    if(write.transposed.table){
-     file.stat.trans.csv <-file.path(report.dir,paste(Station.Name,"-longterm-summary-stat-trans.csv", sep=""))
+     file.stat.trans.csv <-file.path(report.dir,paste(station.name,"-longterm-summary-stat-trans.csv", sep=""))
      Q.longterm.trans.temp <- tidyr::spread(Q.longterm.trans.temp,Month,Value)
      utils::write.csv(Q.longterm.trans.temp, file=file.stat.trans.csv, row.names=FALSE)
    }
@@ -185,6 +181,8 @@ compute.Q.stat.longterm <- function(
                Q.stat.longterm.trans=Q.longterm.trans,
                file.stat.csv=file.stat.csv,
                file.stat.trans.csv=file.stat.trans.csv,
+               "year type"=ifelse(!water.year,"Calendar Year (Jan-Dec)","Water Year (Oct-Sep)"),
+               "start and end years"=c(start.year,end.year),
                na.rm=na.rm,
                Version=Version,
                Date=Sys.time()))
