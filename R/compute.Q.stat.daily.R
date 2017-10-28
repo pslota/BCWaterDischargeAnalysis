@@ -62,8 +62,11 @@ compute.Q.stat.daily <- function(
   start.year=NULL, #not required
   end.year=NULL, #not required
   water.year= FALSE, #not required
-  write.table=TRUE,         # write out calendar year statistics
-  write.transposed.table=TRUE,   # write out statistics in transposed format
+  rolling.mean=1,
+  write.table=FALSE,         # write out calendar year statistics
+  write.transposed.table=FALSE,   # write out statistics in transposed format
+  write.cumulative.table=FALSE,         # write out calendar year statistics
+  write.cumulative.transposed.table=FALSE,   # write out statistics in transposed format
   report.dir='.',
   csv.nddigits=3,               # decimal digit for csv files.
   na.rm=list(na.rm.global=TRUE)){
@@ -82,7 +85,7 @@ compute.Q.stat.daily <- function(
   if( is.null(HYDAT) & length(station.name)>1)        {stop("station.name cannot have length > 1")}
   if( is.null(flow.data) & is.null(HYDAT)){stop("Flow or HYDAT parameters must be set")}
   if( is.null(HYDAT) & !is.data.frame(flow.data))         {stop("Flow is not a data frame.")}
-  if( is.null(HYDAT) &! all(c("Date","Q") %in% names(flow))){stop("Flow dataframe doesn't contain the variables Date and Q.")}
+  if( is.null(HYDAT) & !all(c("Date","Q") %in% names(flow.data))){stop("Flow dataframe doesn't contain the variables Date and Q.")}
   if( is.null(HYDAT) & ! inherits(flow.data$Date[1], "Date")){stop("Date column in Flow data frame is not a date.")}
   if( is.null(HYDAT) & !is.numeric(flow.data$Q))          {stop("Q column in flow.data dataframe is not numeric.")}
   if( is.null(HYDAT) & any(flow.data$Q <0, na.rm=TRUE))   {stop('flow.data cannot have negative values - check your data')}
@@ -92,6 +95,9 @@ compute.Q.stat.daily <- function(
   if( !is.logical(write.table))  {stop("write.table must be logical (TRUE/FALSE")}
   if( !is.logical(write.transposed.table)){stop("write.transposed.table must be logical (TRUE/FALSE")}
   if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exist")}
+
+  is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
+  if( !is.wholenumber(rolling.mean) | rolling.mean <1) {stop("rolling.mean must be a whole number greater than zero")}
 
   if(!is.numeric(csv.nddigits)){ stop("csv.nddigits must be numeric")}
   csv.nddigits <- round(csv.nddigits)[1]
@@ -128,16 +134,14 @@ compute.Q.stat.daily <- function(
                                       flow.data$DayofYear-274,
                                       flow.data$DayofYear-273))
   # Add rolling and cumulative values
-  flow.data$Q.03DAvg <- zoo::rollapply( flow.data$Q,  3, mean, fill=NA, align="right")
-  flow.data$Q.07DAvg <- zoo::rollapply( flow.data$Q,  7, mean, fill=NA, align="right")
-  flow.data$Q.30DAvg <- zoo::rollapply( flow.data$Q, 30, mean, fill=NA, align="right")
+  flow.data$Q.Avg <- zoo::rollapply( flow.data$Q,  rolling.mean, mean, fill=NA, align="right")
   flow.data <- dplyr::mutate(dplyr::group_by(flow.data,Year),CumQ=cumsum(Q))
   flow.data <- dplyr::mutate(dplyr::group_by(flow.data,WaterYear),WYCumQ=cumsum(Q))
 
   # if no start and or end year, set at the minimum/max years in the dataset
   if (water.year) {
     if (!is.numeric(start.year)) {start.year <- min(flow.data$WaterYear)}
-    if (!is.numeric(end.year)) {end.year <- max(flow.data$WaterYear)}
+    if (!is.numeric(end.year)) {end.year <- max(flow.data$Year)}
   } else {
     if (!is.numeric(start.year)) {start.year <- min(flow.data$Year)}
     if (!is.numeric(end.year)) {end.year <- max(flow.data$Year)}
@@ -159,21 +163,37 @@ compute.Q.stat.daily <- function(
 
   flow.data <- dplyr::filter(flow.data,AnalysisYear >= start.year & AnalysisYear <= end.year)
 
-  Q.daily <- dplyr::filter(flow.data,AnalysisDoY<366)
-  Q.daily <- dplyr::summarise(dplyr::group_by(Q.daily,AnalysisDate,AnalysisDoY),
-                                Mean=mean(Q, na.rm=na.rm$na.rm.global),
-                                Minimum=min(Q, na.rm=na.rm$na.rm.global),
-                                "5th Percentile"=quantile(Q,.05, na.rm=TRUE),
-                                "25th Percentile"=quantile(Q,.25, na.rm=TRUE),
-                                Median=median(Q, na.rm=na.rm$na.rm.global),
-                                "75th Percentile"=quantile(Q,.75, na.rm=TRUE),
-                                "95th Percentile"=quantile(Q,.95, na.rm=TRUE),
-                                Maximum=max(Q, na.rm=na.rm$na.rm.global))
+  flow.data.365 <- dplyr::filter(flow.data,AnalysisDoY<366)
 
+  ### DAILY SUMMARY STATS
+  Q.daily <- dplyr::summarise(dplyr::group_by(flow.data.365,AnalysisDate,AnalysisDoY),
+                                Mean=mean(Q.Avg, na.rm=na.rm$na.rm.global),
+                                Minimum=min(Q.Avg, na.rm=na.rm$na.rm.global),
+                                "5th Percentile"=quantile(Q.Avg,.05, na.rm=TRUE),
+                                "25th Percentile"=quantile(Q.Avg,.25, na.rm=TRUE),
+                                Median=median(Q.Avg, na.rm=na.rm$na.rm.global),
+                                "75th Percentile"=quantile(Q.Avg,.75, na.rm=TRUE),
+                                "95th Percentile"=quantile(Q.Avg,.95, na.rm=TRUE),
+                                Maximum=max(Q.Avg, na.rm=na.rm$na.rm.global))
   Q.daily <- dplyr::rename(Q.daily,Date=AnalysisDate,"Day of Year"=AnalysisDoY)
 
 
+  ### DAILY CUMULATIVE STATS
 
+  Q.cumulative <- dplyr::summarise(dplyr::group_by(flow.data.365,AnalysisDate,AnalysisDoY),
+                              Mean=mean(AnalysisCumQ*86400, na.rm=na.rm$na.rm.global),
+                              Minimum=min(AnalysisCumQ*86400, na.rm=na.rm$na.rm.global),
+                              "5th Percentile"=quantile(AnalysisCumQ*86400,.05, na.rm=TRUE),
+                              "25th Percentile"=quantile(AnalysisCumQ*86400,.25, na.rm=TRUE),
+                              Median=median(AnalysisCumQ*86400, na.rm=na.rm$na.rm.global),
+                              "75th Percentile"=quantile(AnalysisCumQ*86400,.75, na.rm=TRUE),
+                              "95th Percentile"=quantile(AnalysisCumQ*86400,.95, na.rm=TRUE),
+                              Maximum=max(AnalysisCumQ*86400, na.rm=na.rm$na.rm.global))
+  Q.cumulative <- dplyr::rename(Q.cumulative,Date=AnalysisDate,"Day of Year"=AnalysisDoY)
+
+
+# WRITE THE SUMMARY FILES
+  ##################
   #  Write out summary tables for calendar years
   #  Write out the summary table for comparison to excel spreadsheet
   file.stat.csv <- NA
@@ -202,13 +222,47 @@ compute.Q.stat.daily <- function(
   }
 
 
+  # WRITE THE CUMULATIVE FILES
+  ##################
+  #  Write out summary tables for calendar years
+  #  Write out the summary table for comparison to excel spreadsheet
+  file.cumulative.csv <- NA
+  if(write.cumulative.table){
+    file.cumulative.csv <-file.path(report.dir, paste(station.name,"-longterm-daily-cumulative.csv", sep=""))
+    temp <- Q.cumulative
+    temp$Date <- format(as.Date(temp$Date),format="%b-%d")
+    temp[,3:ncol(temp)] <- round(temp[,3:ncol(temp)], csv.nddigits)  # round the output
+    utils::write.csv(temp, file=file.cumulative.csv, row.names=FALSE)
+  }
+
+  #  Write out thesummary table in transposed format
+  Q.cumulative.trans <- tidyr::gather(Q.cumulative,Statistic,Value,-Date)
+  Q.cumulative.trans$Date <- format(as.Date(Q.cumulative.trans$Date),format="%b-%d")
+  col.ord <- c("Statistic",unique(Q.cumulative.trans$Date))
+  row.ord <- unique(Q.cumulative.trans$Statistic)
+  Q.cumulative.trans <- tidyr::spread(Q.cumulative.trans,Date,Value)
+  Q.cumulative.trans <- dplyr::arrange(Q.cumulative.trans,match(Statistic,row.ord))
+  Q.cumulative.trans <- Q.cumulative.trans[,col.ord]
+  file.cumulative.trans.csv <- NA
+  if(write.cumulative.transposed.table){
+    file.stat.trans.csv <-file.path(report.dir,paste(station.name,"-longterm-daily-cumulative-trans.csv", sep=""))
+    temp <- Q.cumulative.trans
+    temp[,2:ncol(temp)] <- round(temp[,2:ncol(temp)], csv.nddigits)  # round the output
+    utils::write.csv(temp, file=file.stat.trans.csv, row.names=FALSE)
+  }
+
+
   return(list("station name"= station.name,
               "year type"=ifelse(!water.year,"Calendar Year (Jan-Dec)","Water Year (Oct-Sep)"),
               "year range"=paste0(start.year," - ",end.year),
               Q.stat.daily=Q.daily,
               Q.stat.daily.trans=Q.daily.trans,
+              Q.stat.cumulative=Q.cumulative,
+              Q.stat.cumulative.trans=Q.cumulative.trans,
               file.stat.csv=file.stat.csv,
               file.stat.trans.csv=file.stat.trans.csv,
+              file.cumulative.csv=file.cumulative.csv,
+              file.cumulative.trans.csv=file.cumulative.trans.csv,
               na.rm=na.rm,
               Version=Version,
               Date=Sys.time()))

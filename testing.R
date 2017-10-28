@@ -1,12 +1,14 @@
-
-
+flow <- read.csv("08NM116 - daily discharge.csv", stringsAsFactors = FALSE)
+flow <- dplyr::filter(flow,Parameter=="FLOW")
+flow <- dplyr::select(flow,Date,Q=Value)
 flow$Date <- as.Date(flow$Date)
 
-flow$Year  <- lubridate::year(flow$Date)
-flow$MonthNum  <- lubridate::month(flow$Date)
-flow$Month <- month.abb[flow$MonthNum]
-flow$WaterYear <- as.numeric(ifelse(flow$MonthNum>=10,flow$Year+1,flow$Year))
+#flow$Year  <- lubridate::year(flow$Date)
+#flow$MonthNum  <- lubridate::month(flow$Date)
+#flow$Month <- month.abb[flow$MonthNum]
+#flow$WaterYear <- as.numeric(ifelse(flow$MonthNum>=10,flow$Year+1,flow$Year))
 
+station.name <- "CARN TEST"
 flow.data <- flow
 start.year <- 1975
 end.year <- 2000
@@ -14,6 +16,7 @@ water.year <- FALSE
 na.rm <- list(na.rm.global=FALSE)
 basin.area <- 10
 csv.nddigits <- 3
+report.dir <- "testing"
 
 #  Compute calendar year long-term stats
 Q.month.longterm <-   dplyr::summarize(dplyr::group_by(flow,Month),
@@ -78,3 +81,24 @@ long.term <- compute.Q.stat.longterm(
   )
 annual.test <- annual$Q.stat.annual
 ####### double check the date of half flow dates
+
+
+
+
+daily <- compute.Q.stat.daily(station.name="YAY2",
+                              #flow.data=flow,
+                              HYDAT="08HB048",
+                              #start.year=1975, #not required
+                              #end.year=2000, #not required
+                              rolling.mean=2,
+                              water.year= TRUE, #not required
+                              write.table=TRUE,         # write out calendar year statistics
+                              #write.transposed.table=FALSE,   # write out statistics in transposed format
+                              #write.cumulative.table=FALSE,         # write out calendar year statistics
+                              #write.cumulative.transposed.table=FALSE,   # write out statistics in transposed format                              report.dir='testing'#,
+                              #csv.nddigits=3,               # decimal digit for csv files.
+                              #na.rm=list(na.rm.global=TRUE)
+                              report.dir="testing"
+                              )
+daily.data <- daily$Q.stat.daily
+
