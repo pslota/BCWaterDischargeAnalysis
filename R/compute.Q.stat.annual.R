@@ -3,30 +3,30 @@
 #' @description Computes many annual (calendar and water year) statistics
 #' and (optionally) saves the results in *.csv and *.pdf files.
 #'
-#' @template Station.Code
+#' @template station.name
 #' @template Station.Area
-#' @template flow
+#' @template flow.data
 #' @template start.year
 #' @param write.cy.stat.csv Should a file be created with the calendar year computed percentiles?
-#'    The file name will be  \code{file.path(report.dir,paste(Station.Code,'-annual-cy-summary-stat.csv'))}.
+#'    The file name will be  \code{file.path(report.dir,paste(station.name,'-annual-cy-summary-stat.csv'))}.
 #' @param write.wy.stat.csv Should a file be created with the water year computed percentiles?
-#'    The file name will be  \code{file.path(report.dir,paste(Station.Code,'-annual-wy-summary-stat.csv'))}.
+#'    The file name will be  \code{file.path(report.dir,paste(station.name,'-annual-wy-summary-stat.csv'))}.
 #' @param write.stat.trans.csv Should a file be created with the transposed of the annual statistics
 #'    (both calendar and water year)?
-#'    The file name will be  \code{file.path(report.dir,paste(Station.Code,'-annual-summary-stat-trans.csv'))}.
+#'    The file name will be  \code{file.path(report.dir,paste(station.name,'-annual-summary-stat-trans.csv'))}.
 #' @param write.flow.summary.csv Should a file be created with a flow summary over the years between the
 #'    start.year and end.year (inclusive). This summary includes number of days, number of missing values,
-#'    mean, median, minimum, maximum, and standard deviation of \code{flow$Q}.
-#'    The file name will be \code{file.path(report.dir, paste(Station.Code,"-period-record-summary.csv", sep=""))}.
-#' @param write.lowflow.csv Should a file be created with the minimum value of \code{flow$Q} and date the
+#'    mean, median, minimum, maximum, and standard deviation of \code{flow.data$Q}.
+#'    The file name will be \code{file.path(report.dir, paste(station.name,"-period-record-summary.csv", sep=""))}.
+#' @param write.lowflow.csv Should a file be created with the minimum value of \code{flow.data$Q} and date the
 #'    minimum occured.
-#'    The file name will be \code{file.path(report.dir,paste(Station.Code,"-lowflow-summary.csv",sep=""))}
+#'    The file name will be \code{file.path(report.dir,paste(station.name,"-lowflow-summary.csv",sep=""))}
 #' @param plot.stat.trend Should a file be created with plots of the statistics over the years
 #'         between \code{start.year} and \code{end.year}.
-#'    The file name will be \code{file.path(report.dir, paste(Station.Code,"-annual-trend.pdf",sep=""))}
+#'    The file name will be \code{file.path(report.dir, paste(station.name,"-annual-trend.pdf",sep=""))}
 #' @param plot.cumdepart Should a file be created with plots of the yearly and cumulative departures
 #'    from the grand mean between \code{start.year} and \code{end.year}.
-#'    The file name will be \code{file.path(report.dir, paste(Station.Code,"-cumulative departure.pdf",sep=""))}
+#'    The file name will be \code{file.path(report.dir, paste(station.name,"-cumulative departure.pdf",sep=""))}
 #' @template report.dir
 #' @template csv.nddigits
 #' @template na.rm
@@ -36,7 +36,7 @@
 #'   \item{Q.flow.summary}{Data frame with flow summary.}
 #'   \item{Q.stat.annual}{Data frame with summary statistics as listed at \code{\link{SummaryStatistics}}.}
 #'   \item{Q.stat.annual.trans}{Data frame with transposed summary statistics as listed at \code{\link{SummaryStatistics}}.}
-#'   \item{dates.missing.flow}{Data framw with dates of missing \code{flow$Q} between
+#'   \item{dates.missing.flow}{Data framw with dates of missing \code{flow.data$Q} between
 #'          \code{start.year} and \code{end.year}}
 #'   \item{file.cy.stat.csv}{Object with file name of *.csv file with calendar year summary statistics.}
 #'   \item{file.wy.stat.csv}{Object with file name of *.csv file with water year summary statistics.}
@@ -52,9 +52,9 @@
 #' @examples
 #' \dontrun{
 #' stat.annual <- compute.Q.stat.annual(
-#'                          Station.Code  ='ABCD',
+#'                          station.name  ='ABCD',
 #'                          Station.Area  =12345,
-#'                          flow          =flow,
+#'                          flow.data          =flow,
 #'                          start.year    =1960,
 #'                          end.year      =2014)
 #' }
@@ -80,9 +80,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-compute.Q.stat.annual <- function(Station.Code='XXXXX',
+compute.Q.stat.annual <- function(station.name='XXXXX',
                         Station.Area=NA,
-                        flow,
+                        flow.data,
                         start.year=9999,
                         end.year=0,
                         write.cy.stat.csv=TRUE,        # write out statistics on calendar year
@@ -107,17 +107,17 @@ compute.Q.stat.annual <- function(Station.Code='XXXXX',
 #
   Version <- packageVersion("BCWaterDischargeAnalysis")
 
- if( !is.character(Station.Code))  {stop("Station Code must be a character string.")}
- if(length(Station.Code)>1)        {stop("Station.Code cannot have length > 1")}
+ if( !is.character(station.name))  {stop("Station Code must be a character string.")}
+ if(length(station.name)>1)        {stop("station.name cannot have length > 1")}
  if( !is.numeric(Station.Area))    {stop("Station.Area must be numeric")}
  if(length(Station.Area)>1)        {stop("Station.Area cannot have length > 1")}
- if( !is.data.frame(flow))         {stop("Flow is not a data frame.")}
- if(! all(c("Date","Q") %in% names(flow))){
-                                    stop("Flow dataframe doesn't contain the variables Date and Q.")}
- if( ! inherits(flow$Date[1], "Date")){
+ if( !is.data.frame(flow.data))         {stop("flow.data is not a data frame.")}
+ if(! all(c("Date","Q") %in% names(flow.data))){
+                                    stop("flow.data dataframe doesn't contain the variables Date and Q.")}
+ if( ! inherits(flow.data$Date[1], "Date")){
                                     stop("Date column in Flow data frame is not a date.")}
- if( !is.numeric(flow$Q))          {stop("Q column in flow dataframe is not numeric.")}
- if( any(flow$Q <0, na.rm=TRUE))   {stop('flow cannot have negative values - check your data')}
+ if( !is.numeric(flow.data$Q))          {stop("Q column in flow dataframe is not numeric.")}
+ if( any(flow.data$Q <0, na.rm=TRUE))   {stop('flow.data cannot have negative values - check your data')}
  if(! (is.numeric(start.year) & is.numeric(end.year))){
                                     stop("start.year and end.year not numberic.")}
  if(! (start.year <= end.year))    {stop("start.year > end.year")}
@@ -143,40 +143,39 @@ compute.Q.stat.annual <- function(Station.Code='XXXXX',
 #  Generate all dates between min and max dates and merge with flow
 #  data frame to generate any dates that were missing.
 #  This will automatically generate NA for the days that were not in the file
- temp <- data.frame(Date=seq(min(flow$Date,na.rm=TRUE),
-                             max(flow$Date,na.rm=TRUE),1))
- flow <- merge(flow, temp, all.y=TRUE)
+ temp <- data.frame(Date=seq(min(flow.data$Date,na.rm=TRUE),
+                             max(flow.data$Date,na.rm=TRUE),1))
+ flow.data <- merge(flow.data, temp, all.y=TRUE)
 
 #  Compute the 3, 7, and 30 day rolling average values
- flow$Q.03DAvg <- zoo::rollapply( flow$Q,  3, mean, fill=NA, align="right")
- flow$Q.07DAvg <- zoo::rollapply( flow$Q,  7, mean, fill=NA, align="right")
- flow$Q.30DAvg <- zoo::rollapply( flow$Q, 30, mean, fill=NA, align="right")
+ flow.data$Q.03DAvg <- zoo::rollapply( flow.data$Q,  3, mean, fill=NA, align="right")
+ flow.data$Q.07DAvg <- zoo::rollapply( flow.data$Q,  7, mean, fill=NA, align="right")
+ flow.data$Q.30DAvg <- zoo::rollapply( flow.data$Q, 30, mean, fill=NA, align="right")
 
 #  Truncate flow data to between 1 October of (start.year-1) and 31 December of end.year
 #  We go back to 1 Oct of start.year-1 to enable water year computations if data is present
- flow <- flow[ flow$Date >= as.Date(paste(start.year-1,'10-01',sep='-'), "%Y-%m-%d") &
-               flow$Date <= as.Date(paste(end.year    ,'12-31',sep='-'), '%Y-%m-%d'),]
+ flow.data <- flow.data[ flow.data$Date >= as.Date(paste(start.year-1,'10-01',sep='-'), "%Y-%m-%d") &
+                           flow.data$Date <= as.Date(paste(end.year    ,'12-31',sep='-'), '%Y-%m-%d'),]
 
 #  Generate all dates between 1 Oct start.year-1 and 31 Dec end.year and merge with flow
 #  data frame to generate any dates that were missing.
 #  This will automatically generate NA for the days that were not in the file
  temp <- data.frame(Date=seq(as.Date(paste(start.year-1,'10-01',sep='-'), "%Y-%m-%d"),
                              as.Date(paste(end.year    ,'12-31',sep='-'), '%Y-%m-%d'), 1))
- flow <- merge(flow, temp, all.y=TRUE)
+ flow.data <- merge(flow.data, temp, all.y=TRUE)
 
 #  create the year (annual and water) and month variables
- flow$Year  <- as.numeric(format(flow$Date, "%Y"))
- flow$Month <- as.numeric(format(flow$Date, '%m'))
- flow$WYear <- flow$Year
- flow$WYear[ flow$Month %in% 10:12] <- flow$WYear[flow$Month %in% 10:12 ] +1
+ flow.data$Year  <- as.numeric(format(flow.data$Date, "%Y"))
+ flow.data$Month <- as.numeric(format(flow.data$Date, '%m'))
+ flow.data$WYear <- as.numeric(ifelse(flow.data$MonthNum>=10,flow.data$Year+1,flow.data$Year))
 
 #  which dates have missing flows.
- dates.missing.flows <- flow$Date[ is.na(flow$Q) &
-                             as.numeric(format(flow$Date,"%Y"))>=start.year &
-                             as.numeric(format(flow$Date,"%Y"))<=end.year  ]
+ dates.missing.flows <- flow.data$Date[ is.na(flow.data$Q) &
+                             as.numeric(format(flow.data$Date,"%Y"))>=start.year &
+                             as.numeric(format(flow.data$Date,"%Y"))<=end.year  ]
 
 #  simple summary statistics
- flow.sum <- plyr::ddply(flow[ flow$Year >= start.year & flow$Year <=end.year,], "Year", function(x, na.rm=FALSE){
+ flow.sum <- plyr::ddply(flow.data[ flow.data$Year >= start.year & flow.data$Year <=end.year,], "Year", function(x, na.rm=FALSE){
        n.days   = length(x$Year)
        n.Q      = sum (!is.na(x$Q))
        n.miss.Q = sum ( is.na(x$Q))
@@ -193,7 +192,7 @@ compute.Q.stat.annual <- function(Station.Code='XXXXX',
  if(debug)browser()
 #  Compute statistics on calendar year basis
 #
- Q.stat.cy <- plyr::ddply(flow[ flow$Year >= start.year,], "Year", function(fy, Station.Area, na.rm){
+ Q.stat.cy <- plyr::ddply(flow.data[ flow.data$Year >= start.year,], "Year", function(fy, Station.Area, na.rm){
    # process each year's flow values (fy)
    CY_MIN_01Day_SW    = min(fy$Q, na.rm=na.rm$na.rm.global)	      # CY Min Daily Q
    CY_MINDOY_01Day_SW = as.numeric(format( fy$Date[which.min( fy$Q)], "%j"))        # Date of CY Min Daily Q
@@ -345,7 +344,7 @@ compute.Q.stat.annual <- function(Station.Code='XXXXX',
 
 #  Compute the statistics on a water year basis  (October -> Sept)
 
-Q.stat.wy <- plyr::ddply(flow[ flow$WYear >= start.year,], "WYear", function(fy, Station.Area, na.rm){
+Q.stat.wy <- plyr::ddply(flow.data[ flow.data$WYear >= start.year,], "WYear", function(fy, Station.Area, na.rm){
    # process each waters year's flow values (fy)
    WY_MIN_01Day_SW    = min(fy$Q, na.rm=na.rm$na.rm.global)	                # WY Min Daily Q
    WY_MINDOY_01Day_SW = as.numeric(fy$Date[which.min( fy$Q)]-fy$Date[1]+1)  # Date of WY Min Daily Q
@@ -449,12 +448,12 @@ Q.stat.wy <- plyr::ddply(flow[ flow$WYear >= start.year,], "WYear", function(fy,
 
 
 # compute the number of days in a year outside of the 25th or 75th percentile for each day.
-flow$jdate <- as.numeric(format(flow$Date, "%j")) # the julian date
-daily.quant <- plyr::ddply(flow, "jdate", plyr::summarize,
+flow.data$jdate <- as.numeric(format(flow.data$Date, "%j")) # the julian date
+daily.quant <- plyr::ddply(flow.data, "jdate", plyr::summarize,
                            p25=stats::quantile(Q, prob=0.25, na.rm=TRUE),
                            p75=stats::quantile(Q, prob=0.75, na.rm=TRUE))
-flow <- merge(flow, daily.quant, by='jdate') # merge back with the original data
-outside.quant <- plyr::ddply(flow, "Year", plyr::summarize,
+flow.data <- merge(flow.data, daily.quant, by='jdate') # merge back with the original data
+outside.quant <- plyr::ddply(flow.data, "Year", plyr::summarize,
                              CY_N_BELOW_25=sum(Q < p25, na.rm=TRUE),
                              CY_N_ABOVE_75=sum(Q > p75, na.rm=TRUE),
                              CY_N_OUTSIDE_25_75 = CY_N_BELOW_25 + CY_N_ABOVE_75)
@@ -466,7 +465,7 @@ Q.stat <- merge(Q.stat, outside.quant, by="Year", all.x=TRUE)
 file.summary.csv <- NA
 if(write.flow.summary.csv){
    # write out the flow summary
-   file.summary.csv <- file.path(report.dir, paste(Station.Code,"-period-record-summary.csv", sep=""))
+   file.summary.csv <- file.path(report.dir, paste(station.name,"-period-record-summary.csv", sep=""))
    temp <- flow.sum
    temp[,5:ncol(flow.sum)] <- round(temp[,5:ncol(flow.sum)], csv.nddigits)
    utils::write.csv(temp,file=file.summary.csv, row.names=FALSE)
@@ -477,7 +476,7 @@ file.cy.stat.csv <- NA
 if(write.cy.stat.csv){
    if(debug)browser()
    # Write out the summary table for comparison to excel spreadsheet for calendar year
-   file.cy.stat.csv <- file.path(report.dir, paste(Station.Code,"-annual-cy-summary-stat.csv", sep=""))
+   file.cy.stat.csv <- file.path(report.dir, paste(station.name,"-annual-cy-summary-stat.csv", sep=""))
    select <- !grepl("^WY", colnames(Q.stat)) # exclude water year information
    temp <- Q.stat[, select]
    temp <- round(temp, csv.nddigits)
@@ -488,7 +487,7 @@ file.wy.stat.csv <- NA
 if(write.wy.stat.csv){
   if(debug)browser()
   # Write out the summary table for comparison to excel spreadsheet for water year
-  file.wy.stat.csv <- file.path(report.dir, paste(Station.Code,"-annual-wy-summary-stat.csv", sep=""))
+  file.wy.stat.csv <- file.path(report.dir, paste(station.name,"-annual-wy-summary-stat.csv", sep=""))
   select <-grepl("^WY", colnames(Q.stat))  | (colnames(Q.stat) %in% c("Year"))
   temp <- Q.stat[,select]
   temp <- round(temp, csv.nddigits)
@@ -501,7 +500,7 @@ Year <- Q.stat[,"Year"]
 Q.stat.trans <- t(Q.stat[, !grepl('^Year', names(Q.stat))])
 colnames(Q.stat.trans) <- paste("",Year,sep="")
 if(write.stat.trans.csv){
-  file.stat.trans.csv <-file.path(report.dir,paste(Station.Code,"-annual-summary-stat-trans.csv",sep=""))
+  file.stat.trans.csv <-file.path(report.dir,paste(station.name,"-annual-summary-stat-trans.csv",sep=""))
   temp <- Q.stat.trans
   temp <- round(temp, csv.nddigits)
   utils::write.csv(temp, file=file.stat.trans.csv, row.names=TRUE)
@@ -510,7 +509,7 @@ if(write.stat.trans.csv){
 # Write out the low flow summary
 file.lowflow.csv <- NA
 if(write.lowflow.csv){
-   file.lowflow.csv <- file.path(report.dir,paste(Station.Code,"-lowflow-summary.csv",sep=""))
+   file.lowflow.csv <- file.path(report.dir,paste(station.name,"-lowflow-summary.csv",sep=""))
    select <-          grepl("CY_MIN", names(Q.stat))
    select <- select | grepl("WY_MIN", names(Q.stat))
    temp <- Q.stat[,c("Year", names(Q.stat)[select])]
@@ -537,8 +536,8 @@ if(write.lowflow.csv){
       plotdata <- plotdata[stats::complete.cases(plotdata),]   # remove all missing values
       plotdata$diff.from.mean <- plotdata[, variable] - grand.mean
       plotdata$cum.diff.from.mean <- cumsum(plotdata$diff.from.mean)
-      plot1 <- ggplot2::ggplot(data=plotdata, aes(x=Year, y=cum.diff.from.mean))+
-         ggtitle(paste(Station.Code," - cumulative departure curve for ",variable,sep=""))+
+      plot1 <- ggplot2::ggplot(data=plotdata,  ggplot2::aes(x=Year, y=cum.diff.from.mean))+
+         ggtitle(paste(station.name," - cumulative departure curve for ",variable,sep=""))+
          geom_hline(yintercept=0)+
          geom_segment(aes(x=Year, y=0, xend=Year, yend=diff.from.mean), size=2)+
          geom_line()+
@@ -549,7 +548,7 @@ if(write.lowflow.csv){
 file.cumdepart.pdf <- NA
 if(plot.cumdepart){
    # cumulative departure plots
-   file.cumdepart.pdf <- file.path(report.dir, paste(Station.Code,"-cumulative departure.pdf",sep=""))
+   file.cumdepart.pdf <- file.path(report.dir, paste(station.name,"-cumulative departure.pdf",sep=""))
    var.list <- c("CY_MEAN_DAILY_SW","WY_MEAN_DAILY_SW", "CY_YIELDMM_DAILY_SW", "WY_YIELDMM_DAILY_SW",
                   "ONDJFM_YIELDMM_DAILY_SW","AMJJAS_YIELDMM_DAILY_SW"   )
    grDevices::pdf(file=file.cumdepart.pdf, h=8, w=11)
@@ -563,13 +562,13 @@ if(plot.cumdepart){
 # Make a plot of all of the statistics over time and save to a pdf file
 file.stat.trend.pdf <- NA
 if(plot.stat.trend){
-   file.stat.trend.pdf <- file.path(report.dir, paste(Station.Code,"-annual-trend.pdf",sep=""))
+   file.stat.trend.pdf <- file.path(report.dir, paste(station.name,"-annual-trend.pdf",sep=""))
    grDevices::pdf(file.stat.trend.pdf, h=8, w=11)
 
    plot_trend <- function(plotdata, select){
      x <- plotdata[select,]
      myplot <- ggplot2::ggplot(data=x, aes(x=Year, y=Value, group=Statistic, color=Statistic, linetype=Statistic))+
-       ggtitle(paste(Station.Code, " - Trend for ", x$statgroup[1]))+
+       ggtitle(paste(station.name, " - Trend for ", x$statgroup[1]))+
        geom_point()+
        geom_line()+xlab("Year")+ylab(x$Ylabel[1])
      if(x$transform[1] == 'log'){
