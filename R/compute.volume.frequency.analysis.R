@@ -4,7 +4,9 @@
 #'
 #' @template station.name
 #' @template flow.data
+#' @template HYDAT
 #' @template start.year
+#' @template end.year
 #' @param water.year Should results be computed on the water year (starting 1 October)?
 #'        The 2013/2014 water year
 #'        runs from 2013-10-01 to 2014-09-30.
@@ -23,19 +25,19 @@
 #' @param fit.quantiles Which quantiles should be estimated from the fitted distribution?
 #' @template na.rm
 #'
-#' @param write.stat.csv Should a file be created with the computed percentiles?
+#' @param write.stat.table Should a file be created with the computed percentiles?
 #'    The file name will be  \code{file.path(report.dir,paste(station.name,"-annual-vfa-stat.csv", sep=""))}.
-#' @param write.stat.trans.csv Should a file be created with the computed percentiles in transposed format?
+#' @param write.stat.transposed.table Should a file be created with the computed percentiles in transposed format?
 #'    The file name will be  \code{file.path(report.dir,paste(station.name,"-annual-vfa-stat-trans.csv", sep=""))}.
-#' @param write.plotdata.csv Should a file be created with the frequency plot data?
+#' @param write.plotdata.table Should a file be created with the frequency plot data?
 #'    The file name will be  \code{file.path(report.dir, paste(station.name,"-annual-vfa-plotdata.csv", sep=""))}.
-#' @param write.quantiles.csv Should a file be created with the fitted quantiles?.
+#' @param write.quantiles.table Should a file be created with the fitted quantiles?.
 #'    The file name will be  \code{file.path(report.dir, paste(station.name,"-annual-vfa-quantiles.csv", sep=""))}.
-#' @param write.quantiles.trans.csv Should a file be created with the (transposed) fitted quantiles?
+#' @param write.quantiles.transposed.table Should a file be created with the (transposed) fitted quantiles?
 #'    The file name will be \code{file.path(report.dir, paste(station.name,"-annual-vfa-quantiles-trans.csv", sep=""))}.
 #' @param write.frequency.plot Should a file be created with the frequency plot..
-#'    The file name will be \code{file.path(report.dir, paste(station.name,"-annual-vfa-frequency-plot.",write.frequency.plot.suffix[1],sep=""))}
-#' @param write.frequency.plot.suffix Format of the frequency plot.
+#'    The file name will be \code{file.path(report.dir, paste(station.name,"-annual-vfa-frequency-plot.",write.frequency.plot.type[1],sep=""))}
+#' @param write.frequency.plot.type Format of the frequency plot.
 #' @template report.dir
 #' @template csv.nddigits
 #' @template debug
@@ -95,8 +97,12 @@
 # The key difference lies in how the PIII distribuition is fit. I use MLE while
 # HEC-SSP appears to use method of moments.
 
-compute.volume.frequency.analysis <- function(station.name, flow.data,
-                         start.year=9999, end.year=0000, water.year=FALSE,
+compute.volume.frequency.analysis <- function(
+                         station.name=NULL,
+                         flow.data=NULL,
+                         HYDAT=NULL,
+                         start.year=NULL, end.year=NULL,
+                         water.year=FALSE,
                          roll.avg.days=c(1,3,7,15,30,60,90),
                          use.log=FALSE,
                          use.max=FALSE,
@@ -106,12 +112,12 @@ compute.volume.frequency.analysis <- function(station.name, flow.data,
                          fit.distr.method=ifelse(fit.distr=="PIII","MOM","MLE"),
                          fit.quantiles=c(.975, .99, .98, .95, .90, .80, .50, .20, .10, .05, .01),
                          na.rm=list(na.rm.global=TRUE),
-                         write.stat.csv=TRUE, write.stat.trans.csv=TRUE,
-                         write.plotdata.csv=FALSE,  # write out the plotting data
-                         write.quantiles.csv=TRUE, # write out the fitted quantiles
-                         write.quantiles.trans.csv=TRUE,
+                         write.stat.table=TRUE, write.stat.transposed.table=TRUE,
+                         write.plotdata.table=FALSE,  # write out the plotting data
+                         write.quantiles.table=TRUE, # write out the fitted quantiles
+                         write.quantiles.transposed.table=TRUE,
                          write.frequency.plot=TRUE,  # write out the frequency plot
-                         write.frequency.plot.suffix=c("pdf","png"),
+                         write.frequency.plot.type=c("pdf","png"),
                          report.dir='.',
                          csv.nddigits=3, debug=FALSE
                          )
@@ -124,18 +130,21 @@ compute.volume.frequency.analysis <- function(station.name, flow.data,
    # refer to Chapter 7 of the user manual
 
    # data checks
-   if( !is.character(station.name))  {stop("Station Code must be a character string.")}
-   if(length(station.name)>1)        {stop("station.name cannot have length > 1")}
-   if( !is.data.frame(flow.data))         {stop("flow.data is not a data frame.")}
-   if(! all(c("Date","Q") %in% names(flow.data))){
+   if( !is.null(HYDAT) & !is.null(flow.data))  {stop("Must select either flow.data or HYDAT parameters, not both.")}
+   if( is.null(HYDAT) & is.null(station.name))  {stop("station.name required with flow.data parameter.")}
+   if( is.null(HYDAT) & !is.character(station.name))  {stop("Station Code must be a character string.")}
+   if( is.null(HYDAT) & !is.data.frame(flow.data))         {stop("flow.data is not a data frame.")}
+   if( is.null(HYDAT) & !all(c("Date","Q") %in% names(flow.data))){
         stop("flow.data dataframe doesn't contain the variables Date and Q.")}
-   if( ! inherits(flow.data$Date[1], "Date")){
+   if( is.null(HYDAT) & !inherits(flow.data$Date[1], "Date")){
         stop("Date column in flow.data data frame is not a date.")}
-   if( !is.numeric(flow.data$Q))          {stop("Q column in flow.data dataframe is not numeric.")}
-   if( any(flow.data$Q <0, na.rm=TRUE))   {stop('flow.data cannot have negative values - check your data')}
-   if(! (is.numeric(start.year) & is.numeric(end.year))){
-        stop("start.year and end.year not numberic.")}
-   if(! (start.year <= end.year))    {stop("start.year > end.year")}
+   if( is.null(HYDAT) & !is.numeric(flow.data$Q))          {stop("Q column in flow.data dataframe is not numeric.")}
+   if( is.null(HYDAT) & any(flow.data$Q <0, na.rm=TRUE))   {stop('flow.data cannot have negative values - check your data')}
+
+
+
+
+
    if( !is.logical(water.year))  {stop("water.year must be logical (TRUE/FALSE")}
    if( !is.numeric(roll.avg.days))   {stop("roll.avg.days must be numeric")}
    if( !all(roll.avg.days>=0 & roll.avg.days<=180))
@@ -145,32 +154,32 @@ compute.volume.frequency.analysis <- function(station.name, flow.data,
    if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exits")}
 
    if( !is.list(na.rm))              {stop("na.rm is not a list") }
-   if( !is.logical(write.stat.csv))  {stop("write.stat.csv must be logical (TRUE/FALSE")}
-   if( !is.logical(write.stat.trans.csv)){stop("write.stat.trans.csv must be logical (TRUE/FALSE")}
-   if(! is.logical(unlist(na.rm))){  {stop("na.rm is list of logical (TRUE/FALSE) values only.")}
-   if(! is.logical(use.log))         {stop("use.log must be logical (TRUE/FALSE)")}
-   if(! is.logical(use.max))         {stop("use.max must be logical (TRUE/FALSE)")}
-   if(! all(prob.plot.position %in% c("weibull","median","hazen"))){}
+   if( !is.logical(write.stat.table))  {stop("write.stat.table must be logical (TRUE/FALSE")}
+   if( !is.logical(write.stat.transposed.table)){stop("write.stat.transposed.table must be logical (TRUE/FALSE")}
+   if( !is.logical(unlist(na.rm))){  {stop("na.rm is list of logical (TRUE/FALSE) values only.")}
+   if( !is.logical(use.log))         {stop("use.log must be logical (TRUE/FALSE)")}
+   if( !is.logical(use.max))         {stop("use.max must be logical (TRUE/FALSE)")}
+   if( !all(prob.plot.position %in% c("weibull","median","hazen"))){}
        stop("prob.plot.position must be one of weibull, median, or hazen")}
    if( !is.numeric(prob.scale.points)){stop("prob.scale.points must be numeric and between 0 and 1 (not inclusive)")}
    if( !all(prob.scale.points>0 & prob.scale.points<1)){
        stop("prob.scale.points must be numeric and between 0 and 1 (not inclusive)")}
    if( !all(fit.distr %in% c("weibull","PIII"))){
        stop("fit.distr must be one of weibull or PIII")}
-   if(! is.numeric(fit.quantiles))  {stop("fit.quantiles must be numeric and between 0 and 1 (not inclusive)")}
-   if(! all(fit.quantiles >0 & fit.quantiles < 1)){
+   if( !is.numeric(fit.quantiles))  {stop("fit.quantiles must be numeric and between 0 and 1 (not inclusive)")}
+   if( !all(fit.quantiles >0 & fit.quantiles < 1)){
        stop("fit.quantiles must be numeric and between 0 and 1 (not inclusive)")}
    if(  fit.distr[1]=='weibull' & use.log){stop("Cannot fit Weibull distribution on log-scale")}
-   if(  fit.distr[1]=='weibull' & any(flow.data$Q<0, na.rm=TRUE)){stop("cannot fit weibull distribution with negative flow values")}
+   if(  is.null(HYDAT) & fit.distr[1]=='weibull' & any(flow.data$Q<0, na.rm=TRUE)){stop("cannot fit weibull distribution with negative flow values")}
    if(  fit.distr[1]!="PIII" & fit.distr.method[1]=="MOM"){stop('MOM only can be used with PIII distribution')}
 
-   if( !is.logical(write.stat.csv))      {stop("write.stat.csv must be logical (TRUE/FALSE")}
-   if( !is.logical(write.stat.trans.csv)){stop("write.stat.trans.csv must be logical (TRUE/FALSE")}
-   if( !is.logical(write.plotdata.csv))  {stop("write.plotdata.csv must be logical (TRUE/FALSE")}
-   if( !is.logical(write.quantiles.csv)) {stop("write.quantiles.csv must be logical (TRUE/FALSE")}
-   if( !is.logical(write.quantiles.trans.csv)){stop("write.quantiles.trans.csv must be logical (TRUE/FALSE")}
+   if( !is.logical(write.stat.table))      {stop("write.stat.table must be logical (TRUE/FALSE")}
+   if( !is.logical(write.stat.transposed.table)){stop("write.stat.transposed.table must be logical (TRUE/FALSE")}
+   if( !is.logical(write.plotdata.table))  {stop("write.plotdata.table must be logical (TRUE/FALSE")}
+   if( !is.logical(write.quantiles.table)) {stop("write.quantiles.table must be logical (TRUE/FALSE")}
+   if( !is.logical(write.quantiles.transposed.table)){stop("write.quantiles.transposed.table must be logical (TRUE/FALSE")}
    if( !is.logical(write.frequency.plot)) {stop("write.frequency.plot must be logical (TRUE/FALSE)")}
-   if( !write.frequency.plot.suffix[1] %in% c("pdf","png")){stop("write.frequency.plot.suffix must be pdf or png")}
+   if( !write.frequency.plot.type[1] %in% c("pdf","png")){stop("write.frequency.plot.type must be pdf or png")}
 
    if( !is.numeric(csv.nddigits)){      stop("csv.nddigits must be numeric")}
    csv.nddigits = round(csv.nddigits)[1]
@@ -192,6 +201,18 @@ compute.volume.frequency.analysis <- function(station.name, flow.data,
       if(order==2) return(scale*scale*shape)
       if(order==3) return(2/sqrt(shape)*sign(scale))
    }
+
+   if (!is.null(HYDAT)) {
+     if (is.null(station.name)) {station.name <- HYDAT}
+     flow.data <- tidyhydat::DLY_FLOWS(STATION_NUMBER = HYDAT)
+     flow.data <- dplyr::select(flow.data,Date,Q=Value)
+   }
+
+   if (!is.numeric(start.year)) {start.year <- as.numeric(format(min(flow.data$Date,na.rm=TRUE),"%Y"))-water.year}
+   if (!is.numeric(end.year)) {end.year <- as.numeric(format(max(flow.data$Date,na.rm=TRUE),"%Y"))}
+   if(! (start.year <= end.year))    {stop("start.year must be less than end.year")}
+   if( !(is.numeric(start.year) & is.numeric(end.year))){
+     stop("start.year and end.year not numberic.")}
 
    # Expand the data from the min(date) to max(date) in the dataframe to
    # insert missing values if date was omitted
@@ -256,27 +277,27 @@ compute.volume.frequency.analysis <- function(station.name, flow.data,
    # change the measure labels in the plot
    plotdata2<- plotdata
    plotdata2$Measure <- paste(formatC(as.numeric(substr(plotdata2$Measure,2,4)),width=3),"-day Avg",sep="")
-   freqplot <- ggplot2::ggplot(data=plotdata2, aes(x=prob, y=value, group=Measure, color=Measure),environment=environment())+
-      ggtitle(paste(station.name, " Volume Frequency Analysis"))+
-      geom_point()+
-      xlab("Probability")+
-      scale_x_continuous(trans=scales::probability_trans("norm", lower.tail=FALSE),
+   freqplot <- ggplot2::ggplot(data=plotdata2, ggplot2::aes(x=prob, y=value, group=Measure, color=Measure),environment=environment())+
+     ggplot2::ggtitle(paste(station.name, " Volume Frequency Analysis"))+
+     ggplot2::geom_point()+
+     ggplot2::xlab("Probability")+
+     ggplot2::scale_x_continuous(trans=scales::probability_trans("norm", lower.tail=FALSE),
                          breaks=prob.scale.points,
-                         sec.axis=sec_axis(trans=~1/.,
+                         sec.axis=ggplot2::sec_axis(trans=~1/.,
                                            name='Return Period',
                                            breaks=c(1.01,1.1,2,5,10,20,100,1000),
                                            labels=function(x){ifelse(x<2,x,round(x,0))}))+
-      theme(axis.title.x.top = element_text(size=8),
-            legend.title=element_blank(), legend.key.size=unit(.1,"in"))
+     ggplot2::theme(axis.title.x.top = ggplot2::element_text(size=8),
+            legend.title=ggplot2::element_blank(), legend.key.size=ggplot2::unit(.1,"in"))
 
-   if(!use.max){ freqplot <- freqplot+theme(legend.justification=c(1,1), legend.position=c(1,1))}
-   if( use.max){ freqplot <- freqplot+theme(legend.justification=c(1,0), legend.position=c(1,0))}
-   if(!use.log){ freqplot <- freqplot + scale_y_log10(breaks=pretty_breaks(n=20))}
-   if( use.log){ freqplot <- freqplot + scale_y_continuous(breaks=pretty_breaks(n=20))}
-   if( use.log &  use.max ){freqplot <- freqplot + ylab("ln(Max Flow (cms))")}  # adjust the Y axis label
-   if( use.log & !use.max){freqplot <- freqplot + ylab("ln(Min Flow (cms))")}
-   if(!use.log &  use.max ){freqplot <- freqplot + ylab("Max Flow (cms)")}
-   if(!use.log & !use.max){freqplot <- freqplot + ylab("Min Flow (cms)")}
+   if(!use.max){ freqplot <- freqplot+ggplot2::theme(legend.justification=c(1,1), legend.position=c(1,1))}
+   if( use.max){ freqplot <- freqplot+ggplot2::theme(legend.justification=c(1,0), legend.position=c(1,0))}
+   if(!use.log){ freqplot <- freqplot + ggplot2::scale_y_log10(breaks=scales::pretty_breaks(n=20))}
+   if( use.log){ freqplot <- freqplot + ggplot2::scale_y_continuous(breaks=scales::pretty_breaks(n=20))}
+   if( use.log &  use.max ){freqplot <- freqplot + ggplot2::ylab("ln(Max Flow (cms))")}  # adjust the Y axis label
+   if( use.log & !use.max){freqplot <- freqplot + ggplot2::ylab("ln(Min Flow (cms))")}
+   if(!use.log &  use.max ){freqplot <- freqplot + ggplot2::ylab("Max Flow (cms)")}
+   if(!use.log & !use.max){freqplot <- freqplot + ggplot2::ylab("Min Flow (cms)")}
 
 
    # fit the distribution to each measure
@@ -345,7 +366,7 @@ compute.volume.frequency.analysis <- function(station.name, flow.data,
    fitted.quantiles.trans <- reshape2::dcast(fitted.quantiles, distr+prob+Return~Measure , value.var="quantile")
 
    file.stat.csv <- NA
-   if(write.stat.csv){
+   if(write.stat.table){
      # Write out the summary table for comparison to HEC spreadsheet
      file.stat.csv <- file.path(report.dir,paste(station.name,"-annual-vfa-stat.csv", sep=""))
      temp <- Q.stat
@@ -354,7 +375,7 @@ compute.volume.frequency.analysis <- function(station.name, flow.data,
    }
 
    file.stat.trans.csv <- NA
-   if(write.stat.trans.csv){
+   if(write.stat.transposed.table){
      # Write out the  transposed summary table for comparison to HEC spreadsheet
      file.stat.trans.csv <- file.path(report.dir, paste(station.name,"-annual-vfa-stat-trans.csv", sep=""))
      temp <- Q.stat.trans
@@ -363,14 +384,14 @@ compute.volume.frequency.analysis <- function(station.name, flow.data,
    }
 
    file.plotdata.csv <- NA
-   if(write.plotdata.csv){
+   if(write.plotdata.table){
      # Write out the plotdata for comparison with HEC output
      file.plotdata.csv <- file.path(report.dir, paste(station.name,"-annual-vfa-plotdata.csv", sep=""))
      utils::write.csv(plotdata,file=file.plotdata.csv, row.names=FALSE)
    }
 
    file.quantile.csv <- NA
-   if(write.quantiles.csv){
+   if(write.quantiles.table){
      # Write out the summary table for comparison to HEC spreadsheet
      file.quantile.csv<- file.path(report.dir, paste(station.name,"-annual-vfa-quantiles.csv", sep=""))
      temp <- fitted.quantiles
@@ -379,7 +400,7 @@ compute.volume.frequency.analysis <- function(station.name, flow.data,
    }
 
    file.quantile.trans.csv <- NA
-   if(write.quantiles.trans.csv){
+   if(write.quantiles.transposed.table){
      # Write out the  transposed summary table for comparison to HEC spreadsheet
      file.quantile.trans.csv <- file.path(report.dir, paste(station.name,"-annual-vfa-quantiles-trans.csv", sep=""))
      temp <- fitted.quantiles.trans
@@ -389,21 +410,22 @@ compute.volume.frequency.analysis <- function(station.name, flow.data,
 
    file.frequency.plot <- NA
    if(write.frequency.plot){
-      file.frequency.plot <- file.path(report.dir, paste(station.name,"-annual-vfa-frequency-plot.",write.frequency.plot.suffix[1],sep=""))
+      file.frequency.plot <- file.path(report.dir, paste(station.name,"-annual-vfa-frequency-plot.",write.frequency.plot.type[1],sep=""))
       ggplot2::ggsave(plot=freqplot, file=file.frequency.plot, h=4, w=6, units="in", dpi=300)
    }
 
-   list(start.year=start.year,
-        end.year  =end.year,
-        water.year=water.year,
+   list("station name"= station.name,
+        "year type"=ifelse(!water.year,"Calendar Year (Jan-Dec)","Water Year (Oct-Sep)"),
+        "year range"=paste0(start.year," - ",end.year),
         use.max=use.max,
         roll.avg.days=roll.avg.days,
+        fit.distr=fit.distr[1],  # distributions fit to the data
+        fit.distr.method=fit.distr.method[1],
+        prob.plot.position=prob.plot.position[1],
         Q.stat=Q.stat,
         Q.stat.trans=Q.stat.trans,
         plotdata=plotdata,  # has the plotting positions for each point in frequency analysis
-        prob.plot.position=prob.plot.position,
         freqplot = freqplot,
-        fit.distr=fit.distr[1],  # distributions fit to the data
         fit = fit,               # list of fits of freq.distr to each measure
         fitted.quantiles=fitted.quantiles,             # fitted quantiles and their transposition
         fitted.quantiles.trans=fitted.quantiles.trans,
