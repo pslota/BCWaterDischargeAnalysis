@@ -101,4 +101,34 @@ daily <- compute.Q.stat.daily(station.name="YAY2",
                               report.dir="testing"
                               )
 daily.data <- daily$Q.stat.daily
+daily <- compute.Q.cumulative.daily(station.name="YAY2",
+                              #flow.data=flow,
+                              HYDAT="08HB048",
+                              #start.year=1975, #not required
+                              #end.year=2000, #not required
+                              water.year= TRUE, #not required
+                              write.table=TRUE,         # write out calendar year statistics
+                              write.transposed.table=TRUE,
+                              # write out statistics in transposed format
+                              #csv.nddigits=3,
+                              # decimal digit for csv files.
+                              #na.rm=list(na.rm.global=TRUE)
+                              report.dir="testing"
+)
+
+
+longtermpercentile <- compute.Q.percentile.longterm(#station.name='WY',
+                                                    #flow.data=flow,
+                                                    HYDAT="08HB048",
+                                                    #start.year=1975,
+                                                    #end.year=1990,
+                                                    water.year=TRUE,
+                                                    per.list=c(1,2,seq(5,95,5),98,99),  # these the standard percentiles
+                                                    write.stat.csv=TRUE,        # write out calendar year statistics
+                                                    write.stat.trans.csv=TRUE,  # write out calendar year statistics in transposed format
+                                                    report.dir="testing",
+                                                    csv.nddigits=3,              # number of decimal digits for csv file
+                                                    na.rm=list(na.rm.global=TRUE),
+                                                    debug=FALSE
+                                                    )
 
