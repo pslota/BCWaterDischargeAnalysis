@@ -128,6 +128,7 @@ compute.Q.stat.annual <- function(station.name=NULL,
   if( !is.logical(write.lowflow.table)){ stop("write.lowflow.table must be logical (TRUE/FALSE)")}
   if( !is.logical(plot.stat.trend)) {stop("plot.stat.trend must be logical (TRUE/FALSE")}
   if( !is.logical(plot.cumdepart))  {stop("plot.cumdepart must be logical (TRUE/FALSE")}
+  if( !is.logical(water.year))  {stop("water.year must be logical (TRUE/FALSE")}
 
   if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exist")}
   if( !is.numeric(csv.nddigits))  { stop("csv.ndddigits needs to be numeric")}
