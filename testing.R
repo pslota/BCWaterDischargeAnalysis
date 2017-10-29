@@ -132,3 +132,31 @@ longtermpercentile <- compute.Q.percentile.longterm(#station.name='WY',
                                                     debug=FALSE
                                                     )
 
+
+vfa <- compute.volume.frequency.analysis(#station.name="testing",
+                                  #flow.data=flow,
+                                  HYDAT="08HB048",
+                                  #start.year=1990,
+                                  #end.year=2000,
+                                  #water.year=FALSE,
+                                  #roll.avg.days=c(1,3,7,15,30,60,90),
+                                  #use.log=FALSE,
+                                  #use.max=FALSE,
+                                  #prob.plot.position=c("weibull","median","hazen"),
+                                  #prob.scale.points=c(.9999, .999, .99, .9, .5, .2, .1, .02, .01, .001, .0001),
+                                  #fit.distr="PIII",
+                                  #fit.distr.method=ifelse(fit.distr=="PIII","MOM","MLE"),
+                                  #fit.quantiles=c(.975, .99, .98, .95, .90, .80, .50, .20, .10, .05, .01),
+                                  na.rm=list(na.rm.global=F),## FALSE= no annual value calc'd if data missing
+                                  #write.stat.table=TRUE,
+                                  #write.stat.transposed.table=TRUE,
+                                  #write.plotdata.table=FALSE,  # write out the plotting data
+                                  #write.quantiles.table=TRUE, # write out the fitted quantiles
+                                  #write.quantiles.transposed.table=TRUE,
+                                  #write.frequency.plot=TRUE,  # write out the frequency plot
+                                  #write.frequency.plot.type=c("pdf","png"),
+                                  report.dir='testing',
+                                  csv.nddigits=3,
+                                  debug=FALSE
+)
+
