@@ -2,10 +2,10 @@
 #'
 #' @description Performs a volume frequency analysis on annual statistics similar to HEC-SSP.
 #'
-#' @template Station.Code
-#' @template flow
+#' @template station.name
+#' @template flow.data
 #' @template start.year
-#' @param use.water.year Should results be computed on the water year (starting 1 October)?
+#' @param water.year Should results be computed on the water year (starting 1 October)?
 #'        The 2013/2014 water year
 #'        runs from 2013-10-01 to 2014-09-30.
 #' @param roll.avg.days Volume frequency analysis conducted on these rolling averages.
@@ -24,17 +24,17 @@
 #' @template na.rm
 #'
 #' @param write.stat.csv Should a file be created with the computed percentiles?
-#'    The file name will be  \code{file.path(report.dir,paste(Station.Code,"-annual-vfa-stat.csv", sep=""))}.
+#'    The file name will be  \code{file.path(report.dir,paste(station.name,"-annual-vfa-stat.csv", sep=""))}.
 #' @param write.stat.trans.csv Should a file be created with the computed percentiles in transposed format?
-#'    The file name will be  \code{file.path(report.dir,paste(Station.Code,"-annual-vfa-stat-trans.csv", sep=""))}.
+#'    The file name will be  \code{file.path(report.dir,paste(station.name,"-annual-vfa-stat-trans.csv", sep=""))}.
 #' @param write.plotdata.csv Should a file be created with the frequency plot data?
-#'    The file name will be  \code{file.path(report.dir, paste(Station.Code,"-annual-vfa-plotdata.csv", sep=""))}.
+#'    The file name will be  \code{file.path(report.dir, paste(station.name,"-annual-vfa-plotdata.csv", sep=""))}.
 #' @param write.quantiles.csv Should a file be created with the fitted quantiles?.
-#'    The file name will be  \code{file.path(report.dir, paste(Station.Code,"-annual-vfa-quantiles.csv", sep=""))}.
+#'    The file name will be  \code{file.path(report.dir, paste(station.name,"-annual-vfa-quantiles.csv", sep=""))}.
 #' @param write.quantiles.trans.csv Should a file be created with the (transposed) fitted quantiles?
-#'    The file name will be \code{file.path(report.dir, paste(Station.Code,"-annual-vfa-quantiles-trans.csv", sep=""))}.
+#'    The file name will be \code{file.path(report.dir, paste(station.name,"-annual-vfa-quantiles-trans.csv", sep=""))}.
 #' @param write.frequency.plot Should a file be created with the frequency plot..
-#'    The file name will be \code{file.path(report.dir, paste(Station.Code,"-annual-vfa-frequency-plot.",write.frequency.plot.suffix[1],sep=""))}
+#'    The file name will be \code{file.path(report.dir, paste(station.name,"-annual-vfa-frequency-plot.",write.frequency.plot.suffix[1],sep=""))}
 #' @param write.frequency.plot.suffix Format of the frequency plot.
 #' @template report.dir
 #' @template csv.nddigits
@@ -44,7 +44,7 @@
 #'   \item{Q.flow.summary}{Data frame with flow summary.}
 #'   \item{start.year}{Start year of the analysis}
 #'   \item{end.year}{End year of the analysis}
-#'   \item{use.water.year}{Were computations done on water year?}
+#'   \item{water.year}{Were computations done on water year?}
 #'   \item{use.max}{Were computations done on maximum values.}
 #'   \item{roll.avg.days}{Rolling average days on which statistics computed.}
 #'   \item{Q.stat}{Data frame with Computed annual summary statistics used in analysis}
@@ -68,8 +68,8 @@
 #' @examples
 #' \dontrun{
 #' vfa.analysis <- compute.volume.frequency.analysis(
-#'                      Station.Code ='XXX',
-#'                      flow         =flow,
+#'                      station.name ='XXX',
+#'                      flow.data         =flow,
 #'                      start.year   =1960,
 #'                      end.year     =2014)
 #' }
@@ -95,8 +95,8 @@
 # The key difference lies in how the PIII distribuition is fit. I use MLE while
 # HEC-SSP appears to use method of moments.
 
-compute.volume.frequency.analysis <- function(Station.Code, flow,
-                         start.year=9999, end.year=0000, use.water.year=FALSE,
+compute.volume.frequency.analysis <- function(station.name, flow.data,
+                         start.year=9999, end.year=0000, water.year=FALSE,
                          roll.avg.days=c(1,3,7,15,30,60,90),
                          use.log=FALSE,
                          use.max=FALSE,
@@ -124,19 +124,19 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    # refer to Chapter 7 of the user manual
 
    # data checks
-   if( !is.character(Station.Code))  {stop("Station Code must be a character string.")}
-   if(length(Station.Code)>1)        {stop("Station.Code cannot have length > 1")}
-   if( !is.data.frame(flow))         {stop("Flow is not a data frame.")}
-   if(! all(c("Date","Q") %in% names(flow))){
-        stop("Flow dataframe doesn't contain the variables Date and Q.")}
-   if( ! inherits(flow$Date[1], "Date")){
-        stop("Date column in Flow data frame is not a date.")}
-   if( !is.numeric(flow$Q))          {stop("Q column in flow dataframe is not numeric.")}
-   if( any(flow$Q <0, na.rm=TRUE))   {stop('flow cannot have negative values - check your data')}
+   if( !is.character(station.name))  {stop("Station Code must be a character string.")}
+   if(length(station.name)>1)        {stop("station.name cannot have length > 1")}
+   if( !is.data.frame(flow.data))         {stop("flow.data is not a data frame.")}
+   if(! all(c("Date","Q") %in% names(flow.data))){
+        stop("flow.data dataframe doesn't contain the variables Date and Q.")}
+   if( ! inherits(flow.data$Date[1], "Date")){
+        stop("Date column in flow.data data frame is not a date.")}
+   if( !is.numeric(flow.data$Q))          {stop("Q column in flow.data dataframe is not numeric.")}
+   if( any(flow.data$Q <0, na.rm=TRUE))   {stop('flow.data cannot have negative values - check your data')}
    if(! (is.numeric(start.year) & is.numeric(end.year))){
         stop("start.year and end.year not numberic.")}
    if(! (start.year <= end.year))    {stop("start.year > end.year")}
-   if( !is.logical(use.water.year))  {stop("use.water.year must be logical (TRUE/FALSE")}
+   if( !is.logical(water.year))  {stop("water.year must be logical (TRUE/FALSE")}
    if( !is.numeric(roll.avg.days))   {stop("roll.avg.days must be numeric")}
    if( !all(roll.avg.days>=0 & roll.avg.days<=180))
        {stop("roll.avg.days must be >0 and <=180)")}
@@ -161,7 +161,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    if(! all(fit.quantiles >0 & fit.quantiles < 1)){
        stop("fit.quantiles must be numeric and between 0 and 1 (not inclusive)")}
    if(  fit.distr[1]=='weibull' & use.log){stop("Cannot fit Weibull distribution on log-scale")}
-   if(  fit.distr[1]=='weibull' & any(flow$Q<0, na.rm=TRUE)){stop("cannot fit weibull distribution with negative flow values")}
+   if(  fit.distr[1]=='weibull' & any(flow.data$Q<0, na.rm=TRUE)){stop("cannot fit weibull distribution with negative flow values")}
    if(  fit.distr[1]!="PIII" & fit.distr.method[1]=="MOM"){stop('MOM only can be used with PIII distribution')}
 
    if( !is.logical(write.stat.csv))      {stop("write.stat.csv must be logical (TRUE/FALSE")}
@@ -195,33 +195,33 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
 
    # Expand the data from the min(date) to max(date) in the dataframe to
    # insert missing values if date was omitted
-   min.date <- as.Date(paste(min(start.year,as.numeric(format(min(flow$Date,na.rm=TRUE),"%Y"))-use.water.year),'-',
-                             ifelse(use.water.year,10,1),'-01',sep=""))
-   max.date <- as.Date(paste(max(end.year,as.numeric(format(max(flow$Date,na.rm=TRUE),"%Y"))),'-',
-                             ifelse(use.water.year,9,12),'-',
-                             ifelse(use.water.year,30,31),sep=""))
+   min.date <- as.Date(paste(min(start.year,as.numeric(format(min(flow.data$Date,na.rm=TRUE),"%Y"))-water.year),'-',
+                             ifelse(water.year,10,1),'-01',sep=""))
+   max.date <- as.Date(paste(max(end.year,as.numeric(format(max(flow.data$Date,na.rm=TRUE),"%Y"))),'-',
+                             ifelse(water.year,9,12),'-',
+                             ifelse(water.year,30,31),sep=""))
 
    temp <- data.frame(Date=seq(min.date,max.date, 1))
-   flow <- merge(flow, temp, all.y=TRUE)
+   flow.data <- merge(flow.data, temp, all.y=TRUE)
 
    # Compute the year and adjust if want to use the water year
-   flow$Year <- as.numeric(format(flow$Date, "%Y")) + use.water.year*(as.numeric(format(flow$Date,"%m"))>=10)
+   flow.data$Year <- as.numeric(format(flow.data$Date, "%Y")) + water.year*(as.numeric(format(flow.data$Date,"%m"))>=10)
 
    # Compute the rolling averagw of interest
-   flow <- flow[ order(flow$Date),]
-   flow <- plyr::ldply(roll.avg.days, function (x, flow){
+   flow.data <- flow.data[ order(flow.data$Date),]
+   flow.data <- plyr::ldply(roll.avg.days, function (x, flow.data){
         # compute the rolling average of x days
         # create a variable to be attached to the statistic
-        flow$Measure <- paste("Q", formatC(x, width=3, format="d", flag="0"),"-avg",sep="")
-        flow$Q       <- zoo::rollapply( flow$Q,  x, mean, fill=NA, align="right")
-        flow
-   }, flow=flow)
+        flow.data$Measure <- paste("Q", formatC(x, width=3, format="d", flag="0"),"-avg",sep="")
+        flow.data$Q       <- zoo::rollapply( flow.data$Q,  x, mean, fill=NA, align="right")
+        flow.data
+   }, flow.data=flow.data)
 
    # Truncate the data between the start and end year
-   flow <- flow[ flow$Year >=start.year & flow$Year <= end.year,]
+   flow.data <- flow.data[ flow.data$Year >=start.year & flow.data$Year <= end.year,]
 
    # Compute the yearly min (unless max flag is set)
-   Q.stat <- plyr::ddply(flow, c("Year","Measure"), function(x,use.max=FALSE, na.rm){
+   Q.stat <- plyr::ddply(flow.data, c("Year","Measure"), function(x,use.max=FALSE, na.rm){
        # compute min or max of Q for the year-measure combination
        value <- ifelse(use.max, max(x$Q,na.rm=na.rm$na.rm.global), min(x$Q,na.rm=na.rm$na.rm.global) )
        data.frame(value=value)
@@ -257,7 +257,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    plotdata2<- plotdata
    plotdata2$Measure <- paste(formatC(as.numeric(substr(plotdata2$Measure,2,4)),width=3),"-day Avg",sep="")
    freqplot <- ggplot2::ggplot(data=plotdata2, aes(x=prob, y=value, group=Measure, color=Measure),environment=environment())+
-      ggtitle(paste(Station.Code, " Volume Frequency Analysis"))+
+      ggtitle(paste(station.name, " Volume Frequency Analysis"))+
       geom_point()+
       xlab("Probability")+
       scale_x_continuous(trans=scales::probability_trans("norm", lower.tail=FALSE),
@@ -347,7 +347,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    file.stat.csv <- NA
    if(write.stat.csv){
      # Write out the summary table for comparison to HEC spreadsheet
-     file.stat.csv <- file.path(report.dir,paste(Station.Code,"-annual-vfa-stat.csv", sep=""))
+     file.stat.csv <- file.path(report.dir,paste(station.name,"-annual-vfa-stat.csv", sep=""))
      temp <- Q.stat
      temp$value <- round(temp$value, csv.nddigits)
      utils::write.csv(temp,file=file.stat.csv, row.names=FALSE)
@@ -356,7 +356,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    file.stat.trans.csv <- NA
    if(write.stat.trans.csv){
      # Write out the  transposed summary table for comparison to HEC spreadsheet
-     file.stat.trans.csv <- file.path(report.dir, paste(Station.Code,"-annual-vfa-stat-trans.csv", sep=""))
+     file.stat.trans.csv <- file.path(report.dir, paste(station.name,"-annual-vfa-stat-trans.csv", sep=""))
      temp <- Q.stat.trans
      temp <- round(temp, csv.nddigits)
      utils::write.csv(temp,file=file.stat.trans.csv, row.names=FALSE)
@@ -365,14 +365,14 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    file.plotdata.csv <- NA
    if(write.plotdata.csv){
      # Write out the plotdata for comparison with HEC output
-     file.plotdata.csv <- file.path(report.dir, paste(Station.Code,"-annual-vfa-plotdata.csv", sep=""))
+     file.plotdata.csv <- file.path(report.dir, paste(station.name,"-annual-vfa-plotdata.csv", sep=""))
      utils::write.csv(plotdata,file=file.plotdata.csv, row.names=FALSE)
    }
 
    file.quantile.csv <- NA
    if(write.quantiles.csv){
      # Write out the summary table for comparison to HEC spreadsheet
-     file.quantile.csv<- file.path(report.dir, paste(Station.Code,"-annual-vfa-quantiles.csv", sep=""))
+     file.quantile.csv<- file.path(report.dir, paste(station.name,"-annual-vfa-quantiles.csv", sep=""))
      temp <- fitted.quantiles
      temp$quantile <- round(temp$quantile, csv.nddigits)
      utils::write.csv(temp,file=file.quantile.csv, row.names=FALSE)
@@ -381,7 +381,7 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
    file.quantile.trans.csv <- NA
    if(write.quantiles.trans.csv){
      # Write out the  transposed summary table for comparison to HEC spreadsheet
-     file.quantile.trans.csv <- file.path(report.dir, paste(Station.Code,"-annual-vfa-quantiles-trans.csv", sep=""))
+     file.quantile.trans.csv <- file.path(report.dir, paste(station.name,"-annual-vfa-quantiles-trans.csv", sep=""))
      temp <- fitted.quantiles.trans
      temp[,3:ncol(temp)]<- round(temp[,3:ncol(temp)], csv.nddigits)
      utils::write.csv(temp,file=file.quantile.trans.csv, row.names=FALSE)
@@ -389,13 +389,13 @@ compute.volume.frequency.analysis <- function(Station.Code, flow,
 
    file.frequency.plot <- NA
    if(write.frequency.plot){
-      file.frequency.plot <- file.path(report.dir, paste(Station.Code,"-annual-vfa-frequency-plot.",write.frequency.plot.suffix[1],sep=""))
+      file.frequency.plot <- file.path(report.dir, paste(station.name,"-annual-vfa-frequency-plot.",write.frequency.plot.suffix[1],sep=""))
       ggplot2::ggsave(plot=freqplot, file=file.frequency.plot, h=4, w=6, units="in", dpi=300)
    }
 
    list(start.year=start.year,
         end.year  =end.year,
-        use.water.year=use.water.year,
+        water.year=water.year,
         use.max=use.max,
         roll.avg.days=roll.avg.days,
         Q.stat=Q.stat,
