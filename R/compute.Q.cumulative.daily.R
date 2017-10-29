@@ -62,7 +62,6 @@ compute.Q.cumulative.daily <- function(
   start.year=NULL, #not required
   end.year=NULL, #not required
   water.year= FALSE, #not required
-  rolling.mean=1,
   write.table=FALSE,         # write out calendar year statistics
   write.transposed.table=FALSE,   # write out statistics in transposed format
   write.cumulative.table=FALSE,         # write out calendar year statistics
@@ -95,6 +94,7 @@ compute.Q.cumulative.daily <- function(
   if( !is.logical(write.table))  {stop("write.table must be logical (TRUE/FALSE")}
   if( !is.logical(write.transposed.table)){stop("write.transposed.table must be logical (TRUE/FALSE")}
   if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exist")}
+  if( !is.logical(water.year))  {stop("water.year must be logical (TRUE/FALSE")}
 
   if(!is.numeric(csv.nddigits)){ stop("csv.nddigits must be numeric")}
   csv.nddigits <- round(csv.nddigits)[1]
