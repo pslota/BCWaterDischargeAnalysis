@@ -88,12 +88,15 @@ compute.Q.stat.annual <- function(station.name=NULL,
                                   water.year=FALSE,
                                   start.year=NULL,
                                   end.year=NULL,
+                                  zyp.trending=NA,
                                   write.table=TRUE,        # write out statistics on calendar year
                                   write.transposed.table=TRUE,  # write out statistics in transposed format (cy & wy)
                                   write.summary.table=TRUE, # write out a summary of period of record
                                   write.lowflow.table=TRUE,      # write out a summary of low flows
                                   plot.stat.trend=FALSE,        # should you plot all of stat trends?
                                   plot.cumdepart=FALSE,         # plot cumulative departure curves
+                                  write.zyp.table=FALSE,
+                                  write.zyp.plots=FALSE,
                                   report.dir=".",
                                   na.rm=list(na.rm.global=FALSE),
                                   csv.nddigits=3,              # decimal digits for csv files for statistics
@@ -130,6 +133,14 @@ compute.Q.stat.annual <- function(station.name=NULL,
   if( !is.logical(plot.cumdepart))  {stop("plot.cumdepart must be logical (TRUE/FALSE")}
   if( !is.logical(water.year))  {stop("water.year must be logical (TRUE/FALSE")}
 
+  if( !is.na(zyp.trending) & !zyp.trending %in% c("yuepilon","zhang"))   {
+    stop('zyp.trending must have either "yuepilon" or "zhang" listed')}
+  if( !is.logical(write.zyp.table))  {stop("write.zyp.table must be logical (TRUE/FALSE")}
+  if( !is.logical(write.zyp.plots))  {stop("write.zyp.plots must be logical (TRUE/FALSE")}
+  if( is.na(zyp.trending) & (write.zyp.table | write.zyp.plots) ) {
+    stop('zyp.trending method must be selected to write results')}
+
+
   if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exist")}
   if( !is.numeric(csv.nddigits))  { stop("csv.ndddigits needs to be numeric")}
   csv.nddigits <- round(csv.nddigits[1])  # number of decimal digits for rounding in csv files
@@ -142,6 +153,7 @@ compute.Q.stat.annual <- function(station.name=NULL,
   na.rm <- my.na.rm  # set the na.rm for the rest of the function.
 
   if (!is.null(HYDAT)) {
+    if (!HYDAT %in% tidyhydat::allstations$STATION_NUMBER) {stop("HYDAT station does not exist.")}
     if (is.null(station.name)) {station.name <- HYDAT}
     flow.data <- tidyhydat::DLY_FLOWS(STATION_NUMBER = HYDAT)
     flow.data <- dplyr::select(flow.data,Date,Q=Value)
@@ -151,8 +163,8 @@ compute.Q.stat.annual <- function(station.name=NULL,
   #  data frame to generate any dates that were missing.
   #  This will automatically generate NA for the days that were not in the file
 
-  #min.year <- lubridate::year(min(flow.data$Date))
-  #max.year <- lubridate::year(max(flow.data$Date))
+  min.year <- as.numeric(lubridate::year(min(flow.data$Date)))-water.year
+  max.year <- lubridate::year(max(flow.data$Date))
   temp <- data.frame(Date=seq(as.Date(paste(start.year-1,'01-01',sep='-'), "%Y-%m-%d"),
                               as.Date(paste(end.year  ,'12-31',sep='-'), '%Y-%m-%d'), 1))
   flow.data <- merge(flow.data, temp, all.y=TRUE)
