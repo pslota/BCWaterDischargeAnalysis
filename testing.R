@@ -69,11 +69,14 @@ long.term <- compute.Q.stat.longterm(
                                   start.year=1975,
                                   end.year=2000,
                                   write.table=TRUE,        # write out statistics on calendar year
+                                  #zyp.trending="zhang", # zhang or yuepilon
                                   write.transposed.table=TRUE,  # write out statistics in transposed format (cy & wy)
                                   write.summary.table=TRUE, # write out a summary of period of record
                                   write.lowflow.table=TRUE,      # write out a summary of low flows
                                   plot.stat.trend=FALSE,        # should you plot all of stat trends?
                                   plot.cumdepart=FALSE,         # plot cumulative departure curves
+                                 # write.zyp.table=TRUE,
+                                  #write.zyp.plots=FALSE,
                                   report.dir="testing",
                                   na.rm=list(na.rm.global=FALSE),
                                   csv.nddigits=3,              # decimal digits for csv files for statistics
