@@ -105,6 +105,7 @@ compute.Q.percentile.longterm <- function(
    na.rm <- my.na.rm  # set the na.rm for the rest of the function.
 
    if (!is.null(HYDAT)) {
+     if (!HYDAT %in% tidyhydat::allstations$STATION_NUMBER) {stop("HYDAT station does not exist.")}
      if (is.null(station.name)) {station.name <- HYDAT}
      flow.data <- tidyhydat::DLY_FLOWS(STATION_NUMBER = HYDAT)
      flow.data <- dplyr::select(flow.data,Date,Q=Value)
