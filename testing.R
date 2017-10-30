@@ -61,28 +61,30 @@ long.term <- compute.Q.stat.longterm(
 
 
   annual
-  annual <- compute.Q.stat.annual(station.name='Carnation-CY',
-                                  basin.area=100,
+  annual <- compute.Q.stat.annual(#station.name='Carnation-CY',
+                                  basin.area=10.1,
                                   #flow.data=flow,
                                   HYDAT = "08HB048",
-                                  water.year = FALSE,
+                                  water.year = TRUE,
                                   start.year=1975,
                                   end.year=2000,
-                                  write.table=TRUE,        # write out statistics on calendar year
-                                  #zyp.trending="zhang", # zhang or yuepilon
-                                  write.transposed.table=TRUE,  # write out statistics in transposed format (cy & wy)
-                                  write.summary.table=TRUE, # write out a summary of period of record
-                                  write.lowflow.table=TRUE,      # write out a summary of low flows
-                                  plot.stat.trend=FALSE,        # should you plot all of stat trends?
-                                  plot.cumdepart=FALSE,         # plot cumulative departure curves
-                                 # write.zyp.table=TRUE,
-                                  #write.zyp.plots=FALSE,
-                                  report.dir="testing",
-                                  na.rm=list(na.rm.global=FALSE),
-                                  csv.nddigits=3,              # decimal digits for csv files for statistics
-                                  debug=FALSE
+                                  #write.table=TRUE,        # write out statistics on calendar year
+                                  zyp.trending="zhang", # zhang or yuepilon
+                                  #zyp.alpha=0.01, # zhang or yuepilon
+                                  #write.transposed.table=TRUE,  # write out statistics in transposed format (cy & wy)
+                                  #write.summary.table=TRUE, # write out a summary of period of record
+                                  #write.lowflow.table=TRUE,      # write out a summary of low flows
+                                  #plot.stat.trend=FALSE,        # should you plot all of stat trends?
+                                  #plot.cumdepart=FALSE,         # plot cumulative departure curves
+                                  #write.zyp.table=TRUE,
+                                  #write.zyp.plots=TRUE,
+                                  report.dir="testing"#,
+                                  #na.rm=list(na.rm.global=FALSE),
+                                  #csv.nddigits=3,              # decimal digits for csv files for statistics
+                                  #debug=FALSE
   )
 annual.test <- annual$Q.stat.annual
+annual.trends <- annual$Q.zyp.trends
 ####### double check the date of half flow dates
 
 

@@ -82,13 +82,14 @@
 # See the License for the specific language governing permissions and limitations under the License.
 
 compute.Q.stat.annual <- function(station.name=NULL,
-                                  basin.area=NA,
+                                  basin.area=NA, # if na, then all Yield values == NA
                                   flow.data=NULL,
                                   HYDAT=NULL,
                                   water.year=FALSE,
                                   start.year=NULL,
                                   end.year=NULL,
                                   zyp.trending=NA,
+                                  zyp.alpha=0.05,
                                   write.table=TRUE,        # write out statistics on calendar year
                                   write.transposed.table=TRUE,  # write out statistics in transposed format (cy & wy)
                                   write.summary.table=TRUE, # write out a summary of period of record
@@ -116,8 +117,8 @@ compute.Q.stat.annual <- function(station.name=NULL,
   if( is.null(HYDAT) & is.null(station.name))  {stop("station.name required with flow.data parameter.")}
   if( is.null(HYDAT) & !is.character(station.name))  {stop("station.name must be a character string.")}
   if( is.null(HYDAT) & length(station.name)>1)        {stop("station.name cannot have length > 1")}
-  if( !is.numeric(basin.area))    {stop("basin.area must be numeric")}
-  if(length(basin.area)>1)        {stop("basin.area cannot have length > 1")}
+  if( !is.na(basin.area) & !is.numeric(basin.area))    {stop("basin.area must be numeric")}
+  if( length(basin.area)>1)        {stop("basin.area cannot have length > 1")}
   if( is.null(HYDAT) & !is.data.frame(flow.data))         {stop("flow.data is not a data frame.")}
   if( is.null(HYDAT) & !all(c("Date","Q") %in% names(flow.data))){
     stop("flow.data dataframe doesn't contain the variables Date and Q.")}
@@ -139,7 +140,7 @@ compute.Q.stat.annual <- function(station.name=NULL,
   if( !is.logical(write.zyp.plots))  {stop("write.zyp.plots must be logical (TRUE/FALSE")}
   if( is.na(zyp.trending) & (write.zyp.table | write.zyp.plots) ) {
     stop('zyp.trending method must be selected to write results')}
-
+  if( !is.numeric(zyp.alpha))  { stop("zyp.alpha needs to be numeric")}
 
   if( !dir.exists(as.character(report.dir)))      {stop("directory for saved files does not exist")}
   if( !is.numeric(csv.nddigits))  { stop("csv.ndddigits needs to be numeric")}
@@ -158,6 +159,11 @@ compute.Q.stat.annual <- function(station.name=NULL,
     flow.data <- tidyhydat::DLY_FLOWS(STATION_NUMBER = HYDAT)
     flow.data <- dplyr::select(flow.data,Date,Q=Value)
   }
+
+  # Filter for start and end years
+  if (!is.numeric(start.year)) {start.year <- lubridate::year(min(flow.data$Date))-water.year}
+  if (!is.numeric(end.year)) {end.year <- lubridate::year(max(flow.data$Date))}
+  if(! (start.year <= end.year))    {stop("start.year must be less than end.year")}
 
   #  Generate all dates between min and max dates and merge with flow
   #  data frame to generate any dates that were missing.
@@ -204,10 +210,7 @@ compute.Q.stat.annual <- function(station.name=NULL,
   # compuate the annual cumulative total
   flow.data <- dplyr::mutate(dplyr::group_by(flow.data,AnalysisYear),CumQ=cumsum(Q))
 
-  # Filter for start and end years
-  if (!is.numeric(start.year)) {start.year <- min(flow.data$AnalysisYear)}
-  if (!is.numeric(end.year)) {end.year <- max(flow.data$AnalysisYear)}
-  if(! (start.year <= end.year))    {stop("start.year must be less than end.year")}
+
 
 
 
@@ -399,6 +402,58 @@ compute.Q.stat.annual <- function(station.name=NULL,
     temp[,c(2,5,8,11)] = round(temp[,c(2,5,8,11)],3)
     utils::write.csv(temp, file=file.lowflow.csv, row.names=FALSE)
   }
+
+
+
+  Q.zyp.trends <- NA
+  if (!is.na(zyp.trending)) {
+
+    Q.zyp.trends <- zyp::zyp.trend.dataframe(indat = Q.stat.trans,
+                                             metadata.cols = 1,
+                                             method=zyp.trending)
+    ## ADD SOME METRICS
+
+    if (write.zyp.table) {
+      file.zyp.csv <- file.path(report.dir,paste(station.name,"-zyp-",zyp.trending,"-trends-results.csv",sep=""))
+      temp <- Q.zyp.trends
+      utils::write.csv(temp, file=file.zyp.csv, row.names=FALSE)
+    }
+
+    if (write.zyp.plots) {
+      file.zyp.pdf <- file.path(report.dir,paste(station.name,"-zyp-",zyp.trending,"-trends-results.pdf",sep=""))
+
+      trends.plot.data <- tidyr::gather(Q.stat.trans,Year,Value,-1)
+      trends.plot.data <- dplyr::mutate(trends.plot.data,Year=as.numeric(Year))
+      pdf(file = file.zyp.pdf,8,5)
+      for (metric in unique(trends.plot.data$Statistic)){
+        # Filter for metric
+        trends.data.metric <- dplyr::filter(trends.plot.data,Statistic==metric)
+        trends.results.metric <- dplyr::filter(Q.zyp.trends,Statistic==metric)
+        #int <- trends.results.metric$intercept - trends.results.metric$trend * (Start_Year)
+        # Plot each metric
+        trends.plot <- ggplot2::ggplot(trends.data.metric,ggplot2::aes(x=Year,y=Value))+
+          ggplot2::geom_point()+
+          ggplot2::geom_line(alpha = 0.3) +
+          ggplot2::ggtitle(paste0(metric,"   (Sig. = ",round(trends.results.metric$sig,3),")"))+
+          ggplot2::ylab("Units")+
+          ggplot2::xlab("Year")+
+          ggplot2::scale_x_continuous(breaks = scales::pretty_breaks(n = 12))+
+          ggplot2::scale_y_continuous(breaks = scales::pretty_breaks(n = 6))+
+          ggplot2::theme(panel.border = ggplot2::element_rect(colour = "grey50", fill=NA, size=.1),
+                panel.grid = ggplot2::element_line(size=.2))
+        if (water.year) {trends.plot <- trends.plot + ggplot2::xlab("Water Year")}
+
+        # If sig. trend, plot trend
+        if (trends.results.metric$sig < zyp.alpha & !is.na(trends.results.metric$sig)) {
+          trends.plot <- trends.plot +
+            ggplot2::geom_abline(slope = trends.results.metric$trend, intercept = (trends.results.metric$intercept - trends.results.metric$trend * (start.year)), colour="red")
+        }
+        plot(trends.plot)
+      }
+      dev.off()
+    }
+  }
+
 
   ## Do some plotting
   #################################
@@ -767,6 +822,8 @@ compute.Q.stat.annual <- function(station.name=NULL,
                Q.flow.summary=flow.sum,
                Q.stat.annual=Q.stat,
                Q.stat.annual.trans=Q.stat.trans,
+               "zyp trending method"=zyp.trending,
+               Q.zyp.trends=Q.zyp.trends,
                dates.missing.flows=dates.missing.flows,
                file.stat.csv=file.stat.csv,
                file.stat.trans.csv=file.stat.trans.csv,
